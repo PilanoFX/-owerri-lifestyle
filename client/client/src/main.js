@@ -59,7 +59,14 @@ app.innerHTML = `
           </button>
         `).join("")}
 
-        <div id="player" class="player">🧍</div>
+        <div id="player" class="player">
+  <div class="character">
+    <div class="character-head"></div>
+    <div class="character-body"></div>
+    <div class="character-leg left"></div>
+    <div class="character-leg right"></div>
+  </div>
+</div>
       </section>
 
       <aside>
