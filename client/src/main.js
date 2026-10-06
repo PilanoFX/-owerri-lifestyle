@@ -57,14 +57,11 @@ const player = {
   reputation: 100,
   zone: "Fire Service",
   mode: "Walk",
-  fuel: 100
+  fuel: 100,
+  selectedProperty: null
 };
 
-const root = document.querySelector("#root");
-
-if (!root) {
-  throw new Error("Root element not found.");
-}
+const root = document.getElementById("root");
 
 const style = document.createElement("style");
 
@@ -75,371 +72,306 @@ style.textContent = `
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
   background: #080b10;
-  color: white;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 button {
-  font-family: inherit;
-}
-
-.game {
-  min-height: 100vh;
-  background: #080b10;
-}
-
-.header {
-  padding: 16px;
-  background: linear-gradient(135deg, #111827, #080b10);
-  border-bottom: 1px solid #263244;
-}
-
-.logo {
-  font-size: 24px;
-  font-weight: 900;
-}
-
-.subtitle {
-  color: #94a3b8;
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.stat {
-  background: #111827;
-  border: 1px solid #263244;
-  border-radius: 12px;
-  padding: 10px;
-}
-
-.stat small {
-  display: block;
-  color: #94a3b8;
-  font-size: 10px;
-}
-
-.stat strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 14px;
-}
-
-.toolbar {
-  display: flex;
-  gap: 8px;
-  padding: 12px;
-  overflow-x: auto;
-  background: #0d131d;
-  border-bottom: 1px solid #263244;
-}
-
-.toolbar button {
   border: 0;
   border-radius: 10px;
   padding: 11px 14px;
-  background: #1c2736;
-  color: white;
+  background: #1c2430;
+  color: #fff;
   font-weight: 700;
-  white-space: nowrap;
   cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.15);
+}
+
+.app {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(31, 68, 100, .35), transparent 35%),
+    #080b10;
+}
+
+.topbar {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #10151d;
+  border-bottom: 1px solid #26303d;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.logo span {
+  color: #4dd0ff;
+}
+
+.stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  background: #171e28;
+  border: 1px solid #293442;
+  padding: 8px 11px;
+  border-radius: 9px;
+  font-size: 12px;
 }
 
 .layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 12px;
-  padding: 12px;
+  grid-template-columns: 1fr 310px;
+  gap: 14px;
+  padding: 14px;
 }
 
 .map-wrap {
   position: relative;
   min-height: 650px;
-  border: 2px solid #263244;
-  border-radius: 18px;
   overflow: hidden;
-  background: #467d42;
+  border-radius: 18px;
+  border: 1px solid #293442;
+  background: #263b2d;
 }
 
 .map {
   position: absolute;
   inset: 0;
-  background: #4c8548;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, transparent 48%, rgba(255,255,255,.06) 48%, rgba(255,255,255,.06) 52%, transparent 52%),
+    linear-gradient(0deg, transparent 47%, rgba(255,255,255,.05) 47%, rgba(255,255,255,.05) 53%, transparent 53%),
+    #29422e;
 }
 
 .road {
   position: absolute;
-  background: #303842;
+  background: #363b42;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.04);
 }
+
+.road.horizontal {
+  left: 0;
+  width: 100%;
+  height: 42px;
+}
+
+.road.vertical {
+  top: 0;
+  height: 100%;
+  width: 42px;
+}
+
+.road.r1 { top: 30%; }
+.road.r2 { top: 60%; }
+.road.r3 { top: 82%; }
+
+.road.c1 { left: 25%; }
+.road.c2 { left: 51%; }
+.road.c3 { left: 73%; }
 
 .road::after {
   content: "";
   position: absolute;
   background: repeating-linear-gradient(
-    to right,
-    #e6c84f 0 28px,
-    transparent 28px 50px
+    90deg,
+    transparent 0 22px,
+    rgba(255,220,80,.8) 22px 38px
   );
   height: 3px;
   left: 0;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 19px;
 }
 
-.road1 {
-  left: 0;
-  right: 0;
-  top: 43%;
-  height: 70px;
-}
-
-.road2 {
+.road.vertical::after {
   top: 0;
   bottom: 0;
-  left: 47%;
-  width: 70px;
-}
-
-.road3 {
-  left: 0;
-  right: 0;
-  top: 70%;
-  height: 48px;
-}
-
-.road4 {
-  top: 0;
-  bottom: 0;
-  left: 70%;
-  width: 42px;
-}
-
-.road2::after,
-.road4::after {
-  top: 0;
-  bottom: 0;
-  left: 50%;
+  left: 19px;
   right: auto;
   width: 3px;
   height: auto;
   background: repeating-linear-gradient(
-    to bottom,
-    #e6c84f 0 28px,
-    transparent 28px 50px
+    0deg,
+    transparent 0 22px,
+    rgba(255,220,80,.8) 22px 38px
   );
-  transform: translateX(-50%);
 }
 
-.house {
+.city-block {
   position: absolute;
-  width: 58px;
-  height: 45px;
-  background: #d9b382;
-  border: 3px solid #714c2c;
-  border-radius: 5px;
+  background: #315437;
+  border: 1px solid rgba(255,255,255,.05);
 }
 
-.house::before {
-  content: "";
-  position: absolute;
-  left: -6px;
-  right: -6px;
-  top: -20px;
-  height: 27px;
-  background: #9d493f;
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-}
-
-.house::after {
-  content: "";
-  position: absolute;
-  width: 13px;
-  height: 20px;
-  background: #523a2d;
-  bottom: 0;
-  left: 22px;
-}
-
-.h1 { left: 7%; top: 15%; }
-.h2 { left: 20%; top: 12%; }
-.h3 { left: 78%; top: 13%; }
-.h4 { left: 83%; top: 45%; }
-.h5 { left: 75%; top: 82%; }
-.h6 { left: 18%; top: 82%; }
-.h7 { left: 4%; top: 42%; }
-
-.shop {
-  position: absolute;
-  width: 65px;
-  height: 42px;
-  background: #e7e2c6;
-  border: 3px solid #594c36;
-  border-radius: 4px;
-  text-align: center;
-  font-size: 9px;
-  font-weight: 900;
-  color: #3b3022;
-  padding-top: 15px;
-}
-
-.shop1 { left: 32%; top: 33%; }
-.shop2 { left: 57%; top: 55%; }
-.shop3 { left: 76%; top: 55%; }
+.block1 { left: 3%; top: 5%; width: 18%; height: 18%; }
+.block2 { left: 29%; top: 5%; width: 17%; height: 20%; }
+.block3 { left: 55%; top: 5%; width: 15%; height: 20%; }
+.block4 { left: 77%; top: 7%; width: 17%; height: 18%; }
+.block5 { left: 3%; top: 38%; width: 18%; height: 17%; }
+.block6 { left: 28%; top: 37%; width: 17%; height: 18%; }
+.block7 { left: 56%; top: 39%; width: 14%; height: 16%; }
+.block8 { left: 78%; top: 39%; width: 17%; height: 16%; }
+.block9 { left: 4%; top: 65%; width: 17%; height: 26%; }
+.block10 { left: 29%; top: 64%; width: 17%; height: 27%; }
+.block11 { left: 56%; top: 64%; width: 14%; height: 27%; }
+.block12 { left: 78%; top: 64%; width: 17%; height: 27%; }
 
 .tree {
   position: absolute;
-  width: 22px;
-  height: 22px;
+  width: 14px;
+  height: 14px;
+  background: #173d20;
   border-radius: 50%;
-  background: #164d29;
-  box-shadow: 0 7px 0 #7b542d;
+  box-shadow: 0 2px 0 #102718;
 }
 
-.t1 { left: 14%; top: 28%; }
-.t2 { left: 25%; top: 63%; }
-.t3 { left: 39%; top: 18%; }
-.t4 { left: 62%; top: 78%; }
-.t5 { left: 88%; top: 27%; }
-.t6 { left: 91%; top: 76%; }
-.t7 { left: 9%; top: 76%; }
+.t1 { left: 8%; top: 10%; }
+.t2 { left: 17%; top: 20%; }
+.t3 { left: 34%; top: 12%; }
+.t4 { left: 63%; top: 14%; }
+.t5 { left: 87%; top: 14%; }
+.t6 { left: 10%; top: 47%; }
+.t7 { left: 39%; top: 47%; }
+.t8 { left: 84%; top: 48%; }
+.t9 { left: 15%; top: 78%; }
+.t10 { left: 39%; top: 83%; }
+.t11 { left: 63%; top: 82%; }
+.t12 { left: 89%; top: 82%; }
 
-.light {
+.zone {
   position: absolute;
-  width: 5px;
-  height: 38px;
-  background: #343b45;
+  transform: translate(-50%, -50%);
+  background: rgba(7, 12, 18, .82);
+  border: 1px solid rgba(77,208,255,.5);
+  padding: 7px 9px;
+  border-radius: 9px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 4;
 }
 
-.light::before {
+.zone strong {
+  display: block;
+  color: #4dd0ff;
+}
+
+.player {
+  position: absolute;
+  width: 24px;
+  height: 32px;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  transition: left .12s, top .12s;
+}
+
+.person {
+  width: 18px;
+  height: 18px;
+  margin: auto;
+  border-radius: 50%;
+  background: #f1c27d;
+  border: 3px solid #151a21;
+  position: relative;
+}
+
+.person::after {
   content: "";
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  top: 15px;
+  height: 14px;
+  background: #4d7cff;
+  border-radius: 7px 7px 3px 3px;
+}
+
+.car {
+  width: 38px;
+  height: 20px;
+  margin-top: 7px;
+  background: #d62828;
+  border-radius: 7px;
+  border: 2px solid #151515;
+  position: relative;
+}
+
+.car::before,
+.car::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #111;
+  border-radius: 50%;
+  bottom: -6px;
+}
+
+.car::before { left: 4px; }
+.car::after { right: 4px; }
+
+.car-window {
   position: absolute;
   width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #fff0a8;
-  left: -5px;
-  top: -6px;
+  height: 8px;
+  left: 10px;
+  top: 2px;
+  background: #9bd9ff;
+  border-radius: 3px;
 }
 
-.l1 { left: 45%; top: 35%; }
-.l2 { left: 52%; top: 57%; }
-.l3 { left: 68%; top: 41%; }
-.l4 { left: 28%; top: 42%; }
-
-.city-car {
-  position: absolute;
-  width: 42px;
-  height: 21px;
-  border-radius: 7px;
-  background: #263b55;
-  border: 2px solid #101923;
-  transform: rotate(90deg);
-}
-
-.city-car1 { left: 31%; top: 41%; }
-.city-car2 { left: 63%; top: 43%; }
-.city-car3 { left: 70%; top: 68%; }
-.city-car4 { left: 21%; top: 69%; }
-
-.zone-btn {
+.property-marker {
   position: absolute;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(255,255,255,.25);
-  background: rgba(7,12,18,.82);
-  color: white;
-  padding: 6px 8px;
-  border-radius: 8px;
-  font-size: 10px;
-  font-weight: 800;
-  cursor: pointer;
-  z-index: 8;
-}
-
-.property {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 42px;
-  height: 42px;
-  border: 2px solid #f4d35e;
-  background: rgba(16,24,39,.95);
-  border-radius: 50%;
-  font-size: 21px;
-  cursor: pointer;
-  z-index: 12;
-}
-
-.property.owned {
-  border-color: #22c55e;
-}
-
-#player {
-  position: absolute;
-  width: 26px;
+  z-index: 6;
+  width: 34px;
   height: 34px;
-  border-radius: 13px 13px 8px 8px;
-  background: #2563eb;
-  border: 3px solid white;
-  transform: translate(-50%, -50%);
-  z-index: 20;
-}
-
-#player::before {
-  content: "";
-  position: absolute;
-  width: 13px;
-  height: 13px;
   border-radius: 50%;
-  background: #d9a679;
-  left: 4px;
-  top: -9px;
-  border: 2px solid white;
+  background: #f6c344;
+  color: #151515;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  border: 3px solid #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,.4);
 }
 
-#player-car {
-  position: absolute;
-  width: 52px;
-  height: 27px;
-  background: #d62828;
-  border: 3px solid #111827;
-  border-radius: 10px 14px 9px 9px;
-  transform: translate(-50%, -50%);
-  z-index: 21;
+.property-marker.owned {
+  background: #49d17d;
 }
 
-#player-car::before {
-  content: "";
-  position: absolute;
-  left: 13px;
-  top: -8px;
-  width: 25px;
-  height: 13px;
-  background: #9dd6ef;
-  border: 2px solid #111827;
-  border-radius: 7px 7px 2px 2px;
-}
-
-.sidebar {
-  background: #101722;
-  border: 1px solid #263244;
+.side {
+  background: #10151d;
+  border: 1px solid #293442;
   border-radius: 18px;
   padding: 14px;
-  max-height: 650px;
-  overflow-y: auto;
+  min-height: 650px;
 }
 
 .panel {
-  background: #151f2d;
-  border: 1px solid #2a374a;
+  background: #151c25;
+  border: 1px solid #293442;
   border-radius: 14px;
-  padding: 12px;
+  padding: 13px;
   margin-bottom: 12px;
 }
 
@@ -448,233 +380,173 @@ button {
   font-size: 15px;
 }
 
-.info {
-  color: #b8c4d4;
-  font-size: 12px;
-  line-height: 1.6;
+.mode-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
-.property-info {
-  background: #0c131d;
-  border-radius: 10px;
-  padding: 10px;
-  font-size: 12px;
-  line-height: 1.6;
-  min-height: 90px;
-}
-
-.buy-btn,
-.enter-btn {
+.action {
   width: 100%;
-  margin-top: 9px;
-  padding: 12px;
-  border: 0;
-  border-radius: 10px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.buy-btn {
-  background: #eab308;
-  color: #171717;
-}
-
-.enter-btn {
-  background: #22c55e;
-  color: #052e16;
-}
-
-.buy-btn:disabled,
-.enter-btn:disabled {
-  background: #374151;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.club-btn {
-  width: 100%;
-  padding: 10px;
   margin-top: 7px;
-  border: 0;
-  border-radius: 9px;
-  background: #202c3d;
-  color: white;
-  cursor: pointer;
-  text-align: left;
+}
+
+.primary {
+  background: #1769aa;
+}
+
+.success {
+  background: #16834a;
+}
+
+.danger {
+  background: #9d2525;
+}
+
+.muted {
+  color: #98a5b5;
+  font-size: 12px;
+}
+
+.log {
+  max-height: 170px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.log div {
+  padding: 5px 0;
+  border-bottom: 1px solid #232d38;
 }
 
 .mobile-controls {
   display: grid;
-  grid-template-columns: repeat(3, 48px);
-  gap: 6px;
+  grid-template-columns: repeat(3, 50px);
   justify-content: center;
+  gap: 6px;
   margin-top: 10px;
 }
 
 .mobile-controls button {
-  height: 42px;
-  border: 0;
-  border-radius: 9px;
-  background: #243246;
-  color: white;
-  font-size: 18px;
+  height: 45px;
+  padding: 0;
 }
 
 .mobile-controls .empty {
   visibility: hidden;
 }
 
-.log {
-  max-height: 160px;
-  overflow-y: auto;
-  font-size: 11px;
-  color: #aebbd0;
-  line-height: 1.55;
-}
-
-.log div {
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(255,255,255,.05);
-}
-
-/* HOUSE INTERIOR */
-
 .interior {
   display: none;
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 100;
-  background: #c7b299;
-  color: #171717;
+  background: #111;
 }
 
 .interior.active {
   display: block;
 }
 
-.interior-header {
-  height: 58px;
-  background: #171c24;
-  color: white;
+.interior-top {
+  height: 65px;
+  padding: 12px 18px;
+  background: #171d25;
+  border-bottom: 1px solid #303a47;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  align-items: center;
 }
 
-.interior-title {
-  font-weight: 900;
-}
-
-.leave-house {
-  border: 0;
-  background: #dc2626;
-  color: white;
-  border-radius: 9px;
-  padding: 9px 13px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.room {
+.interior-room {
   position: absolute;
-  inset: 58px 0 0;
+  inset: 65px 0 0;
   background:
-    linear-gradient(#d6c4ad 0 65%, #8a6549 65% 100%);
+    linear-gradient(#d8c4a4 0 56%, #76533a 56% 100%);
   overflow: hidden;
-}
-
-.wall {
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  top: 7%;
-  height: 54%;
-  background: #eadcc9;
-  border: 8px solid #8d674d;
-  border-bottom-width: 12px;
 }
 
 .window {
   position: absolute;
-  left: 13%;
-  top: 14%;
-  width: 105px;
-  height: 85px;
-  background: #8ec5e6;
-  border: 9px solid #704b37;
+  top: 10%;
+  left: 15%;
+  width: 180px;
+  height: 125px;
+  background: linear-gradient(#74c7f5, #b9ecff);
+  border: 12px solid #eee;
 }
 
 .window::after {
   content: "";
   position: absolute;
-  left: 47%;
+  width: 5px;
   top: 0;
   bottom: 0;
-  width: 5px;
-  background: #704b37;
+  left: 50%;
+  background: #eee;
 }
 
 .window::before {
   content: "";
   position: absolute;
+  height: 5px;
   left: 0;
   right: 0;
-  top: 47%;
-  height: 5px;
-  background: #704b37;
+  top: 50%;
+  background: #eee;
 }
 
 .tv {
   position: absolute;
-  right: 14%;
-  top: 18%;
-  width: 135px;
-  height: 80px;
-  background: #111827;
-  border: 8px solid #30343b;
-  border-radius: 5px;
+  right: 13%;
+  top: 15%;
+  width: 230px;
+  height: 140px;
+  background: #090b0e;
+  border: 8px solid #222;
+  border-radius: 8px;
 }
 
 .tv::after {
-  content: "OWERRI LIFE";
-  color: #67e8f9;
-  font-size: 10px;
+  content: "OWERRI";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #4dd0ff;
   font-weight: 900;
-  position: absolute;
-  top: 30px;
-  left: 25px;
+  font-size: 24px;
 }
 
 .sofa {
   position: absolute;
-  left: 14%;
-  bottom: 16%;
-  width: 230px;
-  height: 75px;
-  background: #31566b;
-  border-radius: 20px 20px 8px 8px;
-  border: 6px solid #253b4a;
+  left: 12%;
+  bottom: 17%;
+  width: 300px;
+  height: 90px;
+  background: #493f62;
+  border-radius: 25px 25px 8px 8px;
 }
 
 .sofa::before {
   content: "";
   position: absolute;
-  left: -12px;
-  bottom: 0;
-  width: 24px;
-  height: 65px;
-  background: #253b4a;
-  border-radius: 10px;
+  left: 15px;
+  right: 15px;
+  top: -35px;
+  height: 50px;
+  background: #493f62;
+  border-radius: 25px 25px 0 0;
 }
 
 .table {
   position: absolute;
-  right: 18%;
-  bottom: 16%;
-  width: 125px;
-  height: 55px;
-  background: #704b37;
+  right: 32%;
+  bottom: 14%;
+  width: 160px;
+  height: 70px;
+  background: #70492e;
   border-radius: 10px;
 }
 
@@ -682,63 +554,44 @@ button {
 .table::after {
   content: "";
   position: absolute;
-  bottom: -42px;
-  width: 9px;
-  height: 45px;
-  background: #4d3326;
+  width: 12px;
+  height: 70px;
+  background: #4a2e1d;
+  bottom: -60px;
 }
 
-.table::before {
-  left: 15px;
-}
-
-.table::after {
-  right: 15px;
-}
+.table::before { left: 15px; }
+.table::after { right: 15px; }
 
 .rug {
   position: absolute;
-  left: 32%;
-  right: 32%;
-  bottom: 7%;
-  height: 65px;
-  background: #7d3f4a;
+  left: 30%;
+  bottom: 8%;
+  width: 400px;
+  height: 110px;
+  background: #8a3541;
   border-radius: 50%;
-  border: 5px solid #63303a;
 }
 
 .bedroom-door {
   position: absolute;
-  right: 8%;
-  top: 18%;
-  width: 70px;
-  height: 145px;
-  background: #714c35;
-  border: 7px solid #4c3426;
+  right: 5%;
+  bottom: 0;
+  width: 130px;
+  height: 260px;
+  background: #5d3827;
+  border: 8px solid #392319;
 }
 
 .bedroom-door::after {
-  content: "BEDROOM";
+  content: "";
   position: absolute;
-  color: white;
-  font-size: 8px;
-  font-weight: bold;
-  transform: rotate(-90deg);
-  top: 63px;
-  left: 15px;
-}
-
-.interior-note {
-  position: absolute;
-  bottom: 9%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,.75);
-  color: white;
-  padding: 10px 15px;
-  border-radius: 10px;
-  font-size: 12px;
-  text-align: center;
+  right: 15px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d6b15a;
 }
 
 @media (max-width: 900px) {
@@ -746,26 +599,49 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .map-wrap {
-    min-height: 560px;
+  .side {
+    min-height: auto;
   }
 
-  .sidebar {
-    max-height: none;
+  .map-wrap {
+    min-height: 560px;
   }
 }
 
 @media (max-width: 600px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .stats {
-    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
   }
 
   .layout {
-    padding: 7px;
+    padding: 8px;
   }
 
   .map-wrap {
     min-height: 500px;
+  }
+
+  .zone {
+    font-size: 9px;
+  }
+
+  .window {
+    width: 120px;
+    height: 90px;
+  }
+
+  .tv {
+    width: 150px;
+    height: 90px;
+  }
+
+  .sofa {
+    width: 220px;
   }
 }
 `;
@@ -773,350 +649,355 @@ button {
 document.head.appendChild(style);
 
 root.innerHTML = `
-<div class="game">
+<div class="app">
 
-<header class="header">
-  <div class="logo">🌆 Owerri Lifestyle</div>
-  <div class="subtitle">Live the city. Build your lifestyle.</div>
+  <div class="topbar">
+    <div class="logo">🌆 Owerri <span>Lifestyle</span></div>
 
-  <div class="stats">
-    <div class="stat">
-      <small>💰 CASH</small>
-      <strong id="cash">₦2,500,000</strong>
-    </div>
-
-    <div class="stat">
-      <small>⭐ LEVEL</small>
-      <strong id="level">1</strong>
-    </div>
-
-    <div class="stat">
-      <small>🔥 REP</small>
-      <strong id="rep">100</strong>
-    </div>
-
-    <div class="stat">
-      <small>⛽ FUEL</small>
-      <strong id="fuel">100%</strong>
+    <div class="stats">
+      <div class="stat">💰 <span id="cash">₦2,500,000</span></div>
+      <div class="stat">⭐ Level <span id="level">1</span></div>
+      <div class="stat">❤️ Rep <span id="rep">100</span></div>
+      <div class="stat">⛽ Fuel <span id="fuel">100%</span></div>
+      <div class="stat">🚶 <span id="mode">Walk</span></div>
     </div>
   </div>
-</header>
 
-<div class="toolbar">
-  <button id="walkBtn">🚶 Walk</button>
-  <button id="driveBtn">🚗 Drive</button>
-  <button id="workBtn">💼 Work +₦75k</button>
-  <button id="clubBtn">🎵 Clubs</button>
-</div>
+  <div class="layout">
 
-<main class="layout">
+    <div class="map-wrap">
 
-<section class="map-wrap">
+      <div class="map" id="map">
 
-  <div class="map">
+        <div class="city-block block1"></div>
+        <div class="city-block block2"></div>
+        <div class="city-block block3"></div>
+        <div class="city-block block4"></div>
+        <div class="city-block block5"></div>
+        <div class="city-block block6"></div>
+        <div class="city-block block7"></div>
+        <div class="city-block block8"></div>
+        <div class="city-block block9"></div>
+        <div class="city-block block10"></div>
+        <div class="city-block block11"></div>
+        <div class="city-block block12"></div>
 
-    <div class="road road1"></div>
-    <div class="road road2"></div>
-    <div class="road road3"></div>
-    <div class="road road4"></div>
+        <div class="road horizontal r1"></div>
+        <div class="road horizontal r2"></div>
+        <div class="road horizontal r3"></div>
 
-    <div class="house h1"></div>
-    <div class="house h2"></div>
-    <div class="house h3"></div>
-    <div class="house h4"></div>
-    <div class="house h5"></div>
-    <div class="house h6"></div>
-    <div class="house h7"></div>
+        <div class="road vertical c1"></div>
+        <div class="road vertical c2"></div>
+        <div class="road vertical c3"></div>
 
-    <div class="shop shop1">SHOP</div>
-    <div class="shop shop2">MART</div>
-    <div class="shop shop3">FOOD</div>
+        <div class="tree t1"></div>
+        <div class="tree t2"></div>
+        <div class="tree t3"></div>
+        <div class="tree t4"></div>
+        <div class="tree t5"></div>
+        <div class="tree t6"></div>
+        <div class="tree t7"></div>
+        <div class="tree t8"></div>
+        <div class="tree t9"></div>
+        <div class="tree t10"></div>
+        <div class="tree t11"></div>
+        <div class="tree t12"></div>
 
-    <div class="tree t1"></div>
-    <div class="tree t2"></div>
-    <div class="tree t3"></div>
-    <div class="tree t4"></div>
-    <div class="tree t5"></div>
-    <div class="tree t6"></div>
-    <div class="tree t7"></div>
+        <div id="zones"></div>
+        <div id="properties"></div>
 
-    <div class="light l1"></div>
-    <div class="light l2"></div>
-    <div class="light l3"></div>
-    <div class="light l4"></div>
-
-    <div class="city-car city-car1"></div>
-    <div class="city-car city-car2"></div>
-    <div class="city-car city-car3"></div>
-    <div class="city-car city-car4"></div>
-
-    ${zones.map((zone, index) => `
-      <button
-        class="zone-btn"
-        style="left:${zone[1]}%;top:${zone[2]}%"
-        data-zone="${index}"
-      >
-        📍 ${zone[0]}
-      </button>
-    `).join("")}
-
-    ${properties.map((property, index) => `
-      <button
-        class="property"
-        id="property-${index}"
-        style="left:${property.x}%;top:${property.y}%"
-        data-property="${index}"
-      >
-        🏠
-      </button>
-    `).join("")}
-
-    <div id="player"></div>
-    <div id="player-car" style="display:none;"></div>
-
-    <div id="interior" class="interior">
-
-      <div class="interior-header">
-        <div>
-          <div class="interior-title">🏠 <span id="interiorName">My Home</span></div>
+        <div class="player" id="player">
+          <div class="person"></div>
         </div>
 
-        <button id="leaveHouse" class="leave-house">
-          🚪 Leave House
+      </div>
+    </div>
+
+    <div class="side">
+
+      <div class="panel">
+        <h3>🚶 Movement</h3>
+
+        <div class="mode-buttons">
+          <button id="walkBtn" class="primary">🚶 Walk</button>
+          <button id="driveBtn">🚗 Drive</button>
+        </div>
+
+        <div class="mobile-controls">
+          <button class="empty"></button>
+          <button data-move="up">▲</button>
+          <button class="empty"></button>
+
+          <button data-move="left">◀</button>
+          <button data-move="down">▼</button>
+          <button data-move="right">▶</button>
+        </div>
+
+        <p class="muted">
+          Use the buttons or keyboard arrows/WASD.
+        </p>
+      </div>
+
+      <div class="panel">
+        <h3>💼 Life</h3>
+
+        <button id="workBtn" class="action success">
+          💼 Go To Work
+        </button>
+
+        <button id="travelBtn" class="action">
+          🗺️ Travel
+        </button>
+
+        <button id="clubBtn" class="action">
+          🎵 Join Club
+        </button>
+
+        <button id="visitClubBtn" class="action">
+          🍾 Visit Club
         </button>
       </div>
 
-      <div class="room">
+      <div class="panel">
+        <h3>🏠 Properties</h3>
 
-        <div class="wall"></div>
-
-        <div class="window"></div>
-
-        <div class="tv"></div>
-
-        <div class="bedroom-door"></div>
-
-        <div class="sofa"></div>
-
-        <div class="table"></div>
-
-        <div class="rug"></div>
-
-        <div class="interior-note">
-          🛋️ Welcome home!<br>
-          Your Owerri Life home is yours.
+        <div id="propertyInfo" class="muted">
+          Select a yellow house marker on the map.
         </div>
 
+        <button id="buyBtn" class="action success" style="display:none;">
+          🏠 Buy House
+        </button>
+
+        <button id="enterBtn" class="action primary" style="display:none;">
+          🚪 Enter House
+        </button>
+      </div>
+
+      <div class="panel">
+        <h3>📱 Activity</h3>
+        <div id="log" class="log"></div>
       </div>
 
     </div>
 
   </div>
+</div>
 
-</section>
+<div class="interior" id="interior">
 
-<aside class="sidebar">
-
-<section class="panel">
-  <h3>📍 Current Location</h3>
-
-  <div class="info">
-    Zone: <strong id="zone">Fire Service</strong><br>
-    Status: <strong id="status">Walking</strong>
-  </div>
-</section>
-
-<section class="panel">
-
-  <h3>🏠 Properties</h3>
-
-  <div class="info">
-    Owned: <strong id="ownedCount">0 / 4</strong>
+  <div class="interior-top">
+    <strong id="interiorTitle">🏠 My House</strong>
+    <button id="leaveHouse" class="danger">Leave House</button>
   </div>
 
-  <div id="propertyInfo" class="property-info">
-    Tap a 🏠 house on the map to view the property.
+  <div class="interior-room">
+    <div class="window"></div>
+    <div class="tv"></div>
+    <div class="sofa"></div>
+    <div class="table"></div>
+    <div class="rug"></div>
+    <div class="bedroom-door"></div>
   </div>
-
-  <button id="buyPropertyBtn" class="buy-btn" disabled>
-    🔑 Buy House
-  </button>
-
-  <button id="enterHouseBtn" class="enter-btn" disabled>
-    🚪 Enter House
-  </button>
-
-</section>
-
-<section class="panel">
-
-  <h3>🎵 Nightlife</h3>
-
-  <button class="club-btn" data-club="0">
-    🎧 Cartel Lifestyle
-  </button>
-
-  <button class="club-btn" data-club="1">
-    🎶 De Angels
-  </button>
-
-</section>
-
-<section class="panel">
-
-  <h3>🎮 Controls</h3>
-
-  <div class="info">
-    Desktop: WASD or Arrow Keys<br>
-    Walk = normal movement<br>
-    Drive = faster movement + fuel
-  </div>
-
-  <div class="mobile-controls">
-
-    <button class="empty">•</button>
-    <button data-move="up">⬆️</button>
-    <button class="empty">•</button>
-
-    <button data-move="left">⬅️</button>
-    <button data-move="down">⬇️</button>
-    <button data-move="right">➡️</button>
-
-  </div>
-
-</section>
-
-<section class="panel">
-
-  <h3>📜 Activity</h3>
-
-  <div id="log" class="log"></div>
-
-</section>
-
-</aside>
-
-</main>
 
 </div>
 `;
 
-const cashEl = document.querySelector("#cash");
-const levelEl = document.querySelector("#level");
-const repEl = document.querySelector("#rep");
-const fuelEl = document.querySelector("#fuel");
-const zoneEl = document.querySelector("#zone");
-const statusEl = document.querySelector("#status");
-
-const playerEl = document.querySelector("#player");
-const playerCarEl = document.querySelector("#player-car");
-
-const logEl = document.querySelector("#log");
-
-const propertyInfoEl = document.querySelector("#propertyInfo");
-const buyPropertyBtn = document.querySelector("#buyPropertyBtn");
-const enterHouseBtn = document.querySelector("#enterHouseBtn");
-const ownedCountEl = document.querySelector("#ownedCount");
-
-const interior = document.querySelector("#interior");
-const interiorName = document.querySelector("#interiorName");
-const leaveHouseBtn = document.querySelector("#leaveHouse");
-
-let selectedProperty = null;
+const cashEl = document.getElementById("cash");
+const levelEl = document.getElementById("level");
+const repEl = document.getElementById("rep");
+const fuelEl = document.getElementById("fuel");
+const modeEl = document.getElementById("mode");
+const playerEl = document.getElementById("player");
+const zonesEl = document.getElementById("zones");
+const propertiesEl = document.getElementById("properties");
+const propertyInfoEl = document.getElementById("propertyInfo");
+const buyBtn = document.getElementById("buyBtn");
+const enterBtn = document.getElementById("enterBtn");
+const logEl = document.getElementById("log");
+const interior = document.getElementById("interior");
+const interiorTitle = document.getElementById("interiorTitle");
 
 function money(value) {
-  return "₦" + value.toLocaleString("en-NG");
+  return "₦" + Math.max(0, Math.floor(value)).toLocaleString();
 }
 
 function log(message) {
-  const entry = document.createElement("div");
-  entry.textContent = "• " + message;
-  logEl.prepend(entry);
+  const item = document.createElement("div");
+  item.textContent = message;
+
+  logEl.prepend(item);
+
+  while (logEl.children.length > 8) {
+    logEl.removeChild(logEl.lastChild);
+  }
 }
 
 function update() {
-
   cashEl.textContent = money(player.cash);
   levelEl.textContent = player.level;
   repEl.textContent = player.reputation;
-  fuelEl.textContent = Math.max(0, Math.floor(player.fuel)) + "%";
-
-  zoneEl.textContent = player.zone;
-
-  statusEl.textContent =
-    player.mode === "Drive"
-      ? "Driving"
-      : "Walking";
+  fuelEl.textContent = player.fuel + "%";
+  modeEl.textContent = player.mode;
 
   playerEl.style.left = player.x + "%";
   playerEl.style.top = player.y + "%";
 
-  playerCarEl.style.left = player.x + "%";
-  playerCarEl.style.top = player.y + "%";
-
   if (player.mode === "Drive") {
-    playerEl.style.display = "none";
-    playerCarEl.style.display = "block";
+    playerEl.innerHTML = `
+      <div class="car">
+        <div class="car-window"></div>
+      </div>
+    `;
   } else {
-    playerEl.style.display = "block";
-    playerCarEl.style.display = "none";
+    playerEl.innerHTML = `
+      <div class="person"></div>
+    `;
   }
+
+  updateZone();
+  updateProperties();
+}
+
+function updateZone() {
+  let closest = zones[0];
+  let distance = Infinity;
+
+  for (const zone of zones) {
+    const dx = player.x - zone[1];
+    const dy = player.y - zone[2];
+    const d = Math.sqrt(dx * dx + dy * dy);
+
+    if (d < distance) {
+      distance = d;
+      closest = zone;
+    }
+  }
+
+  player.zone = closest[0];
+}
+
+function renderZones() {
+  zonesEl.innerHTML = "";
+
+  zones.forEach(zone => {
+    const el = document.createElement("div");
+
+    el.className = "zone";
+    el.style.left = zone[1] + "%";
+    el.style.top = zone[2] + "%";
+
+    el.innerHTML = `
+      <strong>${zone[0]}</strong>
+      <span>${zone[3]}</span>
+    `;
+
+    zonesEl.appendChild(el);
+  });
+}
+
+function renderProperties() {
+  propertiesEl.innerHTML = "";
+
+  properties.forEach((property, index) => {
+    const marker = document.createElement("button");
+
+    marker.className =
+      "property-marker" + (property.owned ? " owned" : "");
+
+    marker.style.left = property.x + "%";
+    marker.style.top = property.y + "%";
+
+    marker.textContent = property.owned ? "✓" : "🏠";
+
+    marker.title = property.name;
+
+    marker.addEventListener("click", () => {
+      selectProperty(index);
+    });
+
+    propertiesEl.appendChild(marker);
+  });
+}
+
+function updateProperties() {
+  renderProperties();
+
+  const owned = properties.filter(property => property.owned).length;
+
+  if (!player.selectedProperty) {
+    propertyInfoEl.innerHTML = `
+      <div>Select a yellow house marker on the map.</div>
+      <br>
+      <strong>Owned homes: ${owned}</strong>
+    `;
+
+    buyBtn.style.display = "none";
+    enterBtn.style.display = "none";
+
+    return;
+  }
+
+  const property = player.selectedProperty;
+
+  propertyInfoEl.innerHTML = `
+    <strong>${property.name}</strong>
+    <br><br>
+    ${property.description}
+    <br><br>
+    💰 Price: ${money(property.price)}
+    <br>
+    ${property.owned ? "✅ You own this property." : "🏷️ Available for purchase."}
+    <br><br>
+    🏠 Owned homes: ${owned}
+  `;
+
+  if (property.owned) {
+    buyBtn.style.display = "none";
+    enterBtn.style.display = "block";
+  } else {
+    buyBtn.style.display = "block";
+    enterBtn.style.display = "none";
+  }
+}
+
+function selectProperty(index) {
+  player.selectedProperty = properties[index];
+
+  log("🏠 Selected " + properties[index].name);
 
   updateProperties();
 }
 
-function setMode(mode) {
+function buyProperty() {
+  const property = player.selectedProperty;
 
-  if (mode === "Drive" && player.fuel <= 0) {
-    log("⛽ You are out of fuel.");
+  if (!property) {
+    log("Select a house first.");
     return;
   }
 
-  player.mode = mode;
-
-  if (mode === "Drive") {
-    log("🚗 You are now driving around Owerri.");
-  } else {
-    log("🚶 You are now walking.");
+  if (property.owned) {
+    log("You already own this house.");
+    return;
   }
 
-  update();
-}
-
-function work() {
-
-  player.cash += 75000;
-  player.reputation += 5;
-
-  const needed = player.level * 150;
-
-  if (player.reputation >= needed) {
-    player.level++;
-    log("🎉 Level up! You reached Level " + player.level + ".");
+  if (player.cash < property.price) {
+    log("❌ You don't have enough money.");
+    return;
   }
 
-  log("💼 You completed a job and earned ₦75,000.");
+  player.cash -= property.price;
+  property.owned = true;
+
+  player.reputation += 10;
+
+  log("🎉 Congratulations! You bought " + property.name + ".");
 
   update();
 }
 
-function travel(index) {
+function enterHouse() {
+  const property = player.selectedProperty;
 
-  const zone = zones[index];
-
-  player.x = zone[1];
-  player.y = zone[2];
-  player.zone = zone[0];
-
-  player.reputation += 2;
-
-  log("📍 You travelled to " + zone[0] + ".");
-
-  update();
-}
-
-function joinClub(index) {
-
-  const club = clubs[index];
-
-  player.reputation += 10
+  if (!property || !property
