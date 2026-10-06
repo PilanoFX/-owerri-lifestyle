@@ -13,6 +13,37 @@ const clubs = [
   "De Angels"
 ];
 
+const properties = [
+  {
+    name: "Douglas Luxury Apartment",
+    x: 59,
+    y: 24,
+    price: 1800000,
+    description: "A premium apartment close to downtown nightlife."
+  },
+  {
+    name: "Wetheral City Apartment",
+    x: 72,
+    y: 30,
+    price: 1200000,
+    description: "A modern apartment in the heart of the city."
+  },
+  {
+    name: "New Owerri Villa",
+    x: 80,
+    y: 72,
+    price: 2500000,
+    description: "A beautiful villa in one of Owerri's growing residential areas."
+  },
+  {
+    name: "Nekede Starter House",
+    x: 11,
+    y: 68,
+    price: 650000,
+    description: "An affordable home close to the student district."
+  }
+];
+
 const player = {
   name: "Player",
   x: 49,
@@ -28,16 +59,8 @@ const player = {
 const root = document.querySelector("#root");
 
 if (!root) {
-  document.body.innerHTML =
-    "<h1 style='color:red;padding:30px'>Game container missing</h1>";
-
-  throw new Error("Missing #root");
+  throw new Error("Root element not found.");
 }
-
-
-/* =========================
-   GAME STYLE
-========================= */
 
 const style = document.createElement("style");
 
@@ -46,18 +69,11 @@ style.textContent = `
   box-sizing: border-box;
 }
 
-html,
 body {
   margin: 0;
-  padding: 0;
-  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
   background: #080b10;
   color: white;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-body {
-  overflow-x: hidden;
 }
 
 button {
@@ -65,1257 +81,838 @@ button {
 }
 
 .game {
-  width: 100%;
-  max-width: 1450px;
-  margin: auto;
-  padding: 20px;
+  min-height: 100vh;
+  background: #080b10;
 }
 
-/* HEADER */
-
-header {
-  padding: 24px;
-  text-align: center;
-  margin-bottom: 15px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #19212c,
-      #080c12
-    );
-
-  border: 1px solid #344050;
-  border-radius: 20px;
-
-  box-shadow:
-    0 15px 40px rgba(0,0,0,.4);
+.header {
+  padding: 16px;
+  background: linear-gradient(135deg, #111827, #080b10);
+  border-bottom: 1px solid #263244;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 34px;
+.logo {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: .5px;
 }
 
-header p {
-  color: #aeb8c6;
+.subtitle {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-top: 4px;
 }
-
-/* STATS */
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-bottom: 15px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 14px;
 }
 
-.stats div {
-  background: #151c26;
-  border: 1px solid #303b4a;
-  border-radius: 14px;
-  padding: 15px;
-  text-align: center;
-  font-weight: bold;
+.stat {
+  background: #111827;
+  border: 1px solid #263244;
+  border-radius: 12px;
+  padding: 10px;
 }
 
-/* TOOLBAR */
+.stat small {
+  display: block;
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+.stat strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+}
 
 .toolbar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  background: #0d131d;
+  border-bottom: 1px solid #263244;
 }
 
 .toolbar button {
-  padding: 12px 18px;
-  border: 1px solid #3b4656;
-  border-radius: 12px;
-  background: #202936;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 14px;
+  background: #1c2736;
   color: white;
-  font-weight: bold;
+  font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
 }
 
 .toolbar button:hover {
-  background: #2e3948;
-  transform: translateY(-2px);
+  background: #263548;
 }
 
-/* MAIN */
-
-main {
+.layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 310px;
-  gap: 15px;
+  grid-template-columns: 1fr 320px;
+  gap: 12px;
+  padding: 12px;
 }
 
-/* MAP */
+.map-wrap {
+  position: relative;
+  min-height: 650px;
+  border: 2px solid #263244;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #467d42;
+  box-shadow: 0 15px 50px rgba(0,0,0,.35);
+}
 
 .map {
-  position: relative;
-  min-height: 680px;
-  overflow: hidden;
-
-  border-radius: 22px;
-  border: 3px solid #3d4958;
-
+  position: absolute;
+  inset: 0;
   background:
-    linear-gradient(
-      135deg,
-      #315b3b,
-      #24462e
-    );
-
-  box-shadow:
-    inset 0 0 120px rgba(0,0,0,.55),
-    0 20px 50px rgba(0,0,0,.45);
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.05), transparent 18%),
+    radial-gradient(circle at 80% 70%, rgba(0,0,0,.08), transparent 25%),
+    #4c8548;
 }
-
-/* ROADS */
 
 .road {
   position: absolute;
-  z-index: 1;
-  background: #292e35;
+  background: #303842;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.04);
+}
+
+.road::after {
+  content: "";
+  position: absolute;
+  background: repeating-linear-gradient(
+    to right,
+    #e6c84f 0 28px,
+    transparent 28px 50px
+  );
+  height: 3px;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .8;
 }
 
 .road1 {
-  width: 100%;
-  height: 72px;
+  left: 0;
+  right: 0;
   top: 43%;
+  height: 70px;
 }
 
 .road2 {
-  width: 72px;
-  height: 100%;
-  left: 50%;
+  top: 0;
+  bottom: 0;
+  left: 47%;
+  width: 70px;
 }
 
 .road3 {
-  width: 85%;
-  height: 48px;
-  left: 8%;
+  left: 0;
+  right: 0;
   top: 70%;
-  transform: rotate(-8deg);
+  height: 48px;
 }
 
 .road4 {
-  width: 48px;
-  height: 80%;
-  left: 25%;
-  top: 10%;
-  transform: rotate(7deg);
-}
-
-/* ROAD MARKINGS */
-
-.road1::after,
-.road3::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 3px;
-  top: 50%;
-  left: 0;
-
-  background:
-    repeating-linear-gradient(
-      90deg,
-      #e4d25d 0 30px,
-      transparent 30px 55px
-    );
+  top: 0;
+  bottom: 0;
+  left: 70%;
+  width: 42px;
 }
 
 .road2::after,
 .road4::after {
-  content: "";
-  position: absolute;
-  width: 3px;
-  height: 100%;
-  left: 50%;
   top: 0;
-
-  background:
-    repeating-linear-gradient(
-      0deg,
-      #e4d25d 0 30px,
-      transparent 30px 55px
-    );
+  bottom: 0;
+  left: 50%;
+  right: auto;
+  width: 3px;
+  height: auto;
+  background: repeating-linear-gradient(
+    to bottom,
+    #e6c84f 0 28px,
+    transparent 28px 50px
+  );
+  transform: translateX(-50%);
 }
-
-/* HOUSES */
 
 .house {
   position: absolute;
-  z-index: 2;
-
-  width: 82px;
-  height: 60px;
-
-  background: #d7d0ba;
-  border: 3px solid #746e60;
+  width: 58px;
+  height: 45px;
+  background: #d9b382;
+  border: 3px solid #714c2c;
   border-radius: 5px;
-
-  box-shadow:
-    0 7px 14px rgba(0,0,0,.35);
+  box-shadow: 0 7px 12px rgba(0,0,0,.25);
 }
 
 .house::before {
   content: "";
-
   position: absolute;
-
-  left: -7px;
-  top: -22px;
-
-  width: 0;
-  height: 0;
-
-  border-left: 48px solid transparent;
-  border-right: 48px solid transparent;
-  border-bottom: 25px solid #813f32;
+  left: -6px;
+  right: -6px;
+  top: -20px;
+  height: 27px;
+  background: #9d493f;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
 .house::after {
   content: "";
-
   position: absolute;
-
-  width: 15px;
+  width: 13px;
   height: 20px;
-
-  left: 32px;
+  background: #523a2d;
   bottom: 0;
-
-  background: #51483c;
+  left: 22px;
 }
 
-/* HOUSES */
-
-.h1 {
-  left: 6%;
-  top: 12%;
-}
-
-.h2 {
-  left: 29%;
-  top: 9%;
-}
-
-.h3 {
-  left: 68%;
-  top: 10%;
-}
-
-.h4 {
-  left: 82%;
-  top: 29%;
-}
-
-.h5 {
-  left: 6%;
-  top: 76%;
-}
-
-.h6 {
-  left: 37%;
-  top: 79%;
-}
-
-.h7 {
-  left: 76%;
-  top: 76%;
-}
-
-/* SHOPS */
+.h1 { left: 7%; top: 15%; }
+.h2 { left: 20%; top: 12%; }
+.h3 { left: 78%; top: 13%; }
+.h4 { left: 83%; top: 45%; }
+.h5 { left: 75%; top: 82%; }
+.h6 { left: 18%; top: 82%; }
+.h7 { left: 4%; top: 42%; }
 
 .shop {
   position: absolute;
-  z-index: 3;
-
-  width: 90px;
-  height: 62px;
-
-  background: #e3a83b;
-
-  border: 3px solid #8b6120;
-  border-radius: 7px;
-
-  box-shadow:
-    0 7px 15px rgba(0,0,0,.4);
-}
-
-.shop::before {
-  content: "SHOP";
-
-  position: absolute;
-
-  left: 8px;
-  right: 8px;
-  top: 7px;
-
-  padding: 4px;
-
+  width: 65px;
+  height: 42px;
+  background: #e7e2c6;
+  border: 3px solid #594c36;
+  border-radius: 4px;
   text-align: center;
-
-  color: white;
-  background: #a52f2f;
-
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 9px;
+  font-weight: 900;
+  color: #3b3022;
+  padding-top: 15px;
+  box-shadow: 0 6px 12px rgba(0,0,0,.2);
 }
 
-.shop::after {
-  content: "";
-
-  position: absolute;
-
-  width: 16px;
-  height: 22px;
-
-  left: 37px;
-  bottom: 0;
-
-  background: #513d29;
-}
-
-.shop1 {
-  left: 14%;
-  top: 36%;
-}
-
-.shop2 {
-  left: 67%;
-  top: 43%;
-}
-
-.shop3 {
-  left: 33%;
-  top: 58%;
-}
-
-/* TREES */
+.shop1 { left: 32%; top: 33%; }
+.shop2 { left: 57%; top: 55%; }
+.shop3 { left: 76%; top: 55%; }
 
 .tree {
   position: absolute;
-  z-index: 3;
-  font-size: 34px;
-
-  filter:
-    drop-shadow(
-      0 5px 3px rgba(0,0,0,.4)
-    );
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #164d29;
+  box-shadow: 0 7px 0 #7b542d;
 }
 
-.t1 {
-  left: 2%;
-  top: 30%;
-}
+.t1 { left: 14%; top: 28%; }
+.t2 { left: 25%; top: 63%; }
+.t3 { left: 39%; top: 18%; }
+.t4 { left: 62%; top: 78%; }
+.t5 { left: 88%; top: 27%; }
+.t6 { left: 91%; top: 76%; }
+.t7 { left: 9%; top: 76%; }
 
-.t2 {
-  left: 24%;
-  top: 3%;
-}
-
-.t3 {
-  left: 72%;
-  top: 52%;
-}
-
-.t4 {
-  left: 92%;
-  top: 61%;
-}
-
-.t5 {
-  left: 15%;
-  top: 67%;
-}
-
-.t6 {
-  left: 57%;
-  top: 85%;
-}
-
-.t7 {
-  left: 88%;
-  top: 10%;
-}
-
-/* STREET LIGHTS */
-
-.street-light {
+.light {
   position: absolute;
-  z-index: 4;
-  font-size: 25px;
+  width: 5px;
+  height: 38px;
+  background: #343b45;
 }
 
-.l1 {
-  left: 42%;
-  top: 37%;
+.light::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff0a8;
+  left: -5px;
+  top: -6px;
+  box-shadow: 0 0 18px rgba(255,240,168,.7);
 }
 
-.l2 {
-  left: 58%;
-  top: 37%;
-}
-
-.l3 {
-  left: 42%;
-  top: 51%;
-}
-
-.l4 {
-  left: 58%;
-  top: 51%;
-}
-
-/* CAR DECORATIONS */
+.l1 { left: 45%; top: 35%; }
+.l2 { left: 52%; top: 57%; }
+.l3 { left: 68%; top: 41%; }
+.l4 { left: 28%; top: 42%; }
 
 .city-car {
   position: absolute;
-  z-index: 6;
-
-  width: 48px;
-  height: 25px;
-
-  border-radius: 9px 9px 5px 5px;
-
-  box-shadow:
-    0 5px 8px rgba(0,0,0,.5);
-
-  border: 2px solid rgba(0,0,0,.4);
-}
-
-.city-car::before {
-  content: "";
-
-  position: absolute;
-
-  width: 18px;
-  height: 10px;
-
-  left: 13px;
-  top: 3px;
-
-  background: #9ed1e8;
-
-  border-radius: 3px;
-}
-
-.city-car::after {
-  content: "";
-
-  position: absolute;
-
-  width: 8px;
-  height: 8px;
-
-  left: 4px;
-  bottom: -5px;
-
-  border-radius: 50%;
-
-  background: #111;
-
-  box-shadow:
-    31px 0 #111;
-}
-
-.city-car1 {
-  background: #c72d2d;
-  left: 34%;
-  top: 40%;
-}
-
-.city-car2 {
-  background: #e4c42c;
-  left: 62%;
-  top: 47%;
-}
-
-.city-car3 {
-  background: #3477c7;
-  left: 48%;
-  top: 61%;
+  width: 42px;
+  height: 21px;
+  border-radius: 7px;
+  background: #263b55;
+  border: 2px solid #101923;
   transform: rotate(90deg);
 }
 
-.city-car4 {
-  background: #eee;
-  left: 19%;
-  top: 43%;
-}
-
-/* PLAYER CAR */
-
-.player-car {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  z-index: 30;
-
-  width: 58px;
-  height: 32px;
-
-  background: #d62828;
-
-  border: 3px solid #fff;
-
-  border-radius: 12px 12px 7px 7px;
-
-  box-shadow:
-    0 0 0 5px rgba(214,40,40,.2),
-    0 0 25px rgba(214,40,40,.7);
-
-  transition:
-    left .1s,
-    top .1s;
-}
-
-.player-car::before {
+.city-car::before,
+.city-car::after {
   content: "";
-
   position: absolute;
-
-  width: 24px;
-  height: 14px;
-
-  left: 14px;
-  top: 3px;
-
-  background: #a9d8eb;
-
-  border-radius: 4px;
-}
-
-.player-car::after {
-  content: "";
-
-  position: absolute;
-
   width: 9px;
-  height: 9px;
-
-  left: 5px;
-  bottom: -6px;
-
-  background: #111;
-
-  border-radius: 50%;
-
-  box-shadow:
-    39px 0 #111;
+  height: 5px;
+  background: #080b10;
+  bottom: -5px;
+  border-radius: 2px;
 }
 
-/* PLAYER */
+.city-car::before {
+  left: 4px;
+}
 
-.player {
+.city-car::after {
+  right: 4px;
+}
+
+.city-car1 { left: 31%; top: 41%; }
+.city-car2 { left: 63%; top: 43%; }
+.city-car3 { left: 70%; top: 68%; }
+.city-car4 { left: 21%; top: 69%; }
+
+.zone-btn {
   position: absolute;
   transform: translate(-50%, -50%);
-  z-index: 30;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(7,12,18,.82);
+  color: white;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 8;
+}
 
-  width: 55px;
-  height: 55px;
+.zone-btn:hover {
+  background: #182536;
+}
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+.property {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 42px;
+  height: 42px;
+  border: 2px solid #f4d35e;
+  background: rgba(16, 24, 39, .95);
   border-radius: 50%;
+  font-size: 21px;
+  cursor: pointer;
+  z-index: 12;
+  box-shadow: 0 0 16px rgba(244,211,94,.35);
+}
 
-  background:
-    rgba(255,196,0,.25);
+.property:hover {
+  transform: translate(-50%, -50%) scale(1.12);
+}
 
+.property.owned {
+  border-color: #22c55e;
+  box-shadow: 0 0 18px rgba(34,197,94,.5);
+}
+
+#player {
+  position: absolute;
+  width: 26px;
+  height: 34px;
+  border-radius: 13px 13px 8px 8px;
+  background: #2563eb;
   border: 3px solid white;
-
-  font-size: 31px;
-
-  box-shadow:
-    0 0 0 5px rgba(255,196,0,.1),
-    0 0 30px rgba(255,196,0,.6);
-
-  transition:
-    left .1s,
-    top .1s;
-}
-
-/* LOCATION */
-
-.location {
-  position: absolute;
   transform: translate(-50%, -50%);
-  z-index: 10;
-
-  background: #101720;
-  color: white;
-
-  border: 2px solid rgba(255,255,255,.25);
-  border-radius: 12px;
-
-  padding: 9px 12px;
-
-  font-size: 12px;
-  font-weight: bold;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 7px 18px rgba(0,0,0,.55);
+  z-index: 20;
+  transition: left .12s, top .12s;
 }
 
-.location:hover {
-  transform:
-    translate(-50%, -50%)
-    scale(1.08);
-
-  background: #263343;
+#player::before {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #d9a679;
+  left: 4px;
+  top: -9px;
+  border: 2px solid white;
 }
 
-/* SIDE PANEL */
-
-aside {
-  background: #151c26;
-
-  border: 1px solid #303b4a;
-
-  border-radius: 20px;
-
-  padding: 20px;
-
-  box-shadow:
-    0 15px 35px rgba(0,0,0,.35);
+#player-car {
+  position: absolute;
+  width: 52px;
+  height: 27px;
+  background: #d62828;
+  border: 3px solid #111827;
+  border-radius: 10px 14px 9px 9px;
+  transform: translate(-50%, -50%);
+  z-index: 21;
+  transition: left .12s, top .12s;
+  box-shadow: 0 7px 15px rgba(0,0,0,.35);
 }
 
-aside h2 {
-  margin-top: 0;
+#player-car::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: -8px;
+  width: 25px;
+  height: 13px;
+  background: #9dd6ef;
+  border: 2px solid #111827;
+  border-radius: 7px 7px 2px 2px;
 }
 
-aside h3 {
-  margin-top: 25px;
+#player-car::after {
+  content: "●     ●";
+  position: absolute;
+  color: #080b10;
+  left: 7px;
+  bottom: -12px;
+  font-size: 16px;
+  letter-spacing: 4px;
 }
 
-#status {
-  color: #aeb8c6;
-}
-
-.club {
-  display: block;
-  width: 100%;
-
-  margin: 8px 0;
-
-  padding: 11px;
-
-  border-radius: 11px;
-
-  background: #202936;
-  color: white;
-
-  border: 1px solid #3a4656;
-
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.club:hover {
-  background: #2e3948;
-}
-
-#activity {
-  margin-top: 20px;
-
-  background: #0d1219;
-
-  border: 1px solid #293440;
-
-  border-radius: 12px;
-
-  padding: 12px;
-
-  max-height: 220px;
-
+.sidebar {
+  background: #101722;
+  border: 1px solid #263244;
+  border-radius: 18px;
+  padding: 14px;
   overflow-y: auto;
+  max-height: 650px;
 }
 
-#activity p {
-  color: #c6cfda;
-
-  padding-bottom: 10px;
-
-  border-bottom:
-    1px solid #222b35;
+.panel {
+  background: #151f2d;
+  border: 1px solid #2a374a;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
 }
 
-/* MOBILE */
+.panel h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.info {
+  color: #b8c4d4;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.property-info {
+  background: #0c131d;
+  border-radius: 10px;
+  padding: 10px;
+  color: #dbe4ef;
+  font-size: 12px;
+  line-height: 1.6;
+  min-height: 100px;
+}
+
+.buy-btn {
+  width: 100%;
+  margin-top: 9px;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #eab308;
+  color: #171717;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.buy-btn:disabled {
+  background: #374151;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.club-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 7px;
+  border: 0;
+  border-radius: 9px;
+  background: #202c3d;
+  color: white;
+  cursor: pointer;
+  text-align: left;
+}
 
 .mobile-controls {
-  display: none;
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
 }
 
 .mobile-controls button {
-  width: 60px;
-  height: 52px;
-
-  border-radius: 12px;
-
-  background: #202936;
+  height: 42px;
+  border: 0;
+  border-radius: 9px;
+  background: #243246;
   color: white;
-
-  border: 1px solid #3b4656;
-
-  font-size: 20px;
+  font-size: 18px;
 }
 
-@media (max-width: 850px) {
+.mobile-controls .empty {
+  visibility: hidden;
+}
 
-  .game {
-    padding: 10px;
+.log {
+  max-height: 160px;
+  overflow-y: auto;
+  font-size: 11px;
+  color: #aebbd0;
+  line-height: 1.55;
+}
+
+.log div {
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
   }
 
-  header h1 {
-    font-size: 25px;
+  .map-wrap {
+    min-height: 560px;
   }
 
+  .sidebar {
+    max-height: none;
+  }
+}
+
+@media (max-width: 600px) {
   .stats {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  main {
-    grid-template-columns: 1fr;
+  .layout {
+    padding: 7px;
   }
 
-  .map {
-    min-height: 520px;
+  .map-wrap {
+    min-height: 500px;
+    border-radius: 12px;
   }
 
-  aside {
-    order: 2;
-  }
-
-  .mobile-controls {
-    display: grid;
-
-    grid-template-columns:
-      repeat(3, 60px);
-
-    justify-content: center;
-
-    gap: 6px;
-
-    margin-top: 15px;
-  }
-
-  .mobile-controls button:nth-child(1) {
-    grid-column: 2;
-  }
-
-  .mobile-controls button:nth-child(2) {
-    grid-column: 1;
-  }
-
-  .mobile-controls button:nth-child(3) {
-    grid-column: 2;
-  }
-
-  .mobile-controls button:nth-child(4) {
-    grid-column: 3;
-  }
-
-  .house,
-  .shop {
-    transform: scale(.75);
-  }
-
-  .location {
-    font-size: 9px;
-    padding: 6px 8px;
+  .house {
+    transform: scale(.8);
   }
 }
 `;
 
 document.head.appendChild(style);
 
-
-/* =========================
-   GAME HTML
-========================= */
-
 root.innerHTML = `
 <div class="game">
 
-<header>
-  <h1>🌆 Owerri Lifestyle</h1>
-  <p>Live the city. Build your lifestyle.</p>
-</header>
+  <header class="header">
+    <div class="logo">🌆 Owerri Lifestyle</div>
+    <div class="subtitle">Live the city. Build your lifestyle.</div>
 
+    <div class="stats">
+      <div class="stat">
+        <small>💰 CASH</small>
+        <strong id="cash">₦2,500,000</strong>
+      </div>
 
-<section class="stats">
+      <div class="stat">
+        <small>⭐ LEVEL</small>
+        <strong id="level">1</strong>
+      </div>
 
-  <div>
-    💰 ₦<span id="cash"></span>
+      <div class="stat">
+        <small>🔥 REP</small>
+        <strong id="rep">100</strong>
+      </div>
+
+      <div class="stat">
+        <small>⛽ FUEL</small>
+        <strong id="fuel">100%</strong>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button id="walkBtn">🚶 Walk</button>
+    <button id="driveBtn">🚗 Drive</button>
+    <button id="workBtn">💼 Work +₦75k</button>
+    <button id="clubBtn">🎵 Clubs</button>
   </div>
 
-  <div>
-    ⭐ Level <span id="level"></span>
-  </div>
-
-  <div>
-    🔥 Rep <span id="rep"></span>
-  </div>
-
-  <div>
-    ⛽ Fuel <span id="fuel"></span>%
-  </div>
-
-  <div>
-    🟢 Online <span id="online">1</span>
-  </div>
-
-</section>
-
-
-<section class="toolbar">
-
-  <button id="walkBtn">
-    🚶 Walk
-  </button>
-
-  <button id="driveBtn">
-    🚗 Drive
-  </button>
-
-  <button id="workBtn">
-    💼 Work +₦75k
-  </button>
-
-  <button id="clubBtn">
-    🎵 Clubs
-  </button>
-
-</section>
-
-
-<main>
-
-<section class="map">
-
-
-  <div class="road road1"></div>
-  <div class="road road2"></div>
-  <div class="road road3"></div>
-  <div class="road road4"></div>
-
-
-  <!-- HOUSES -->
-
-  <div class="house h1"></div>
-  <div class="house h2"></div>
-  <div class="house h3"></div>
-  <div class="house h4"></div>
-  <div class="house h5"></div>
-  <div class="house h6"></div>
-  <div class="house h7"></div>
-
-
-  <!-- SHOPS -->
-
-  <div class="shop shop1"></div>
-  <div class="shop shop2"></div>
-  <div class="shop shop3"></div>
-
-
-  <!-- TREES -->
-
-  <div class="tree t1">🌳</div>
-  <div class="tree t2">🌴</div>
-  <div class="tree t3">🌳</div>
-  <div class="tree t4">🌴</div>
-  <div class="tree t5">🌳</div>
-  <div class="tree t6">🌴</div>
-  <div class="tree t7">🌳</div>
-
-
-  <!-- STREET LIGHTS -->
-
-  <div class="street-light l1">💡</div>
-  <div class="street-light l2">💡</div>
-  <div class="street-light l3">💡</div>
-  <div class="street-light l4">💡</div>
-
-
-  <!-- CITY CARS -->
-
-  <div class="city-car city-car1"></div>
-  <div class="city-car city-car2"></div>
-  <div class="city-car city-car3"></div>
-  <div class="city-car city-car4"></div>
-
-
-  <!-- LOCATIONS -->
-
-  ${zones.map((zone, index) => `
-    <button
-      class="location"
-      style="
-        left:${zone[1]}%;
-        top:${zone[2]}%;
-      "
-      data-zone="${index}"
-    >
-      📍 ${zone[0]}
-    </button>
-  `).join("")}
-
-
-  <!-- PLAYER -->
-
-  <div
-    id="player"
-    class="player"
-    style="
-      left:${player.x}%;
-      top:${player.y}%;
-    "
-  >
-    🧍
-  </div>
-
-
-  <!-- PLAYER CAR -->
-
-  <div
-    id="playerCar"
-    class="player-car"
-    style="
-      left:${player.x}%;
-      top:${player.y}%;
-      display:none;
-    "
-  ></div>
-
-</section>
-
-
-<aside>
-
-  <h2>
-    📍 <span id="zoneName"></span>
-  </h2>
-
-  <p id="status">
-    You are exploring Owerri.
-  </p>
-
-
-  <h3>
-    🌃 Nightlife
-  </h3>
-
-
-  ${clubs.map((club, index) => `
-    <button
-      class="club"
-      data-club="${index}"
-    >
-      🎵 ${club}
-    </button>
-  `).join("")}
-
-
-  <h3>
-    🎮 Controls
-  </h3>
-
-  <p>
-    Use WASD or arrow keys to move.
-  </p>
-
-
-  <div class="mobile-controls">
-
-    <button data-move="up">
-      ⬆️
-    </button>
-
-    <button data-move="left">
-      ⬅️
-    </button>
-
-    <button data-move="down">
-      ⬇️
-    </button>
-
-    <button data-move="right">
-      ➡️
-    </button>
-
-  </div>
-
-
-  <div id="activity">
-
-    <p>
-      Welcome to Owerri Lifestyle.
-    </p>
-
-  </div>
-
-</aside>
-
-</main>
-
+  <main class="layout">
+
+    <section class="map-wrap">
+      <div class="map">
+
+        <div class="road road1"></div>
+        <div class="road road2"></div>
+        <div class="road road3"></div>
+        <div class="road road4"></div>
+
+        <div class="house h1"></div>
+        <div class="house h2"></div>
+        <div class="house h3"></div>
+        <div class="house h4"></div>
+        <div class="house h5"></div>
+        <div class="house h6"></div>
+        <div class="house h7"></div>
+
+        <div class="shop shop1">SHOP</div>
+        <div class="shop shop2">MART</div>
+        <div class="shop shop3">FOOD</div>
+
+        <div class="tree t1"></div>
+        <div class="tree t2"></div>
+        <div class="tree t3"></div>
+        <div class="tree t4"></div>
+        <div class="tree t5"></div>
+        <div class="tree t6"></div>
+        <div class="tree t7"></div>
+
+        <div class="light l1"></div>
+        <div class="light l2"></div>
+        <div class="light l3"></div>
+        <div class="light l4"></div>
+
+        <div class="city-car city-car1"></div>
+        <div class="city-car city-car2"></div>
+        <div class="city-car city-car3"></div>
+        <div class="city-car city-car4"></div>
+
+        ${zones.map((zone, index) => `
+          <button
+            class="zone-btn"
+            style="left:${zone[1]}%;top:${zone[2]}%"
+            data-zone="${index}"
+          >
+            📍 ${zone[0]}
+          </button>
+        `).join("")}
+
+        ${properties.map((property, index) => `
+          <button
+            class="property"
+            id="property-${index}"
+            style="left:${property.x}%;top:${property.y}%"
+            data-property="${index}"
+            title="${property.name}"
+          >
+            🏠
+          </button>
+        `).join("")}
+
+        <div id="player"></div>
+        <div id="player-car" style="display:none;"></div>
+
+      </div>
+    </section>
+
+    <aside class="sidebar">
+
+      <section class="panel">
+        <h3>📍 Current Location</h3>
+        <div class="info">
+          Zone: <strong id="zone">Fire Service</strong><br>
+          Status: <strong id="status">Walking</strong>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>🏠 Properties</h3>
+
+        <div class="info">
+          Owned: <strong id="ownedCount">0 / 4</strong>
+        </div>
+
+        <div id="propertyInfo" class="property-info">
+          Tap a 🏠 house on the map to view the property.
+        </div>
+
+        <button id="buyPropertyBtn" class="buy-btn" disabled>
+          🔑 Buy House
+        </button>
+      </section>
+
+      <section class="panel">
+        <h3>🎵 Nightlife</h3>
+
+        <button class="club-btn" data-club="0">
+          🎧 Cartel Lifestyle
+        </button>
+
+        <button class="club-btn" data-club="1">
+          🎶 De Angels
+        </button>
+      </section>
+
+      <section class="panel">
+        <h3>🎮 Controls</h3>
+
+        <div class="info">
+          Desktop: WASD or Arrow Keys<br>
+          Walk = normal movement<br>
+          Drive = faster movement + fuel
+        </div>
+
+        <div class="mobile-controls">
+          <button class="empty">•</button>
+          <button data-move="up">⬆️</button>
+          <button class="empty">•</button>
+
+          <button data-move="left">⬅️</button>
+          <button data-move="down">⬇️</button>
+          <button data-move="right">➡️</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>📜 Activity</h3>
+        <div id="log" class="log"></div>
+      </section>
+
+    </aside>
+
+  </main>
 </div>
 `;
 
+const cashEl = document.querySelector("#cash");
+const levelEl = document.querySelector("#level");
+const repEl = document.querySelector("#rep");
+const fuelEl = document.querySelector("#fuel");
+const zoneEl = document.querySelector("#zone");
+const statusEl = document.querySelector("#status");
+const playerEl = document.querySelector("#player");
+const playerCarEl = document.querySelector("#player-car");
+const logEl = document.querySelector("#log");
+const propertyInfoEl = document.querySelector("#propertyInfo");
+const buyPropertyBtn = document.querySelector("#buyPropertyBtn");
+const ownedCountEl = document.querySelector("#ownedCount");
 
-/* =========================
-   UPDATE
-========================= */
+let selectedProperty = null;
+
+function money(value) {
+  return "₦" + value.toLocaleString("en-NG");
+}
 
 function update() {
+  cashEl.textContent = money(player.cash);
+  levelEl.textContent = player.level;
+  repEl.textContent = player.reputation;
+  fuelEl.textContent = Math.max(0, Math.floor(player.fuel)) + "%";
+  zoneEl.textContent = player.zone;
+  statusEl.textContent = player.mode === "Drive" ? "Driving" : "Walking";
 
-  document.querySelector("#cash").textContent =
-    player.cash.toLocaleString("en-NG");
+  playerEl.style.left = player.x + "%";
+  playerEl.style.top = player.y + "%";
 
-  document.querySelector("#level").textContent =
-    player.level;
-
-  document.querySelector("#rep").textContent =
-    player.reputation;
-
-  document.querySelector("#fuel").textContent =
-    Math.max(0, Math.round(player.fuel));
-
-  document.querySelector("#zoneName").textContent =
-    player.zone;
-
-
-  const person =
-    document.querySelector("#player");
-
-  const car =
-    document.querySelector("#playerCar");
-
+  playerCarEl.style.left = player.x + "%";
+  playerCarEl.style.top = player.y + "%";
 
   if (player.mode === "Drive") {
-
-    person.style.display = "none";
-
-    car.style.display = "block";
-
-    car.style.left =
-      `${player.x}%`;
-
-    car.style.top =
-      `${player.y}%`;
-
+    playerEl.style.display = "none";
+    playerCarEl.style.display = "block";
   } else {
-
-    person.style.display = "flex";
-
-    car.style.display = "none";
-
-    person.style.left =
-      `${player.x}%`;
-
-    person.style.top =
-      `${player.y}%`;
-
+    playerEl.style.display = "block";
+    playerCarEl.style.display = "none";
   }
 
-
-  document.querySelector("#status").textContent =
-    `${player.mode} mode • ${player.zone}`;
+  updateProperties();
 }
-
-
-/* =========================
-   LOG
-========================= */
 
 function log(message) {
-
-  const activity =
-    document.querySelector("#activity");
-
-  activity.innerHTML =
-    `<p>${message}</p>` +
-    activity.innerHTML;
+  const entry = document.createElement("div");
+  entry.textContent = "• " + message;
+  logEl.prepend(entry);
 }
 
-
-/* =========================
-   MODE
-========================= */
-
 function setMode(mode) {
-
-  if (
-    mode === "Drive" &&
-    player.fuel <= 0
-  ) {
-
-    log(
-      "⛽ Your car is out of fuel."
-    );
-
+  if (mode === "Drive" && player.fuel <= 0) {
+    log("⛽ You are out of fuel.");
     return;
   }
 
-
   player.mode = mode;
 
-
   if (mode === "Drive") {
-
-    log(
-      "🚗 You got into your car."
-    );
-
+    log("🚗 You are now driving around Owerri.");
   } else {
-
-    log(
-      "🚶 You got out of the car."
-    );
-
+    log("🚶 You are now walking.");
   }
-
 
   update();
 }
 
-
-/* =========================
-   WORK
-========================= */
-
 function work() {
-
   player.cash += 75000;
   player.reputation += 5;
 
+  const needed = player.level * 150;
 
-  if (
-    player.reputation >=
-    player.level * 150
-  ) {
-
+  if (player.reputation >= needed) {
     player.level++;
-
-    log(
-      `🎉 Level up! You are now level ${player.level}.`
-    );
-
-  } else {
-
-    log(
-      "💼 You finished a job and earned ₦75,000."
-    );
-
+    log("🎉 Level up! You reached Level " + player.level + ".");
   }
 
-
+  log("💼 You completed a job and earned ₦75,000.");
   update();
 }
-
-
-/* =========================
-   TRAVEL
-========================= */
 
 function travel(index) {
+  const zone = zones[index];
 
-  const zone =
-    zones[index];
-
-
-  player.x =
-    zone[1];
-
-  player.y =
-    zone[2];
-
-  player.zone =
-    zone[0];
-
+  player.x = zone[1];
+  player.y = zone[2];
+  player.zone = zone[0];
   player.reputation += 2;
 
-
-  log(
-    `📍 You travelled to ${zone[0]} — ${zone[3]}.`
-  );
-
-
+  log("📍 You travelled to " + zone[0] + ".");
   update();
 }
 
-
-/* =========================
-   CLUB
-========================= */
-
 function joinClub(index) {
-
-  const club =
-    clubs[index];
+  const club = clubs[index];
 
   player.reputation += 10;
 
-
-  log(
-    `🎵 You joined ${club}. Reputation +10.`
-  );
-
-
+  log("🎵 You visited " + club + " and gained reputation.");
   update();
 }
-
 
 function visitClub() {
+  const index = zones.findIndex(z => z[0] === "Douglas");
 
-  player.x = 55;
-  player.y = 45;
-
-  player.zone =
-    "Douglas";
-
-
-  log(
-    "🌃 You headed toward the nightlife district."
-  );
-
-
-  update();
+  if (index !== -1) {
+    travel(index);
+  }
 }
 
-
-/* =========================
-   MOVEMENT
-========================= */
-
 function movePlayer(direction) {
-
-  let step = 1.5;
-
+  let step = player.mode === "Drive" ? 3 : 1.5;
 
   if (player.mode === "Drive") {
-
     if (player.fuel <= 0) {
-
-      log(
-        "⛽ You are out of fuel."
-      );
-
+      log("⛽ Your car has run out of fuel.");
+      setMode("Walk");
       return;
     }
 
-    step = 3;
-
     player.fuel -= 0.4;
   }
-
 
   if (direction === "up") {
     player.y -= step;
@@ -1333,158 +930,177 @@ function movePlayer(direction) {
     player.x += step;
   }
 
-
-  player.x =
-    Math.max(
-      2,
-      Math.min(98, player.x)
-    );
-
-  player.y =
-    Math.max(
-      5,
-      Math.min(95, player.y)
-    );
-
+  player.x = Math.max(2, Math.min(98, player.x));
+  player.y = Math.max(5, Math.min(95, player.y));
 
   update();
 }
 
+function selectProperty(index) {
+  selectedProperty = index;
 
-/* =========================
-   KEYBOARD
-========================= */
+  const property = properties[index];
 
-document.addEventListener(
-  "keydown",
-  event => {
+  const ownedText = property.owned
+    ? "✅ YOU OWN THIS PROPERTY"
+    : "🏷️ Available for purchase";
 
-    const key =
-      event.key.toLowerCase();
+  propertyInfoEl.innerHTML = `
+    <strong>${property.name}</strong><br>
+    ${property.description}<br><br>
+    💰 Price: <strong>${money(property.price)}</strong><br>
+    ${ownedText}
+  `;
 
+  buyPropertyBtn.disabled = property.owned;
 
-    if (
-      key === "w" ||
-      key === "arrowup"
-    ) {
-
-      movePlayer("up");
-
-    }
-
-
-    if (
-      key === "s" ||
-      key === "arrowdown"
-    ) {
-
-      movePlayer("down");
-
-    }
-
-
-    if (
-      key === "a" ||
-      key === "arrowleft"
-    ) {
-
-      movePlayer("left");
-
-    }
-
-
-    if (
-      key === "d" ||
-      key === "arrowright"
-    ) {
-
-      movePlayer("right");
-
-    }
-
+  if (property.owned) {
+    buyPropertyBtn.textContent = "✅ Property Owned";
+  } else {
+    buyPropertyBtn.textContent = "🔑 Buy House";
   }
-);
 
+  update();
+}
 
-/* =========================
-   BUTTONS
-========================= */
+function updateProperties() {
+  const owned = properties.filter(property => property.owned).length;
 
-document.querySelector("#walkBtn").onclick =
-  () => setMode("Walk");
+  ownedCountEl.textContent = owned + " / " + properties.length;
 
+  properties.forEach((property, index) => {
+    const marker = document.querySelector("#property-" + index);
 
-document.querySelector("#driveBtn").onclick =
-  () => setMode("Drive");
+    if (!marker) return;
 
-
-document.querySelector("#workBtn").onclick =
-  () => work();
-
-
-document.querySelector("#clubBtn").onclick =
-  () => visitClub();
-
-
-/* =========================
-   LOCATIONS
-========================= */
-
-document
-  .querySelectorAll("[data-zone]")
-  .forEach(button => {
-
-    button.onclick = () => {
-
-      travel(
-        Number(button.dataset.zone)
-      );
-
-    };
-
+    if (property.owned) {
+      marker.textContent = "🔑";
+      marker.classList.add("owned");
+    } else {
+      marker.textContent = "🏠";
+      marker.classList.remove("owned");
+    }
   });
 
+  if (selectedProperty !== null) {
+    const property = properties[selectedProperty];
 
-/* =========================
-   CLUBS
-========================= */
+    const ownedText = property.owned
+      ? "✅ YOU OWN THIS PROPERTY"
+      : "🏷️ Available for purchase";
 
-document
-  .querySelectorAll("[data-club]")
-  .forEach(button => {
+    propertyInfoEl.innerHTML = `
+      <strong>${property.name}</strong><br>
+      ${property.description}<br><br>
+      💰 Price: <strong>${money(property.price)}</strong><br>
+      ${ownedText}
+    `;
 
-    button.onclick = () => {
+    buyPropertyBtn.disabled = property.owned;
 
-      joinClub(
-        Number(button.dataset.club)
-      );
+    if (property.owned) {
+      buyPropertyBtn.textContent = "✅ Property Owned";
+    } else {
+      buyPropertyBtn.textContent = "🔑 Buy House";
+    }
+  }
+}
 
-    };
+function buyProperty() {
+  if (selectedProperty === null) {
+    log("🏠 Select a property first.");
+    return;
+  }
 
+  const property = properties[selectedProperty];
+
+  if (property.owned) {
+    log("🏠 You already own this property.");
+    return;
+  }
+
+  if (player.cash < property.price) {
+    log("❌ You do not have enough money to buy this house.");
+    return;
+  }
+
+  player.cash -= property.price;
+  property.owned = true;
+  player.reputation += 15;
+
+  log(
+    "🎉 Congratulations! You bought " +
+    property.name +
+    " for " +
+    money(property.price) +
+    "."
+  );
+
+  log("🔑 This property is now YOUR PROPERTY.");
+
+  update();
+}
+
+document.querySelector("#walkBtn").addEventListener("click", () => {
+  setMode("Walk");
+});
+
+document.querySelector("#driveBtn").addEventListener("click", () => {
+  setMode("Drive");
+});
+
+document.querySelector("#workBtn").addEventListener("click", work);
+
+document.querySelector("#clubBtn").addEventListener("click", visitClub);
+
+document.querySelector("#buyPropertyBtn").addEventListener("click", buyProperty);
+
+document.querySelectorAll("[data-zone]").forEach(button => {
+  button.addEventListener("click", () => {
+    travel(Number(button.dataset.zone));
   });
+});
 
-
-/* =========================
-   MOBILE CONTROLS
-========================= */
-
-document
-  .querySelectorAll("[data-move]")
-  .forEach(button => {
-
-    button.onclick = () => {
-
-      movePlayer(
-        button.dataset.move
-      );
-
-    };
-
+document.querySelectorAll("[data-property]").forEach(button => {
+  button.addEventListener("click", () => {
+    selectProperty(Number(button.dataset.property));
   });
+});
 
+document.querySelectorAll("[data-club]").forEach(button => {
+  button.addEventListener("click", () => {
+    joinClub(Number(button.dataset.club));
+  });
+});
 
-/* =========================
-   START
-========================= */
+document.querySelectorAll("[data-move]").forEach(button => {
+  button.addEventListener("click", () => {
+    movePlayer(button.dataset.move);
+  });
+});
+
+document.addEventListener("keydown", event => {
+  const key = event.key.toLowerCase();
+
+  if (key === "w" || event.key === "ArrowUp") {
+    movePlayer("up");
+  }
+
+  if (key === "s" || event.key === "ArrowDown") {
+    movePlayer("down");
+  }
+
+  if (key === "a" || event.key === "ArrowLeft") {
+    movePlayer("left");
+  }
+
+  if (key === "d" || event.key === "ArrowRight") {
+    movePlayer("right");
+  }
+});
+
+log("🌆 Welcome to Owerri Lifestyle.");
+log("🏠 Four properties are available to buy.");
+log("💡 Tap a 🏠 marker to inspect a property.");
 
 update();
