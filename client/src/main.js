@@ -1,3 +1,5 @@
+import './style.css';
+
 const zones = [
   ["IMSU Junction", 50, 25, "Campus district"],
   ["Fire Service", 43, 43, "City hub"],
