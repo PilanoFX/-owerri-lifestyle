@@ -1,11 +1,37 @@
+// ===================== DATA =====================
 const zones = [
-  ["IMSU Junction", 50, 25, "Campus"],
-  ["Fire Service", 43, 43, "City Hub"],
-  ["Douglas", 55, 45, "Downtown"],
-  ["Wetheral", 64, 36, "Urban"],
-  ["New Owerri", 70, 66, "Residential"],
-  ["Nekede", 18, 56, "Student Area"],
-  ["FUTO", 30, 75, "University"]
+  { name: "IMSU Junction", x: 50, y: 25, type: "Campus", activities: [
+    { name: "Attend Lecture", cost: 0, time: 30, effects: { energy: -15, fun: -5, social: 5 } },
+    { name: "Hang with Friends", cost: 2000, time: 20, effects: { fun: 20, social: 25, energy: -10 } },
+    { name: "Buy Snacks", cost: 1500, time: 10, effects: { hunger: 25, energy: 5 } }
+  ]},
+  { name: "Fire Service", x: 43, y: 43, type: "City Hub", activities: [
+    { name: "Get Documents", cost: 5000, time: 25, effects: { energy: -10 } },
+    { name: "Chat with Officers", cost: 0, time: 15, effects: { social: 15, fun: 5 } }
+  ]},
+  { name: "Douglas", x: 55, y: 45, type: "Downtown", activities: [
+    { name: "Shop at Market", cost: 8000, time: 30, effects: { hunger: 15, fun: 10 } },
+    { name: "Eat Amala", cost: 3500, time: 20, effects: { hunger: 45, energy: 10, fun: 15 } },
+    { name: "Business Meeting", cost: 0, time: 40, effects: { energy: -20, social: 20, cash: 15000 } }
+  ]},
+  { name: "Wetheral", x: 64, y: 36, type: "Urban", activities: [
+    { name: "Coffee Shop", cost: 2500, time: 15, effects: { energy: 20, fun: 10, social: 10 } },
+    { name: "Window Shopping", cost: 0, time: 20, effects: { fun: 15, energy: -5 } }
+  ]},
+  { name: "New Owerri", x: 70, y: 66, type: "Residential", activities: [
+    { name: "Visit Neighbours", cost: 0, time: 25, effects: { social: 30, fun: 15 } },
+    { name: "Rest at Park", cost: 0, time: 20, effects: { energy: 25, fun: 10 } }
+  ]},
+  { name: "Nekede", x: 18, y: 56, type: "Student Area", activities: [
+    { name: "Study Session", cost: 0, time: 45, effects: { energy: -20, fun: -10 } },
+    { name: "Street Food", cost: 1200, time: 10, effects: { hunger: 35, energy: 5 } },
+    { name: "Party with Students", cost: 5000, time: 40, effects: { fun: 40, social: 30, energy: -25, hygiene: -15 } }
+  ]},
+  { name: "FUTO", x: 30, y: 75, type: "University", activities: [
+    { name: "Lab Work", cost: 0, time: 50, effects: { energy: -25, fun: -5 } },
+    { name: "Campus Cafeteria", cost: 2000, time: 15, effects: { hunger: 40, energy: 10 } },
+    { name: "Football Match", cost: 0, time: 35, effects: { fun: 35, energy: -20, social: 20, hygiene: -10 } }
+  ]}
 ];
 
 const properties = [
@@ -23,136 +49,121 @@ const player = {
   reputation: 100,
   mode: "Walk",
   fuel: 100,
-  selected: null
+  selected: null,
+  needs: {
+    hunger: 80,
+    energy: 75,
+    fun: 60,
+    social: 55,
+    hygiene: 85,
+    bladder: 70
+  }
 };
 
+const NEED_DECAY = {
+  hunger: 0.08,
+  energy: 0.06,
+  fun: 0.05,
+  social: 0.04,
+  hygiene: 0.03,
+  bladder: 0.07
+};
+
+// ===================== SETUP =====================
 const root = document.getElementById("root");
 
-const style = document.createElement("style");
-
-style.textContent = `
-*{box-sizing:border-box}
-body{margin:0;background:#080b10;color:white;font-family:Arial}
-button{border:0;border-radius:9px;padding:10px;color:white;background:#202a36;font-weight:bold;cursor:pointer}
-.top{padding:14px;background:#10161e;border-bottom:1px solid #303b48}
-.logo{font-size:21px;font-weight:bold;margin-bottom:10px}.logo span{color:#42d4ff}
-.stats{display:flex;gap:7px;flex-wrap:wrap}.stat{background:#19212b;padding:7px 10px;border-radius:8px;font-size:12px}
-.layout{display:grid;grid-template-columns:1fr 300px;gap:12px;padding:12px}
-.mapbox{height:650px;position:relative;overflow:hidden;border-radius:16px;background:#29462f;border:1px solid #33413a}
-.map{position:absolute;inset:0}.road{position:absolute;background:#383d44}
-.h{height:42px;width:100%}.v{width:42px;height:100%}
-.r1{top:30%}.r2{top:60%}.r3{top:82%}.c1{left:25%}.c2{left:51%}.c3{left:73%}
-.block{position:absolute;background:#315337}
-.b1{left:3%;top:5%;width:18%;height:18%}.b2{left:29%;top:5%;width:17%;height:20%}
-.b3{left:55%;top:5%;width:15%;height:20%}.b4{left:77%;top:7%;width:17%;height:18%}
-.b5{left:3%;top:38%;width:18%;height:17%}.b6{left:28%;top:37%;width:17%;height:18%}
-.b7{left:56%;top:39%;width:14%;height:16%}.b8{left:78%;top:39%;width:17%;height:16%}
-.b9{left:4%;top:65%;width:17%;height:26%}.b10{left:29%;top:64%;width:17%;height:27%}
-.b11{left:56%;top:64%;width:14%;height:27%}.b12{left:78%;top:64%;width:17%;height:27%}
-.zone{position:absolute;transform:translate(-50%,-50%);background:#101820dd;border:1px solid #42d4ff;padding:6px 8px;border-radius:8px;font-size:10px;z-index:4;white-space:nowrap}
-.house{position:absolute;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:#f4c542;color:#111;border:3px solid white;z-index:20;font-size:18px}
-.house.owned{background:#36d278}
-.player{position:absolute;transform:translate(-50%,-50%);z-index:30}
-.person{width:20px;height:20px;border-radius:50%;background:#f1c27d;border:3px solid #111;position:relative}
-.person:after{content:"";position:absolute;top:17px;left:0;width:17px;height:15px;background:#4d7cff;border-radius:7px}
-.car{width:42px;height:22px;background:#d62828;border-radius:7px;border:2px solid #111;position:relative}
-.car:before,.car:after{content:"";position:absolute;width:9px;height:9px;background:#111;border-radius:50%;bottom:-6px}
-.car:before{left:4px}.car:after{right:4px}.car span{position:absolute;left:11px;top:2px;width:16px;height:8px;background:#9ddcff}
-.side{background:#10161e;border:1px solid #303b48;border-radius:16px;padding:12px}
-.panel{background:#151d27;border:1px solid #303b48;border-radius:12px;padding:12px;margin-bottom:10px}
-.panel h3{margin:0 0 10px}.full{width:100%;margin-top:7px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.log{max-height:170px;overflow:auto;font-size:12px}.log div{padding:5px 0;border-bottom:1px solid #29323d}
-.controls{display:grid;grid-template-columns:repeat(3,45px);gap:5px;justify-content:center;margin-top:10px}
-.controls button{height:42px;padding:0}.empty{visibility:hidden}
-.interior{display:none;position:fixed;inset:0;background:#151515;z-index:100}
-.interior.show{display:block}
-.inhead{height:65px;background:#202832;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
-.room{position:absolute;top:65px;bottom:0;left:0;right:0;background:linear-gradient(#d8c4a4 0 55%,#755239 55%)}
-.window{position:absolute;left:15%;top:12%;width:170px;height:120px;background:#82d5fa;border:12px solid white}
-.tv{position:absolute;right:12%;top:15%;width:220px;height:130px;background:#080808;border:8px solid #222}
-.tv:after{content:"OWERRI";display:flex;height:100%;align-items:center;justify-content:center;color:#42d4ff;font-weight:bold;font-size:22px}
-.sofa{position:absolute;left:12%;bottom:18%;width:290px;height:85px;background:#4b4163;border-radius:20px}
-.table{position:absolute;right:30%;bottom:15%;width:150px;height:65px;background:#70492e;border-radius:8px}
-.bed{position:absolute;left:37%;bottom:5%;width:330px;height:100px;background:#d8d8e8;border-radius:20px}
-@media(max-width:850px){.layout{grid-template-columns:1fr}.mapbox{height:520px}}
-`;
-
-document.head.appendChild(style);
-
 root.innerHTML = `
-<div class="top">
-  <div class="logo">🌆 Owerri <span>Lifestyle</span></div>
-  <div class="stats">
-    <div class="stat">💰 <b id="cash"></b></div>
-    <div class="stat">⭐ Level <b id="level"></b></div>
-    <div class="stat">❤️ Rep <b id="rep"></b></div>
-    <div class="stat">⛽ <b id="fuel"></b>%</div>
-    <div class="stat">🚶 <b id="mode"></b></div>
-  </div>
-</div>
-
-<div class="layout">
-  <div class="mapbox">
-    <div class="map">
-      <div class="block b1"></div><div class="block b2"></div>
-      <div class="block b3"></div><div class="block b4"></div>
-      <div class="block b5"></div><div class="block b6"></div>
-      <div class="block b7"></div><div class="block b8"></div>
-      <div class="block b9"></div><div class="block b10"></div>
-      <div class="block b11"></div><div class="block b12"></div>
-
-      <div class="road h r1"></div><div class="road h r2"></div><div class="road h r3"></div>
-      <div class="road v c1"></div><div class="road v c2"></div><div class="road v c3"></div>
-
-      <div id="zones"></div>
-      <div id="houses"></div>
-
-      <div class="player" id="player"><div class="person"></div></div>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">🌆 Owerri <span>Lifestyle</span></div>
+    <div class="stats-row">
+      <div class="stat">💰 <b id="cash"></b></div>
+      <div class="stat">⭐ Level <b id="level"></b></div>
+      <div class="stat">❤️ Rep <b id="rep"></b></div>
+      <div class="stat">⛽ <b id="fuel"></b>%</div>
+      <div class="stat">🚶 <b id="mode"></b></div>
     </div>
-  </div>
+  </header>
 
-  <div class="side">
+  <!-- NEEDS BAR -->
+  <div class="needs-bar" id="needsBar"></div>
 
-    <div class="panel">
-      <h3>🚗 Movement</h3>
-      <div class="grid2">
-        <button id="walk">🚶 Walk</button>
-        <button id="drive">🚗 Drive</button>
-      </div>
+  <div class="layout">
+    <div class="mapbox">
+      <div class="map" id="map">
+        <!-- decorative blocks -->
+        <div class="block b1"></div><div class="block b2"></div>
+        <div class="block b3"></div><div class="block b4"></div>
+        <div class="block b5"></div><div class="block b6"></div>
+        <div class="block b7"></div><div class="block b8"></div>
+        <div class="block b9"></div><div class="block b10"></div>
+        <div class="block b11"></div><div class="block b12"></div>
 
-      <div class="controls">
-        <button class="empty"></button>
-        <button data-move="up">▲</button>
-        <button class="empty"></button>
-        <button data-move="left">◀</button>
-        <button data-move="down">▼</button>
-        <button data-move="right">▶</button>
+        <!-- roads -->
+        <div class="road h r1"></div>
+        <div class="road h r2"></div>
+        <div class="road h r3"></div>
+        <div class="road v c1"></div>
+        <div class="road v c2"></div>
+        <div class="road v c3"></div>
+
+        <div id="zones"></div>
+        <div id="houses"></div>
+        <div class="player" id="player"><div class="person"></div></div>
       </div>
     </div>
 
-    <div class="panel">
-      <h3>💼 Life</h3>
-      <button id="work" class="full">💼 Go To Work</button>
-      <button id="travel" class="full">🗺️ Travel</button>
-      <button id="club" class="full">🎵 Join Club</button>
-      <button id="night" class="full">🍾 Visit Club</button>
-    </div>
+    <aside class="side">
+      <div class="panel">
+        <h3>🚗 Movement</h3>
+        <div class="grid2">
+          <button id="walk">🚶 Walk</button>
+          <button id="drive">🚗 Drive</button>
+        </div>
+        <div class="controls">
+          <button class="empty"></button>
+          <button data-move="up">▲</button>
+          <button class="empty"></button>
+          <button data-move="left">◀</button>
+          <button data-move="down">▼</button>
+          <button data-move="right">▶</button>
+        </div>
+      </div>
 
-    <div class="panel">
-      <h3>🏠 Property</h3>
-      <div id="info">Tap a 🏠 on the map.</div>
-      <button id="buy" class="full" style="display:none">🏠 Buy House</button>
-      <button id="enter" class="full" style="display:none">🚪 Enter House</button>
-    </div>
+      <div class="panel">
+        <h3>💼 Life</h3>
+        <button id="work" class="full">💼 Go To Work</button>
+        <button id="travel" class="full">🗺️ Travel</button>
+        <button id="club" class="full">🎵 Join Club</button>
+        <button id="night" class="full">🍾 Visit Club</button>
+      </div>
 
-    <div class="panel">
-      <h3>📱 Activity</h3>
-      <div id="log" class="log"></div>
-    </div>
+      <div class="panel">
+        <h3>🏠 Property</h3>
+        <div id="info">Tap a 🏠 on the map.</div>
+        <button id="buy" class="full" style="display:none">🏠 Buy House</button>
+        <button id="enter" class="full" style="display:none">🚪 Enter House</button>
+      </div>
 
+      <div class="panel">
+        <h3>📱 Activity</h3>
+        <div id="log" class="log"></div>
+      </div>
+    </aside>
   </div>
 </div>
 
+<!-- LOCATION ACTIVITY PANEL -->
+<div class="sheet" id="locationSheet">
+  <div class="sheet-content">
+    <button class="close-sheet" id="closeSheet">×</button>
+    <h2 id="sheetTitle"></h2>
+    <p id="sheetType" class="sheet-type"></p>
+    <div id="sheetActivities" class="activities"></div>
+  </div>
+</div>
+
+<!-- HOUSE INTERIOR -->
 <div class="interior" id="interior">
   <div class="inhead">
     <b id="houseTitle">🏠 My House</b>
@@ -168,28 +179,78 @@ root.innerHTML = `
 </div>
 `;
 
+// ===================== HELPERS =====================
 const $ = id => document.getElementById(id);
 
 function money(n) {
   return "₦" + Math.floor(n).toLocaleString();
 }
 
-function log(message) {
+function log(msg) {
   const item = document.createElement("div");
-  item.textContent = message;
+  item.textContent = msg;
   $("log").prepend(item);
 }
 
+function clamp(v, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, v));
+}
+
+// ===================== NEEDS =====================
+function renderNeeds() {
+  const bar = $("needsBar");
+  const icons = {
+    hunger: "🍔", energy: "⚡", fun: "🎉",
+    social: "💬", hygiene: "🚿", bladder: "🚽"
+  };
+
+  bar.innerHTML = Object.entries(player.needs).map(([key, value]) => {
+    const pct = Math.round(value);
+    const color = pct > 60 ? "#4ade80" : pct > 30 ? "#fbbf24" : "#f87171";
+    return `
+      <div class="need">
+        <span class="need-icon">${icons[key]}</span>
+        <div class="need-track">
+          <div class="need-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+        <span class="need-val">${pct}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function decayNeeds() {
+  for (const key in NEED_DECAY) {
+    player.needs[key] = clamp(player.needs[key] - NEED_DECAY[key]);
+  }
+  renderNeeds();
+}
+
+function applyEffects(effects) {
+  if (!effects) return;
+  for (const [key, val] of Object.entries(effects)) {
+    if (key === "cash") {
+      player.cash += val;
+    } else if (player.needs[key] !== undefined) {
+      player.needs[key] = clamp(player.needs[key] + val);
+    }
+  }
+  renderNeeds();
+  update();
+}
+
+// ===================== RENDER MAP =====================
 function renderZones() {
   const container = $("zones");
   container.innerHTML = "";
 
-  zones.forEach(z => {
-    const el = document.createElement("div");
+  zones.forEach((z, i) => {
+    const el = document.createElement("button");
     el.className = "zone";
-    el.style.left = z[1] + "%";
-    el.style.top = z[2] + "%";
-    el.innerHTML = `<b>${z[0]}</b><br>${z[3]}`;
+    el.style.left = z.x + "%";
+    el.style.top = z.y + "%";
+    el.innerHTML = `<b>${z.name}</b><br><small>${z.type}</small>`;
+    el.onclick = () => openLocation(i);
     container.appendChild(el);
   });
 }
@@ -200,16 +261,13 @@ function renderHouses() {
 
   properties.forEach((p, index) => {
     const house = document.createElement("button");
-
     house.type = "button";
     house.className = p.owned ? "house owned" : "house";
     house.style.left = p.x + "%";
     house.style.top = p.y + "%";
     house.textContent = p.owned ? "✓" : "🏠";
     house.title = p.name;
-
-    house.addEventListener("click", () => selectHouse(index));
-
+    house.onclick = () => selectHouse(index);
     container.appendChild(house);
   });
 }
@@ -218,7 +276,7 @@ function update() {
   $("cash").textContent = money(player.cash);
   $("level").textContent = player.level;
   $("rep").textContent = player.reputation;
-  $("fuel").textContent = player.fuel;
+  $("fuel").textContent = Math.round(player.fuel);
   $("mode").textContent = player.mode;
 
   $("player").style.left = player.x + "%";
@@ -230,11 +288,61 @@ function update() {
       : `<div class="person"></div>`;
 
   renderHouses();
+  renderNeeds();
 }
 
+// ===================== LOCATION PANEL =====================
+function openLocation(index) {
+  const z = zones[index];
+  $("sheetTitle").textContent = z.name;
+  $("sheetType").textContent = z.type;
+
+  const list = $("sheetActivities");
+  list.innerHTML = z.activities.map((a, i) => `
+    <button class="activity-btn" data-zone="${index}" data-act="${i}">
+      <div class="act-name">${a.name}</div>
+      <div class="act-meta">
+        ${a.cost > 0 ? money(a.cost) : "Free"} · ${a.time} min
+      </div>
+    </button>
+  `).join("");
+
+  list.querySelectorAll(".activity-btn").forEach(btn => {
+    btn.onclick = () => doActivity(+btn.dataset.zone, +btn.dataset.act);
+  });
+
+  $("locationSheet").classList.add("open");
+}
+
+function closeLocation() {
+  $("locationSheet").classList.remove("open");
+}
+
+function doActivity(zoneIndex, actIndex) {
+  const z = zones[zoneIndex];
+  const a = z.activities[actIndex];
+
+  if (player.cash < a.cost) {
+    log("❌ Not enough money for " + a.name);
+    return;
+  }
+
+  player.cash -= a.cost;
+  applyEffects(a.effects);
+  player.reputation += 2;
+
+  // move player to the location
+  player.x = z.x;
+  player.y = z.y;
+
+  log(`✅ ${a.name} at ${z.name}`);
+  closeLocation();
+  update();
+}
+
+// ===================== HOUSE =====================
 function selectHouse(index) {
   const house = properties[index];
-
   player.selected = house;
 
   $("info").innerHTML = `
@@ -245,13 +353,11 @@ function selectHouse(index) {
 
   $("buy").style.display = house.owned ? "none" : "block";
   $("enter").style.display = house.owned ? "block" : "none";
-
   log("🏠 Selected " + house.name);
 }
 
 function buyHouse() {
   const house = player.selected;
-
   if (!house) return;
 
   if (player.cash < house.price) {
@@ -262,27 +368,25 @@ function buyHouse() {
   player.cash -= house.price;
   house.owned = true;
   player.reputation += 10;
-
   log("🎉 You bought " + house.name + "!");
-
   update();
   selectHouse(properties.indexOf(house));
 }
 
 function enterHouse() {
   const house = player.selected;
-
   if (!house || !house.owned) {
     log("🏠 Buy the house first.");
     return;
   }
-
   $("houseTitle").textContent = "🏠 " + house.name;
   $("interior").classList.add("show");
-
-  log("🚪 You entered your house.");
+  // resting in house restores needs
+  applyEffects({ energy: 30, hygiene: 20, bladder: 40, fun: 10 });
+  log("🚪 You entered your house and rested.");
 }
 
+// ===================== MOVEMENT & ACTIONS =====================
 function move(direction) {
   const amount = player.mode === "Drive" ? 3 : 1.4;
 
@@ -291,7 +395,7 @@ function move(direction) {
       log("⛽ Out of fuel.");
       return;
     }
-    player.fuel--;
+    player.fuel = clamp(player.fuel - 1, 0, 100);
   }
 
   if (direction === "up") player.y -= amount;
@@ -299,17 +403,21 @@ function move(direction) {
   if (direction === "left") player.x -= amount;
   if (direction === "right") player.x += amount;
 
-  player.x = Math.max(3, Math.min(97, player.x));
-  player.y = Math.max(5, Math.min(95, player.y));
+  player.x = clamp(player.x, 3, 97);
+  player.y = clamp(player.y, 5, 95);
+
+  // small need cost for moving
+  player.needs.energy = clamp(player.needs.energy - 0.4);
+  player.needs.bladder = clamp(player.needs.bladder - 0.2);
 
   update();
 }
 
 function work() {
   const pay = player.mode === "Drive" ? 45000 : 30000;
-
   player.cash += pay;
   player.reputation += 3;
+  applyEffects({ energy: -25, fun: -10, social: 5 });
 
   if (player.reputation >= player.level * 120) {
     player.level++;
@@ -322,14 +430,14 @@ function work() {
 
 function travel() {
   const z = zones[Math.floor(Math.random() * zones.length)];
-
-  player.x = z[1];
-  player.y = z[2];
-
-  log("🗺️ You travelled to " + z[0] + ".");
+  player.x = z.x;
+  player.y = z.y;
+  applyEffects({ energy: -8 });
+  log("🗺️ You travelled to " + z.name + ".");
   update();
 }
 
+// ===================== EVENT LISTENERS =====================
 $("walk").onclick = () => {
   player.mode = "Walk";
   update();
@@ -347,6 +455,7 @@ $("travel").onclick = travel;
 
 $("club").onclick = () => {
   player.reputation += 5;
+  applyEffects({ fun: 15, social: 20, energy: -10 });
   log("🎵 You joined a lifestyle club.");
   update();
 };
@@ -356,39 +465,38 @@ $("night").onclick = () => {
     log("💸 You need ₦15,000.");
     return;
   }
-
   player.cash -= 15000;
   player.reputation += 8;
+  applyEffects({ fun: 40, social: 25, energy: -30, hygiene: -15, hunger: -10 });
   log("🍾 You enjoyed a night out.");
   update();
 };
 
 $("buy").onclick = buyHouse;
 $("enter").onclick = enterHouse;
-
 $("leave").onclick = () => {
   $("interior").classList.remove("show");
   log("🚶 You left the house.");
 };
+$("closeSheet").onclick = closeLocation;
 
-document.querySelectorAll("[data-move]").forEach(button => {
-  button.onclick = () => move(button.dataset.move);
+document.querySelectorAll("[data-move]").forEach(btn => {
+  btn.onclick = () => move(btn.dataset.move);
 });
 
-document.addEventListener("keydown", event => {
-  const key = event.key.toLowerCase();
-
+document.addEventListener("keydown", e => {
+  const key = e.key.toLowerCase();
   if (key === "arrowup" || key === "w") move("up");
   if (key === "arrowdown" || key === "s") move("down");
   if (key === "arrowleft" || key === "a") move("left");
   if (key === "arrowright" || key === "d") move("right");
+  if (key === "escape") closeLocation();
 });
 
+// ===================== START =====================
 renderZones();
 renderHouses();
-
-log("🌆 Welcome to Owerri Lifestyle.");
-log("🏠 Tap a house to buy it.");
-log("💼 Work to make money.");
-
 update();
+
+// needs decay every 3 seconds
+setInterval(decayNeeds, 3000);
