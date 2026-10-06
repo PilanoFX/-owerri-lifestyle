@@ -21,7 +21,8 @@ const player = {
   level: 1,
   reputation: 100,
   zone: "Fire Service",
-  mode: "Walk"
+  mode: "Walk",
+  fuel: 100
 };
 
 const root = document.querySelector("#root");
@@ -35,7 +36,7 @@ if (!root) {
 
 
 /* =========================
-   CITY STYLE
+   GAME STYLE
 ========================= */
 
 const style = document.createElement("style");
@@ -104,7 +105,7 @@ header p {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
   margin-bottom: 15px;
 }
@@ -150,7 +151,7 @@ main {
   gap: 15px;
 }
 
-/* CITY MAP */
+/* MAP */
 
 .map {
   position: relative;
@@ -172,37 +173,12 @@ main {
     0 20px 50px rgba(0,0,0,.45);
 }
 
-/* GRASS DETAILS */
-
-.map::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-
-  background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgba(255,255,255,.04),
-      transparent 25%
-    ),
-    radial-gradient(
-      circle at 80% 70%,
-      rgba(255,255,255,.03),
-      transparent 25%
-    );
-
-  pointer-events: none;
-}
-
 /* ROADS */
 
 .road {
   position: absolute;
   z-index: 1;
   background: #292e35;
-
-  box-shadow:
-    inset 0 0 0 2px rgba(255,255,255,.05);
 }
 
 .road1 {
@@ -316,18 +292,7 @@ main {
   background: #51483c;
 }
 
-/* WINDOWS */
-
-.house-window {
-  position: absolute;
-  width: 13px;
-  height: 13px;
-  background: #86c6df;
-  border: 2px solid #4c5559;
-  z-index: 3;
-}
-
-/* HOUSES POSITIONS */
+/* HOUSES */
 
 .h1 {
   left: 6%;
@@ -507,9 +472,9 @@ main {
   top: 51%;
 }
 
-/* CARS */
+/* CAR DECORATIONS */
 
-.car {
+.city-car {
   position: absolute;
   z-index: 6;
 
@@ -524,7 +489,7 @@ main {
   border: 2px solid rgba(0,0,0,.4);
 }
 
-.car::before {
+.city-car::before {
   content: "";
 
   position: absolute;
@@ -540,7 +505,7 @@ main {
   border-radius: 3px;
 }
 
-.car::after {
+.city-car::after {
   content: "";
 
   position: absolute;
@@ -559,61 +524,89 @@ main {
     31px 0 #111;
 }
 
-.car1 {
+.city-car1 {
   background: #c72d2d;
   left: 34%;
   top: 40%;
 }
 
-.car2 {
+.city-car2 {
   background: #e4c42c;
   left: 62%;
   top: 47%;
 }
 
-.car3 {
+.city-car3 {
   background: #3477c7;
   left: 48%;
   top: 61%;
   transform: rotate(90deg);
 }
 
-.car4 {
+.city-car4 {
   background: #eee;
   left: 19%;
   top: 43%;
 }
 
-/* LOCATION MARKERS */
+/* PLAYER CAR */
 
-.location {
+.player-car {
   position: absolute;
   transform: translate(-50%, -50%);
-  z-index: 8;
+  z-index: 30;
 
-  background: #101720;
-  color: white;
+  width: 58px;
+  height: 32px;
 
-  border: 2px solid rgba(255,255,255,.25);
-  border-radius: 12px;
+  background: #d62828;
 
-  padding: 9px 12px;
+  border: 3px solid #fff;
 
-  font-size: 12px;
-  font-weight: bold;
-
-  cursor: pointer;
+  border-radius: 12px 12px 7px 7px;
 
   box-shadow:
-    0 7px 18px rgba(0,0,0,.55);
+    0 0 0 5px rgba(214,40,40,.2),
+    0 0 25px rgba(214,40,40,.7);
+
+  transition:
+    left .1s,
+    top .1s;
 }
 
-.location:hover {
-  transform:
-    translate(-50%, -50%)
-    scale(1.08);
+.player-car::before {
+  content: "";
 
-  background: #263343;
+  position: absolute;
+
+  width: 24px;
+  height: 14px;
+
+  left: 14px;
+  top: 3px;
+
+  background: #a9d8eb;
+
+  border-radius: 4px;
+}
+
+.player-car::after {
+  content: "";
+
+  position: absolute;
+
+  width: 9px;
+  height: 9px;
+
+  left: 5px;
+  bottom: -6px;
+
+  background: #111;
+
+  border-radius: 50%;
+
+  box-shadow:
+    39px 0 #111;
 }
 
 /* PLAYER */
@@ -621,7 +614,7 @@ main {
 .player {
   position: absolute;
   transform: translate(-50%, -50%);
-  z-index: 20;
+  z-index: 30;
 
   width: 55px;
   height: 55px;
@@ -646,6 +639,38 @@ main {
   transition:
     left .1s,
     top .1s;
+}
+
+/* LOCATION */
+
+.location {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+
+  background: #101720;
+  color: white;
+
+  border: 2px solid rgba(255,255,255,.25);
+  border-radius: 12px;
+
+  padding: 9px 12px;
+
+  font-size: 12px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 7px 18px rgba(0,0,0,.55);
+}
+
+.location:hover {
+  transform:
+    translate(-50%, -50%)
+    scale(1.08);
+
+  background: #263343;
 }
 
 /* SIDE PANEL */
@@ -698,8 +723,6 @@ aside h3 {
   background: #2e3948;
 }
 
-/* ACTIVITY */
-
 #activity {
   margin-top: 20px;
 
@@ -725,7 +748,7 @@ aside h3 {
     1px solid #222b35;
 }
 
-/* MOBILE CONTROLS */
+/* MOBILE */
 
 .mobile-controls {
   display: none;
@@ -744,8 +767,6 @@ aside h3 {
 
   font-size: 20px;
 }
-
-/* MOBILE */
 
 @media (max-width: 850px) {
 
@@ -845,6 +866,10 @@ root.innerHTML = `
   </div>
 
   <div>
+    ⛽ Fuel <span id="fuel"></span>%
+  </div>
+
+  <div>
     🟢 Online <span id="online">1</span>
   </div>
 
@@ -876,6 +901,7 @@ root.innerHTML = `
 
 <section class="map">
 
+
   <div class="road road1"></div>
   <div class="road road2"></div>
   <div class="road road3"></div>
@@ -884,40 +910,13 @@ root.innerHTML = `
 
   <!-- HOUSES -->
 
-  <div class="house h1">
-    <div class="house-window" style="left:10px;top:18px"></div>
-    <div class="house-window" style="left:57px;top:18px"></div>
-  </div>
-
-  <div class="house h2">
-    <div class="house-window" style="left:10px;top:18px"></div>
-    <div class="house-window" style="left:57px;top:18px"></div>
-  </div>
-
-  <div class="house h3">
-    <div class="house-window" style="left:10px;top:18px"></div>
-    <div class="house-window" style="left:57px;top:18px"></div>
-  </div>
-
-  <div class="house h4">
-    <div class="house-window" style="left:10px;top:18px"></div>
-    <div class="house-window" style="left:57px;top:18px"></div>
-  </div>
-
-  <div class="house h5">
-    <div class="house-window" style="left:10px;top:18px"></div>
-    <div class="house-window" style="left:57px;top:18px"></div>
-  </div>
-
-  <div class="house h6">
-    <div class="house-window" style="left:10px;top:18px"></div>
-    <div class="house-window" style="left:57px;top:18px"></div>
-  </div>
-
-  <div class="house h7">
-    <div class="house-window" style="left:10px;top:18px"></div>
-    <div class="house-window" style="left:57px;top:18px"></div>
-  </div>
+  <div class="house h1"></div>
+  <div class="house h2"></div>
+  <div class="house h3"></div>
+  <div class="house h4"></div>
+  <div class="house h5"></div>
+  <div class="house h6"></div>
+  <div class="house h7"></div>
 
 
   <!-- SHOPS -->
@@ -946,12 +945,12 @@ root.innerHTML = `
   <div class="street-light l4">💡</div>
 
 
-  <!-- CARS -->
+  <!-- CITY CARS -->
 
-  <div class="car car1"></div>
-  <div class="car car2"></div>
-  <div class="car car3"></div>
-  <div class="car car4"></div>
+  <div class="city-car city-car1"></div>
+  <div class="city-car city-car2"></div>
+  <div class="city-car city-car3"></div>
+  <div class="city-car city-car4"></div>
 
 
   <!-- LOCATIONS -->
@@ -982,6 +981,19 @@ root.innerHTML = `
   >
     🧍
   </div>
+
+
+  <!-- PLAYER CAR -->
+
+  <div
+    id="playerCar"
+    class="player-car"
+    style="
+      left:${player.x}%;
+      top:${player.y}%;
+      display:none;
+    "
+  ></div>
 
 </section>
 
@@ -1017,21 +1029,27 @@ root.innerHTML = `
   </h3>
 
   <p>
-    Use WASD or arrow keys to move around the city.
+    Use WASD or arrow keys to move.
   </p>
 
 
-  <div
-    class="mobile-controls"
-  >
+  <div class="mobile-controls">
 
-    <button data-move="up">⬆️</button>
+    <button data-move="up">
+      ⬆️
+    </button>
 
-    <button data-move="left">⬅️</button>
+    <button data-move="left">
+      ⬅️
+    </button>
 
-    <button data-move="down">⬇️</button>
+    <button data-move="down">
+      ⬇️
+    </button>
 
-    <button data-move="right">➡️</button>
+    <button data-move="right">
+      ➡️
+    </button>
 
   </div>
 
@@ -1067,14 +1085,46 @@ function update() {
   document.querySelector("#rep").textContent =
     player.reputation;
 
+  document.querySelector("#fuel").textContent =
+    Math.max(0, Math.round(player.fuel));
+
   document.querySelector("#zoneName").textContent =
     player.zone;
 
-  document.querySelector("#player").style.left =
-    `${player.x}%`;
 
-  document.querySelector("#player").style.top =
-    `${player.y}%`;
+  const person =
+    document.querySelector("#player");
+
+  const car =
+    document.querySelector("#playerCar");
+
+
+  if (player.mode === "Drive") {
+
+    person.style.display = "none";
+
+    car.style.display = "block";
+
+    car.style.left =
+      `${player.x}%`;
+
+    car.style.top =
+      `${player.y}%`;
+
+  } else {
+
+    person.style.display = "flex";
+
+    car.style.display = "none";
+
+    person.style.left =
+      `${player.x}%`;
+
+    person.style.top =
+      `${player.y}%`;
+
+  }
+
 
   document.querySelector("#status").textContent =
     `${player.mode} mode • ${player.zone}`;
@@ -1082,7 +1132,7 @@ function update() {
 
 
 /* =========================
-   ACTIVITY
+   LOG
 ========================= */
 
 function log(message) {
@@ -1097,26 +1147,41 @@ function log(message) {
 
 
 /* =========================
-   WALK / DRIVE
+   MODE
 ========================= */
 
 function setMode(mode) {
 
+  if (
+    mode === "Drive" &&
+    player.fuel <= 0
+  ) {
+
+    log(
+      "⛽ Your car is out of fuel."
+    );
+
+    return;
+  }
+
+
   player.mode = mode;
+
 
   if (mode === "Drive") {
 
     log(
-      "🚗 You are now driving around Owerri."
+      "🚗 You got into your car."
     );
 
   } else {
 
     log(
-      "🚶 You are now walking around Owerri."
+      "🚶 You got out of the car."
     );
 
   }
+
 
   update();
 }
@@ -1130,6 +1195,7 @@ function work() {
 
   player.cash += 75000;
   player.reputation += 5;
+
 
   if (
     player.reputation >=
@@ -1150,6 +1216,7 @@ function work() {
 
   }
 
+
   update();
 }
 
@@ -1160,18 +1227,26 @@ function work() {
 
 function travel(index) {
 
-  const zone = zones[index];
+  const zone =
+    zones[index];
 
-  player.x = zone[1];
-  player.y = zone[2];
 
-  player.zone = zone[0];
+  player.x =
+    zone[1];
+
+  player.y =
+    zone[2];
+
+  player.zone =
+    zone[0];
 
   player.reputation += 2;
+
 
   log(
     `📍 You travelled to ${zone[0]} — ${zone[3]}.`
   );
+
 
   update();
 }
@@ -1183,13 +1258,16 @@ function travel(index) {
 
 function joinClub(index) {
 
-  const club = clubs[index];
+  const club =
+    clubs[index];
 
   player.reputation += 10;
+
 
   log(
     `🎵 You joined ${club}. Reputation +10.`
   );
+
 
   update();
 }
@@ -1200,26 +1278,43 @@ function visitClub() {
   player.x = 55;
   player.y = 45;
 
-  player.zone = "Douglas";
+  player.zone =
+    "Douglas";
+
 
   log(
     "🌃 You headed toward the nightlife district."
   );
+
 
   update();
 }
 
 
 /* =========================
-   PLAYER MOVEMENT
+   MOVEMENT
 ========================= */
 
 function movePlayer(direction) {
 
-  const step =
-    player.mode === "Drive"
-      ? 3
-      : 1.5;
+  let step = 1.5;
+
+
+  if (player.mode === "Drive") {
+
+    if (player.fuel <= 0) {
+
+      log(
+        "⛽ You are out of fuel."
+      );
+
+      return;
+    }
+
+    step = 3;
+
+    player.fuel -= 0.4;
+  }
 
 
   if (direction === "up") {
@@ -1267,32 +1362,44 @@ document.addEventListener(
     const key =
       event.key.toLowerCase();
 
+
     if (
       key === "w" ||
       key === "arrowup"
     ) {
+
       movePlayer("up");
+
     }
+
 
     if (
       key === "s" ||
       key === "arrowdown"
     ) {
+
       movePlayer("down");
+
     }
+
 
     if (
       key === "a" ||
       key === "arrowleft"
     ) {
+
       movePlayer("left");
+
     }
+
 
     if (
       key === "d" ||
       key === "arrowright"
     ) {
+
       movePlayer("right");
+
     }
 
   }
@@ -1306,11 +1413,14 @@ document.addEventListener(
 document.querySelector("#walkBtn").onclick =
   () => setMode("Walk");
 
+
 document.querySelector("#driveBtn").onclick =
   () => setMode("Drive");
 
+
 document.querySelector("#workBtn").onclick =
   () => work();
+
 
 document.querySelector("#clubBtn").onclick =
   () => visitClub();
@@ -1355,7 +1465,7 @@ document
 
 
 /* =========================
-   MOBILE BUTTONS
+   MOBILE CONTROLS
 ========================= */
 
 document
