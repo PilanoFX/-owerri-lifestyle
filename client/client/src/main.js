@@ -1,173 +1,466 @@
+import './style.css';
+
 const zones = [
-  ["IMSU Junction", 50, 25, "Campus district"],
-  ["Fire Service", 43, 43, "City hub"],
-  ["Douglas", 55, 45, "Downtown"],
-  ["Wetheral", 64, 36, "Urban corridor"],
-  ["New Owerri", 70, 66, "Residential"],
-  ["Nekede", 18, 56, "Student district"],
-  ["FUTO", 30, 75, "University area"]
+  ['IMSU Junction', 50, 25, 'Campus district'],
+  ['Fire Service', 43, 43, 'City hub'],
+  ['Douglas', 55, 45, 'Downtown'],
+  ['Wetheral', 64, 36, 'Urban corridor'],
+  ['New Owerri', 70, 66, 'Residential'],
+  ['Nekede', 18, 56, 'Student district'],
+  ['FUTO', 30, 75, 'University area']
 ];
 
-const clubs = ["Cartel Lifestyle", "De Angels"];
-
-const player = {
-  name: "Player",
-  x: 49,
-  y: 38,
+let state = {
+  name: 'Guest',
+  x: 43,
+  y: 43,
   cash: 2500000,
-  level: 1,
-  reputation: 100,
-  zone: "Fire Service",
-  mode: "Walk"
+  level: 2,
+  rep: 100,
+  zone: 'Fire Service',
+  vehicle: 'walk'
 };
 
-const app = document.querySelector("#app");
+const root = document.querySelector('#root');
 
-app.innerHTML = `
-  <div class="game">
-    <header>
-      <h1>Owerri Lifestyle</h1>
-      <p>Live the city. Build your lifestyle.</p>
+if (!root) {
+  throw new Error('Game container #root was not found.');
+}
+
+root.innerHTML = `
+  <div class="app">
+
+    <header class="top">
+      <div>
+        <div class="brand">🌆 OWERRI <span>LIFESTYLE</span></div>
+        <div class="tag">Live your life. Build your name. Own Owerri.</div>
+      </div>
+
+      <div class="status">
+        <span>● Online</span>
+        <b>1 online</b>
+      </div>
     </header>
 
+    <section class="login panel">
+      <div>
+        <strong>Player name</strong>
+        <small>Choose a name other players will see.</small>
+      </div>
+
+      <form id="loginForm">
+        <input id="nameInput" maxlength="18" value="Guest" placeholder="e.g. Chioma">
+        <button type="submit">Enter City</button>
+      </form>
+    </section>
+
     <section class="stats">
-      <div>💰 ₦<span id="cash"></span></div>
-      <div>⭐ Level <span id="level"></span></div>
-      <div>🔥 Rep <span id="rep"></span></div>
-      <div>🟢 Online <span id="online">1</span></div>
+
+      <div>
+        💰
+        <b id="cash">₦2,500,000</b>
+        <small>Cash</small>
+      </div>
+
+      <div>
+        ⭐
+        <b id="level">2</b>
+        <small>Level</small>
+      </div>
+
+      <div>
+        ❤️
+        <b id="rep">100</b>
+        <small>Reputation</small>
+      </div>
+
+      <div>
+        📍
+        <b id="zone">Fire Service</b>
+        <small>Current area</small>
+      </div>
+
     </section>
 
-    <section class="toolbar">
-      <button onclick="setMode('Walk')">🚶 Walk</button>
-      <button onclick="setMode('Drive')">🚗 Drive</button>
-      <button onclick="work()">💼 Work +₦75k</button>
-      <button onclick="visitClub()">🎵 Clubs</button>
-    </section>
+    <section class="game">
 
-    <main>
-      <section class="map" id="map">
-        <div class="road road1"></div>
-        <div class="road road2"></div>
+      <div class="worldWrap">
 
-        ${zones.map((z, i) => `
-          <button
-            class="location"
-            style="left:${z[1]}%;top:${z[2]}%"
-            onclick="travel(${i})"
+        <div id="world">
+
+          <div class="terrain t1"></div>
+          <div class="terrain t2"></div>
+
+          <div class="road r1"></div>
+          <div class="road r2"></div>
+
+          ${zones.map(zone => `
+            <button
+              class="place"
+              style="left:${zone[1]}%;top:${zone[2]}%"
+              data-zone="${zone[0]}"
+            >
+              📍 ${zone[0]}
+            </button>
+          `).join('')}
+
+          <div
+            id="player"
+            class="avatar me"
+            style="left:${state.x}%;top:${state.y}%"
           >
-            ${z[0]}
-          </button>
-        `).join("")}
+            <span>🧍🏾</span>
+            <b>${state.name}</b>
+          </div>
 
-        <div id="player" class="player">
-  <div class="character">
-    <div class="character-head"></div>
-    <div class="character-body"></div>
-    <div class="character-leg left"></div>
-    <div class="character-leg right"></div>
-  </div>
-</div>
-      </section>
-
-      <aside>
-        <h2>📍 ${player.zone}</h2>
-        <p id="status">You are exploring Owerri.</p>
-
-        <h3>Nightlife</h3>
-        ${clubs.map(c => `<button class="club" onclick="joinClub('${c}')">${c}</button>`).join("")}
-
-        <h3>Controls</h3>
-        <p>Use WASD or arrow keys to move.</p>
-
-        <div id="activity">
-          <p>Welcome to Owerri Lifestyle.</p>
         </div>
+
+        <div class="controls">
+          <button data-mode="walk" class="active">🚶 Walk</button>
+          <button data-mode="drive">🚗 Drive</button>
+          <button id="work">💼 Work +₦75k</button>
+          <button id="shopButton">🛍️ Shop</button>
+        </div>
+
+      </div>
+
+      <aside class="side">
+
+        <section>
+          <h2>📍 Explore Owerri</h2>
+          <div id="locations" class="locations"></div>
+        </section>
+
+        <section>
+          <h2>🎉 Clubs</h2>
+
+          <div class="club">
+            <div>
+              <b>🔥 Cartel Lifestyle</b>
+              <small>Nightlife • Social • Status</small>
+            </div>
+            <button class="clubButton">Join</button>
+          </div>
+
+          <div class="club">
+            <div>
+              <b>👼 De Angels</b>
+              <small>Music • Social • Events</small>
+            </div>
+            <button class="clubButton">Join</button>
+          </div>
+
+        </section>
+
+        <section>
+          <h2>🏠 Properties</h2>
+          <div class="property">
+            <div>
+              <b>New Owerri Apartment</b>
+              <small>New Owerri • For sale</small>
+            </div>
+            <button>₦850k</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>💬 City Chat</h2>
+
+          <div id="chat" class="chat"></div>
+
+          <form id="chatForm" class="chatForm">
+            <input id="chatInput" maxlength="140" placeholder="Say something…">
+            <button type="submit">Send</button>
+          </form>
+
+        </section>
+
       </aside>
-    </main>
+
+    </section>
+
+    <div id="shop" class="modal hidden">
+      <div class="modalCard">
+        <button id="closeShop" class="close">×</button>
+
+        <h2>🛍️ City Garage</h2>
+        <p>Choose your vehicle.</p>
+
+        <div class="vehicle">
+          <div>
+            <b>🏍️ Okada</b>
+            <small>₦350,000</small>
+          </div>
+          <button data-vehicle="bike">Buy</button>
+        </div>
+
+        <div class="vehicle">
+          <div>
+            <b>🚗 City Sedan</b>
+            <small>₦2,500,000</small>
+          </div>
+          <button data-vehicle="sedan">Buy</button>
+        </div>
+
+        <div class="vehicle">
+          <div>
+            <b>🚙 Owerri SUV</b>
+            <small>₦6,500,000</small>
+          </div>
+          <button data-vehicle="suv">Buy</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <footer>
+      Owerri Lifestyle • Explore Owerri • Build your name • Own the city
+    </footer>
+
   </div>
 `;
 
-function update() {
-  document.querySelector("#cash").textContent =
-    player.cash.toLocaleString();
-
-  document.querySelector("#level").textContent = player.level;
-  document.querySelector("#rep").textContent = player.reputation;
-
-  const p = document.querySelector("#player");
-  p.style.left = `${player.x}%`;
-  p.style.top = `${player.y}%`;
-
-  document.querySelector("#status").textContent =
-    `${player.mode} mode • ${player.zone}`;
+function money(amount) {
+  return '₦' + amount.toLocaleString('en-NG');
 }
 
-function log(message) {
-  document.querySelector("#activity").innerHTML =
-    `<p>${message}</p>` +
-    document.querySelector("#activity").innerHTML;
+function showMessage(message) {
+  const toast = document.querySelector('#toast');
+
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2200);
 }
 
-window.setMode = function(mode) {
-  player.mode = mode;
-  log(`You switched to ${mode} mode.`);
-  update();
-};
+function updateStats() {
+  document.querySelector('#cash').textContent = money(state.cash);
+  document.querySelector('#level').textContent = state.level;
+  document.querySelector('#rep').textContent = state.rep;
+  document.querySelector('#zone').textContent = state.zone;
 
-window.work = function() {
-  player.cash += 75000;
-  player.reputation += 5;
+  const player = document.querySelector('#player');
 
-  if (player.reputation >= player.level * 150) {
-    player.level++;
-    log(`🎉 Level up! You are now level ${player.level}.`);
-  } else {
-    log("💼 You finished a job and earned ₦75,000.");
+  if (player) {
+    player.style.left = state.x + '%';
+    player.style.top = state.y + '%';
+
+    player.querySelector('b').textContent = state.name;
+    player.querySelector('span').textContent =
+      state.vehicle === 'walk' ? '🧍🏾' : '🚗';
   }
+}
 
-  update();
-};
+function travel(zoneName) {
+  const zone = zones.find(item => item[0] === zoneName);
 
-window.travel = function(index) {
-  const zone = zones[index];
+  if (!zone) return;
 
-  player.x = zone[1];
-  player.y = zone[2];
-  player.zone = zone[0];
+  state.x = zone[1];
+  state.y = zone[2];
+  state.zone = zone[0];
+  state.rep += 2;
 
-  player.reputation += 2;
+  updateStats();
 
-  log(`📍 You travelled to ${zone[0]} — ${zone[3]}.`);
-  update();
-};
+  showMessage('📍 Arrived at ' + zone[0]);
+}
 
-window.joinClub = function(club) {
-  player.reputation += 10;
-  log(`🎵 You joined ${club}. Reputation +10.`);
-  update();
-};
-
-window.visitClub = function() {
-  player.x = 55;
-  player.y = 45;
-  player.zone = "Douglas";
-  log("🌃 You headed toward the nightlife district.");
-  update();
-};
-
-document.addEventListener("keydown", (event) => {
-  const key = event.key.toLowerCase();
-  const step = player.mode === "Drive" ? 3 : 1.5;
-
-  if (key === "w" || key === "arrowup") player.y -= step;
-  if (key === "s" || key === "arrowdown") player.y += step;
-  if (key === "a" || key === "arrowleft") player.x -= step;
-  if (key === "d" || key === "arrowright") player.x += step;
-
-  player.x = Math.max(2, Math.min(98, player.x));
-  player.y = Math.max(5, Math.min(95, player.y));
-
-  update();
+document.querySelectorAll('.place').forEach(button => {
+  button.addEventListener('click', () => {
+    travel(button.dataset.zone);
+  });
 });
 
-update();
+const locations = document.querySelector('#locations');
+
+locations.innerHTML = zones.map(zone => `
+  <button class="locationButton" data-location="${zone[0]}">
+    📍
+    <span>
+      <b>${zone[0]}</b>
+      <small>${zone[3]}</small>
+    </span>
+  </button>
+`).join('');
+
+document.querySelectorAll('.locationButton').forEach(button => {
+  button.addEventListener('click', () => {
+    travel(button.dataset.location);
+  });
+});
+
+document.querySelector('#loginForm').addEventListener('submit', event => {
+  event.preventDefault();
+
+  const input = document.querySelector('#nameInput');
+  const name = input.value.trim();
+
+  if (!name) return;
+
+  state.name = name;
+
+  updateStats();
+
+  showMessage('Welcome to Owerri, ' + name + '!');
+});
+
+document.querySelector('#work').addEventListener('click', () => {
+  state.cash += 75000;
+  state.rep += 1;
+
+  updateStats();
+
+  showMessage('💼 You earned ₦75,000!');
+});
+
+document.querySelectorAll('[data-mode]').forEach(button => {
+  button.addEventListener('click', () => {
+
+    document.querySelectorAll('[data-mode]').forEach(item => {
+      item.classList.remove('active');
+    });
+
+    button.classList.add('active');
+
+    if (
+      button.dataset.mode === 'drive' &&
+      state.vehicle === 'walk'
+    ) {
+      showMessage('🚗 Buy a vehicle first.');
+      return;
+    }
+
+    showMessage(
+      button.dataset.mode === 'drive'
+        ? '🚗 Driving mode activated.'
+        : '🚶 Walking mode activated.'
+    );
+  });
+});
+
+document.querySelector('#shopButton').addEventListener('click', () => {
+  document.querySelector('#shop').classList.remove('hidden');
+});
+
+document.querySelector('#closeShop').addEventListener('click', () => {
+  document.querySelector('#shop').classList.add('hidden');
+});
+
+document.querySelectorAll('[data-vehicle]').forEach(button => {
+
+  button.addEventListener('click', () => {
+
+    const vehicle = button.dataset.vehicle;
+
+    const prices = {
+      bike: 350000,
+      sedan: 2500000,
+      suv: 6500000
+    };
+
+    const names = {
+      bike: 'Okada',
+      sedan: 'City Sedan',
+      suv: 'Owerri SUV'
+    };
+
+    if (state.cash < prices[vehicle]) {
+      showMessage('❌ You do not have enough cash.');
+      return;
+    }
+
+    state.cash -= prices[vehicle];
+    state.vehicle = vehicle;
+
+    updateStats();
+
+    showMessage('🚗 You bought a ' + names[vehicle] + '!');
+  });
+
+});
+
+document.querySelectorAll('.clubButton').forEach(button => {
+
+  button.addEventListener('click', () => {
+
+    state.rep += 5;
+
+    updateStats();
+
+    showMessage('🎉 Club joined!');
+  });
+
+});
+
+document.querySelector('#chatForm').addEventListener('submit', event => {
+
+  event.preventDefault();
+
+  const input = document.querySelector('#chatInput');
+  const message = input.value.trim();
+
+  if (!message) return;
+
+  const chat = document.querySelector('#chat');
+
+  const item = document.createElement('div');
+
+  item.innerHTML = `
+    <b>${state.name}</b>
+    <span>${message}</span>
+  `;
+
+  chat.prepend(item);
+
+  input.value = '';
+});
+
+window.addEventListener('keydown', event => {
+
+  if (
+    event.target.matches('input, textarea, button')
+  ) {
+    return;
+  }
+
+  const key = event.key.toLowerCase();
+
+  if (
+    !['w', 'a', 's', 'd'].includes(key) &&
+    !event.key.startsWith('Arrow')
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const driveMode =
+    document.querySelector('[data-mode].active')?.dataset.mode === 'drive';
+
+  const step = driveMode ? 3 : 1.5;
+
+  if (key === 'w' || event.key === 'ArrowUp') {
+    state.y = Math.max(5, state.y - step);
+  }
+
+  if (key === 's' || event.key === 'ArrowDown') {
+    state.y = Math.min(95, state.y + step);
+  }
+
+  if (key === 'a' || event.key === 'ArrowLeft') {
+    state.x = Math.max(3, state.x - step);
+  }
+
+  if (key === 'd' || event.key === 'ArrowRight') {
+    state.x = Math.min(97, state.x + step);
+  }
+
+  updateStats();
+});
+
+updateStats();
