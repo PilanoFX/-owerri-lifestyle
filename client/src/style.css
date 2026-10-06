@@ -128,6 +128,39 @@ aside {
     min-height: 500px;
   }
 }
-body {
-  background: red !important;
+.game {
+  max-width: 1400px;
+}
+
+header {
+  background: linear-gradient(135deg, #171d28, #0c1118);
+  border: 1px solid #343d4c;
+}
+
+.map {
+  background-color: #31563b;
+  border: 3px solid #3f4b5b;
+  box-shadow:
+    inset 0 0 100px rgba(0, 0, 0, 0.45),
+    0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+.road {
+  background: #292d33;
+}
+
+.location {
+  background: #111820;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.player {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 196, 0, 0.2);
+  border: 3px solid #fff;
+  font-size: 31px;
+  box-shadow: 0 0 20px rgba(255, 196, 0, 0.45);
 }
