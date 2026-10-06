@@ -2,6 +2,11 @@ import express from "express";
 import cors from "cors";
 import { WebSocketServer } from "ws";
 import http from "http";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -13,6 +18,21 @@ app.get("/health", (req, res) => {
     ok: true,
     game: "Owerri Lifestyle"
   });
+});
+
+const clientDist = path.join(__dirname, "..", "client", "dist");
+
+app.use(express.static(clientDist));
+
+app.use((req, res, next) => {
+  if (req.method !== "GET") return next();
+
+  res.sendFile(
+    path.join(clientDist, "index.html"),
+    (error) => {
+      if (error) next(error);
+    }
+  );
 });
 
 const server = http.createServer(app);
@@ -60,7 +80,10 @@ wss.on("connection", (ws) => {
       }
 
       if (message.type === "name") {
-        player.name = String(message.name || "Player").slice(0, 20);
+        player.name = String(
+          message.name || "Player"
+        ).slice(0, 20);
+
         broadcast();
       }
     } catch (error) {
@@ -90,5 +113,7 @@ function broadcast() {
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
-  console.log(`Owerri Lifestyle server running on port ${PORT}`);
+  console.log(
+    `Owerri Lifestyle server running on port ${PORT}`
+  );
 });
