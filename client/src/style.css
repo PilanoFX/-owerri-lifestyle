@@ -1,18 +1,11 @@
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
   margin: 0;
   min-height: 100%;
-  font-family: Arial, sans-serif;
-  background: #08100c;
-  color: white;
-}
-
-body {
-  overflow-x: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #080b10;
+  color: #e8f0ea;
 }
 
 button {
@@ -22,456 +15,426 @@ button {
   font-weight: 700;
 }
 
-/* =========================
-   GAME
-========================= */
+/* ========== TOP BAR ========== */
+.app { max-width: 1400px; margin: 0 auto; padding: 12px; }
 
-.game {
-  width: 100%;
-  max-width: 1450px;
-  margin: auto;
-  padding: 16px;
+.topbar {
+  background: #10161e;
+  border: 1px solid #2a3540;
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
 }
 
-/* =========================
-   HEADER
-========================= */
-
-header {
-  padding: 20px;
-  margin-bottom: 14px;
-  border-radius: 18px;
-  text-align: center;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(23, 32, 27, 0.98),
-      rgba(8, 14, 11, 0.98)
-    );
-  border: 1px solid #344238;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+.brand {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 10px;
 }
+.brand span { color: #42d4ff; }
 
-header h1 {
-  margin: 0;
-  font-size: clamp(26px, 5vw, 42px);
-  letter-spacing: 1px;
-}
-
-header p {
-  margin: 8px 0 0;
-  color: #b8c7bc;
-}
-
-/* =========================
-   STATS
-========================= */
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.stats div {
-  padding: 14px;
-  border-radius: 14px;
-  text-align: center;
-  background: #172019;
-  border: 1px solid #2e3d32;
-  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.25);
-}
-
-.stats span {
-  font-weight: 800;
-}
-
-/* =========================
-   TOOLBAR
-========================= */
-
-.toolbar {
+.stats-row {
   display: flex;
-  gap: 9px;
   flex-wrap: wrap;
-  margin-bottom: 14px;
+  gap: 8px;
 }
 
-.toolbar button {
-  padding: 12px 16px;
-  border-radius: 12px;
-  color: white;
-  background: #202c24;
-  border: 1px solid #3c4b40;
-  transition: 0.2s;
+.stat {
+  background: #19212b;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  border: 1px solid #2d3a48;
 }
 
-.toolbar button:hover {
-  transform: translateY(-2px);
-  background: #2d3d31;
-}
-
-/* =========================
-   MAIN LAYOUT
-========================= */
-
-main {
+/* ========== NEEDS BAR ========== */
+.needs-bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 310px;
-  gap: 15px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: #0f161c;
+  border: 1px solid #2a3540;
+  border-radius: 14px;
 }
 
-/* =========================
-   CITY MAP
-========================= */
+.need {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.need-icon { font-size: 16px; }
+
+.need-track {
+  width: 100%;
+  height: 8px;
+  background: #1c2630;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.need-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.need-val {
+  font-size: 11px;
+  color: #9db0a5;
+  font-weight: 700;
+}
+
+/* ========== LAYOUT ========== */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 12px;
+}
+
+/* ========== MAP ========== */
+.mapbox {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid #33413a;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+}
 
 .map {
   position: relative;
-  min-height: 650px;
-  overflow: hidden;
-  border-radius: 22px;
-  border: 3px solid #3f5144;
-
+  height: 620px;
   background:
-    /* small city blocks */
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0.025) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      0deg,
-      rgba(255,255,255,0.025) 1px,
-      transparent 1px
-    ),
-    /* grass */
-    linear-gradient(
-      135deg,
-      #315c3a,
-      #3c7044 45%,
-      #285336
-    );
-
-  background-size:
-    42px 42px,
-    42px 42px,
-    auto;
-
-  box-shadow:
-    inset 0 0 120px rgba(0, 0, 0, 0.5),
-    0 18px 45px rgba(0, 0, 0, 0.45);
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(145deg, #2f5a3a, #264a32 50%, #3a6b42);
+  background-size: 40px 40px, 40px 40px, auto;
 }
 
-/* =========================
-   CITY BLOCKS
-========================= */
-
-.map::before {
-  content: "";
+/* city blocks */
+.block {
   position: absolute;
-  inset: 0;
-
-  background:
-    linear-gradient(
-      25deg,
-      transparent 0 22%,
-      rgba(19, 27, 21, 0.5) 22% 28%,
-      transparent 28% 100%
-    ),
-    linear-gradient(
-      150deg,
-      transparent 0 62%,
-      rgba(18, 27, 21, 0.45) 62% 68%,
-      transparent 68% 100%
-    );
-
-  pointer-events: none;
+  background: #315337;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
 }
+.b1 { left:3%; top:5%; width:18%; height:18%; }
+.b2 { left:29%; top:5%; width:17%; height:20%; }
+.b3 { left:55%; top:5%; width:15%; height:20%; }
+.b4 { left:77%; top:7%; width:17%; height:18%; }
+.b5 { left:3%; top:38%; width:18%; height:17%; }
+.b6 { left:28%; top:37%; width:17%; height:18%; }
+.b7 { left:56%; top:39%; width:14%; height:16%; }
+.b8 { left:78%; top:39%; width:17%; height:16%; }
+.b9 { left:4%; top:65%; width:17%; height:26%; }
+.b10 { left:29%; top:64%; width:17%; height:27%; }
+.b11 { left:56%; top:64%; width:14%; height:27%; }
+.b12 { left:78%; top:64%; width:17%; height:27%; }
 
-/* =========================
-   ROADS
-========================= */
-
+/* roads */
 .road {
   position: absolute;
-  z-index: 1;
-  background: #292e30;
-  box-shadow:
-    inset 0 0 0 2px rgba(255,255,255,0.04),
-    0 5px 15px rgba(0,0,0,0.3);
-}
-
-.road1 {
-  width: 100%;
-  height: 78px;
-  top: 44%;
-}
-
-.road2 {
-  width: 78px;
-  height: 100%;
-  left: 48%;
-}
-
-/* road markings */
-
-.road1::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 3px dashed #d7bd4d;
-  opacity: 0.7;
-}
-
-.road2::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  border-left: 3px dashed #d7bd4d;
-  opacity: 0.7;
-}
-
-/* =========================
-   EXTRA ROADS
-========================= */
-
-.map::after {
-  content: "";
-  position: absolute;
-  width: 150%;
-  height: 58px;
-  left: -25%;
-  top: 24%;
-  transform: rotate(-18deg);
-  background: #303537;
-  box-shadow:
-    inset 0 0 0 2px rgba(255,255,255,0.04),
-    0 5px 15px rgba(0,0,0,0.3);
+  background: #383d44;
+  box-shadow: inset 0 0 0 2px #4a5058;
   z-index: 1;
 }
+.road.h { height: 42px; width: 100%; }
+.road.v { width: 42px; height: 100%; }
+.r1 { top: 30%; }
+.r2 { top: 60%; }
+.r3 { top: 82%; }
+.c1 { left: 25%; }
+.c2 { left: 51%; }
+.c3 { left: 73%; }
 
-/* =========================
-   LOCATION BUTTONS
-========================= */
-
-.location {
+/* dashed center lines */
+.road.h::after {
+  content: "";
   position: absolute;
-  z-index: 4;
+  left: 0; right: 0; top: 50%;
+  border-top: 2px dashed #d7bd4d;
+  opacity: 0.55;
+}
+.road.v::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  border-left: 2px dashed #d7bd4d;
+  opacity: 0.55;
+}
 
+/* location buttons */
+.zone {
+  position: absolute;
   transform: translate(-50%, -50%);
-
-  padding: 9px 12px;
-  border-radius: 12px;
-
+  z-index: 4;
+  background: rgba(16, 24, 32, 0.92);
+  border: 1.5px solid #42d4ff;
   color: white;
-  background: rgba(10, 18, 13, 0.92);
-
-  border: 1px solid rgba(255,255,255,0.22);
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-
-  font-size: 12px;
-  white-space: nowrap;
-
-  transition:
-    transform 0.2s,
-    background 0.2s;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  transition: transform 0.15s, background 0.15s;
+  text-align: center;
+  line-height: 1.25;
 }
-
-.location:hover {
+.zone small { font-weight: 500; color: #9ec8d8; font-size: 10px; }
+.zone:hover {
   transform: translate(-50%, -50%) scale(1.08);
-  background: #263b2b;
+  background: #1a2a38;
 }
 
-/* =========================
-   PLAYER
-========================= */
+/* houses */
+.house {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #f4c542;
+  color: #111;
+  border: 3px solid white;
+  z-index: 20;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  cursor: pointer;
+}
+.house.owned { background: #36d278; }
 
+/* player */
 .player {
   position: absolute;
-  z-index: 8;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  transition: left 0.1s linear, top 0.1s linear;
+}
+.person {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #f1c27d;
+  border: 3px solid #111;
+  position: relative;
+  box-shadow: 0 0 0 4px rgba(255,200,40,0.35);
+}
+.person::after {
+  content: "";
+  position: absolute;
+  top: 18px; left: 1px;
+  width: 18px; height: 14px;
+  background: #4d7cff;
+  border-radius: 6px;
+}
+.car {
+  width: 44px; height: 24px;
+  background: #d62828;
+  border-radius: 7px;
+  border: 2px solid #111;
+  position: relative;
+  box-shadow: 0 0 0 4px rgba(255,80,80,0.25);
+}
+.car::before, .car::after {
+  content: "";
+  position: absolute;
+  width: 10px; height: 10px;
+  background: #111;
+  border-radius: 50%;
+  bottom: -6px;
+}
+.car::before { left: 4px; }
+.car::after { right: 4px; }
+.car span {
+  position: absolute;
+  left: 12px; top: 3px;
+  width: 16px; height: 9px;
+  background: #9ddcff;
+  border-radius: 2px;
+}
 
-  width: 58px;
-  height: 58px;
+/* ========== SIDE PANEL ========== */
+.side {
+  background: #10161e;
+  border: 1px solid #2a3540;
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
+.panel {
+  background: #151d27;
+  border: 1px solid #2d3a48;
+  border-radius: 12px;
+  padding: 12px;
+}
+.panel h3 { margin: 0 0 10px; font-size: 14px; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.full { width: 100%; margin-top: 7px; }
+
+.panel button {
+  background: #202a36;
+  color: white;
+  padding: 10px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+.panel button:hover { background: #2a3748; }
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, 45px);
+  gap: 5px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.controls button { height: 42px; padding: 0; }
+.empty { visibility: hidden; }
+
+.log {
+  max-height: 160px;
+  overflow: auto;
+  font-size: 12px;
+}
+.log div {
+  padding: 5px 0;
+  border-bottom: 1px solid #29323d;
+}
+
+/* ========== LOCATION SHEET ========== */
+.sheet {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 80;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.sheet.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sheet-content {
+  width: 100%;
+  max-width: 480px;
+  background: #121a22;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 18px 30px;
+  border: 1px solid #2d3a48;
+  transform: translateY(30px);
+  transition: transform 0.25s;
+}
+.sheet.open .sheet-content { transform: translateY(0); }
+
+.close-sheet {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  background: transparent;
+  color: #aaa;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sheet-type {
+  color: #7eb8c9;
+  font-size: 13px;
+  margin: 0 0 14px;
+}
+
+.activities { display: flex; flex-direction: column; gap: 8px; }
+
+.activity-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1a2430;
+  border: 1px solid #2d3a48;
+  color: white;
+  padding: 12px 14px;
+  border-radius: 12px;
+  text-align: left;
+}
+.activity-btn:hover { background: #223040; border-color: #42d4ff; }
+
+.act-name { font-weight: 800; font-size: 14px; }
+.act-meta { font-size: 12px; color: #8fa3b0; }
+
+/* ========== HOUSE INTERIOR ========== */
+.interior {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #151515;
+  z-index: 100;
+}
+.interior.show { display: block; }
+
+.inhead {
+  height: 65px;
+  background: #202832;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
-  justify-content: center;
-
-  transform: translate(-50%, -50%);
-
-  border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(255, 205, 60, 0.5),
-      rgba(255, 205, 60, 0.08) 60%,
-      transparent 70%
-    );
-
-  border: 3px solid white;
-
-  font-size: 32px;
-
-  box-shadow:
-    0 0 0 5px rgba(255,255,255,0.08),
-    0 0 30px rgba(255,200,40,0.55);
-
-  transition:
-    left 0.12s linear,
-    top 0.12s linear;
+  justify-content: space-between;
+}
+.room {
+  position: absolute;
+  top: 65px; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(#d8c4a4 0 55%, #755239 55%);
+}
+.window {
+  position: absolute; left: 15%; top: 12%;
+  width: 170px; height: 120px;
+  background: #82d5fa; border: 12px solid white;
+}
+.tv {
+  position: absolute; right: 12%; top: 15%;
+  width: 220px; height: 130px;
+  background: #080808; border: 8px solid #222;
+}
+.tv::after {
+  content: "OWERRI";
+  display: flex; height: 100%;
+  align-items: center; justify-content: center;
+  color: #42d4ff; font-weight: bold; font-size: 22px;
+}
+.sofa {
+  position: absolute; left: 12%; bottom: 18%;
+  width: 290px; height: 85px;
+  background: #4b4163; border-radius: 20px;
+}
+.table {
+  position: absolute; right: 30%; bottom: 15%;
+  width: 150px; height: 65px;
+  background: #70492e; border-radius: 8px;
+}
+.bed {
+  position: absolute; left: 37%; bottom: 5%;
+  width: 330px; height: 100px;
+  background: #d8d8e8; border-radius: 20px;
 }
 
-/* =========================
-   SIDE PANEL
-========================= */
-
-aside {
-  background:
-    linear-gradient(
-      180deg,
-      #172019,
-      #101710
-    );
-
-  padding: 20px;
-
-  border-radius: 20px;
-
-  border: 1px solid #354438;
-
-  box-shadow:
-    0 15px 35px rgba(0,0,0,0.35);
-}
-
-aside h2 {
-  margin-top: 0;
-}
-
-aside h3 {
-  margin-top: 24px;
-  color: #d8e4db;
-}
-
-aside p {
-  color: #aebbb2;
-  line-height: 1.5;
-}
-
-/* =========================
-   CLUB BUTTONS
-========================= */
-
-.club {
-  display: block;
-  width: 100%;
-  margin: 9px 0;
-
-  padding: 12px;
-
-  border-radius: 12px;
-
-  color: white;
-
-  background: #243128;
-
-  border: 1px solid #3a4b3e;
-
-  transition: 0.2s;
-}
-
-.club:hover {
-  background: #304435;
-  transform: translateY(-2px);
-}
-
-/* =========================
-   ACTIVITY
-========================= */
-
-#activity {
-  margin-top: 20px;
-  padding: 12px;
-
-  max-height: 180px;
-  overflow-y: auto;
-
-  border-radius: 12px;
-
-  background: rgba(0,0,0,0.18);
-  border: 1px solid #2c3a30;
-}
-
-#activity p {
-  margin: 0 0 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-/* =========================
-   MOBILE
-========================= */
-
+/* ========== MOBILE ========== */
 @media (max-width: 900px) {
-
-  .game {
-    padding: 10px;
-  }
-
-  main {
-    grid-template-columns: 1fr;
-  }
-
-  aside {
-    order: 2;
-  }
-
-  .map {
-    min-height: 560px;
-  }
+  .layout { grid-template-columns: 1fr; }
+  .map { height: 480px; }
+  .needs-bar { grid-template-columns: repeat(3, 1fr); }
 }
 
-@media (max-width: 600px) {
-
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stats div {
-    padding: 11px 6px;
-    font-size: 13px;
-  }
-
-  .toolbar button {
-    flex: 1 1 calc(50% - 10px);
-    min-width: 130px;
-  }
-
-  .map {
-    min-height: 500px;
-    border-radius: 17px;
-  }
-
-  .location {
-    padding: 7px 8px;
-    font-size: 10px;
-  }
-
-  .player {
-    width: 50px;
-    height: 50px;
-    font-size: 28px;
-  }
-
-  aside {
-    padding: 15px;
-  }
+@media (max-width: 500px) {
+  .stats-row { gap: 6px; }
+  .stat { font-size: 12px; padding: 6px 9px; }
+  .zone { font-size: 10px; padding: 5px 7px; }
 }
