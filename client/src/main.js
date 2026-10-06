@@ -1,6 +1,6 @@
 /* =========================================================
-   Owerri Lifestyle – Full Upgrade
-   (3D buildings + windows + traffic + day/night + facing player)
+   Owerri Lifestyle – Complete Version
+   (3D Map + Traffic + Day/Night + Facing Player + 3D House Interior)
    ========================================================= */
 
 const zones = [
@@ -79,7 +79,7 @@ const player = {
   mode: "Walk",
   fuel: 100,
   selected: null,
-  direction: "down", // up | down | left | right
+  direction: "down",
   hunger: 80,
   energy: 85,
   fun: 60,
@@ -111,15 +111,9 @@ button:active{transform:scale(0.96)}
 
 .layout{display:flex;flex-direction:column;gap:12px;padding:12px}
 
-/* ===== MAP BOX ===== */
 .mapbox{
-  position:relative;
-  width:100%;
-  height:min(62vh,560px);
-  min-height:400px;
-  border-radius:20px;
-  overflow:hidden;
-  border:2px solid #2a4a38;
+  position:relative;width:100%;height:min(62vh,560px);min-height:400px;
+  border-radius:20px;overflow:hidden;border:2px solid #2a4a38;
   box-shadow:0 20px 40px rgba(0,0,0,0.55), inset 0 0 60px rgba(0,0,0,0.35);
   transition: background 1.2s, border-color 1.2s;
 }
@@ -137,168 +131,69 @@ button:active{transform:scale(0.96)}
 }
 .mapbox.night .map{filter:brightness(0.55) contrast(1.1)}
 
-/* ===== ROADS ===== */
-.road{
-  position:absolute;
-  background:#2c3238;
-  box-shadow:0 7px 0 #15191d, inset 0 1px 0 rgba(255,255,255,0.07);
-  z-index:2;
-}
-.h{height:44px;width:100%}
-.v{width:44px;height:100%}
+.road{position:absolute;background:#2c3238;box-shadow:0 7px 0 #15191d, inset 0 1px 0 rgba(255,255,255,0.07);z-index:2}
+.h{height:44px;width:100%}.v{width:44px;height:100%}
 .r1{top:26%}.r2{top:52%}.r3{top:76%}
 .c1{left:20%}.c2{left:47%}.c3{left:74%}
+.road.h::after{content:"";position:absolute;left:0;right:0;top:50%;height:0;border-top:3px dashed rgba(255,220,80,0.6);transform:translateY(-50%)}
+.road.v::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:0;border-left:3px dashed rgba(255,220,80,0.6);transform:translateX(-50%)}
 
-.road.h::after{
-  content:"";position:absolute;left:0;right:0;top:50%;
-  height:0;border-top:3px dashed rgba(255,220,80,0.6);transform:translateY(-50%);
-}
-.road.v::after{
-  content:"";position:absolute;top:0;bottom:0;left:50%;
-  width:0;border-left:3px dashed rgba(255,220,80,0.6);transform:translateX(-50%);
-}
-
-/* Street lights (night only) */
-.streetlight{
-  position:absolute;width:6px;height:18px;background:#444;border-radius:2px;z-index:4;
-  box-shadow:0 0 12px 4px rgba(255,220,120,0.0);
-  transition: box-shadow 1s;
-}
+.streetlight{position:absolute;width:6px;height:18px;background:#444;border-radius:2px;z-index:4;box-shadow:0 0 12px 4px rgba(255,220,120,0);transition:box-shadow 1s}
 .mapbox.night .streetlight{box-shadow:0 0 18px 6px rgba(255,220,120,0.55)}
 .sl1{left:22%;top:24%}.sl2{left:49%;top:24%}.sl3{left:76%;top:24%}
 .sl4{left:22%;top:50%}.sl5{left:49%;top:50%}.sl6{left:76%;top:50%}
 .sl7{left:22%;top:74%}.sl8{left:49%;top:74%}.sl9{left:76%;top:74%}
 
-/* ===== 3D BUILDINGS WITH WINDOWS ===== */
-.block{
-  position:absolute;
-  background:linear-gradient(145deg,#2f4a36,#3a5c42);
-  border-radius:3px 3px 2px 2px;
-  box-shadow:
-    0 12px 0 #152218,
-    0 16px 22px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.1);
-  z-index:3;
-  overflow:hidden;
-}
-.block::before{ /* roof */
-  content:"";position:absolute;top:-9px;left:-1px;right:-1px;height:11px;
-  background:linear-gradient(90deg,#3d6048,#4a7255);
-  border-radius:3px 3px 0 0;
-  box-shadow:0 -2px 0 rgba(0,0,0,0.25);
-}
-/* windows */
-.block::after{
-  content:"";
-  position:absolute;inset:8px 6px 6px 6px;
-  background:
-    repeating-linear-gradient(90deg,
-      rgba(180,220,255,0.15) 0 8px,
-      transparent 8px 16px),
-    repeating-linear-gradient(0deg,
-      rgba(180,220,255,0.12) 0 7px,
-      transparent 7px 15px);
-  border-radius:2px;
-  opacity:0.7;
-}
+.block{position:absolute;background:linear-gradient(145deg,#2f4a36,#3a5c42);border-radius:3px 3px 2px 2px;
+  box-shadow:0 12px 0 #152218,0 16px 22px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1);z-index:3;overflow:hidden}
+.block::before{content:"";position:absolute;top:-9px;left:-1px;right:-1px;height:11px;background:linear-gradient(90deg,#3d6048,#4a7255);border-radius:3px 3px 0 0;box-shadow:0 -2px 0 rgba(0,0,0,0.25)}
+.block::after{content:"";position:absolute;inset:8px 6px 6px 6px;
+  background:repeating-linear-gradient(90deg,rgba(180,220,255,0.15) 0 8px,transparent 8px 16px),
+             repeating-linear-gradient(0deg,rgba(180,220,255,0.12) 0 7px,transparent 7px 15px);
+  border-radius:2px;opacity:0.7}
 .mapbox.night .block::after{
-  background:
-    repeating-linear-gradient(90deg,
-      rgba(255,230,150,0.45) 0 8px,
-      transparent 8px 16px),
-    repeating-linear-gradient(0deg,
-      rgba(255,230,150,0.35) 0 7px,
-      transparent 7px 15px);
-  opacity:0.9;
-  box-shadow:0 0 8px rgba(255,220,120,0.3);
-}
+  background:repeating-linear-gradient(90deg,rgba(255,230,150,0.45) 0 8px,transparent 8px 16px),
+             repeating-linear-gradient(0deg,rgba(255,230,150,0.35) 0 7px,transparent 7px 15px);
+  opacity:0.9;box-shadow:0 0 8px rgba(255,220,120,0.3)}
 
-.b1{left:3%;top:5%;width:13%;height:13%}
-.b2{left:23%;top:4%;width:14%;height:15%}
-.b3{left:49%;top:5%;width:13%;height:14%}
-.b4{left:74%;top:6%;width:15%;height:13%}
-.b5{left:3%;top:35%;width:13%;height:12%}
-.b6{left:23%;top:34%;width:14%;height:13%}
-.b7{left:49%;top:36%;width:12%;height:11%}
-.b8{left:74%;top:35%;width:15%;height:12%}
-.b9{left:3%;top:61%;width:13%;height:23%}
-.b10{left:23%;top:60%;width:14%;height:24%}
-.b11{left:49%;top:62%;width:12%;height:22%}
-.b12{left:74%;top:60%;width:15%;height:24%}
+.b1{left:3%;top:5%;width:13%;height:13%}.b2{left:23%;top:4%;width:14%;height:18%}
+.b3{left:49%;top:5%;width:13%;height:14%}.b4{left:74%;top:6%;width:15%;height:13%}
+.b5{left:3%;top:35%;width:13%;height:12%}.b6{left:23%;top:34%;width:14%;height:16%}
+.b7{left:49%;top:36%;width:12%;height:11%}.b8{left:74%;top:35%;width:15%;height:12%}
+.b9{left:3%;top:61%;width:13%;height:23%}.b10{left:23%;top:60%;width:14%;height:27%}
+.b11{left:49%;top:62%;width:12%;height:22%}.b12{left:74%;top:60%;width:15%;height:24%}
 
-/* taller buildings */
-.b2{height:18%}.b6{height:16%}.b10{height:27%}
-
-/* ===== LOCATION MARKERS ===== */
-.zone{
-  position:absolute;transform:translate(-50%,-50%);
-  background:rgba(12,18,26,0.94);border:1.5px solid #42d4ff;
-  padding:6px 10px;border-radius:12px;font-size:11px;z-index:10;
-  white-space:nowrap;cursor:pointer;text-align:center;
-  box-shadow:0 8px 0 rgba(0,0,0,0.35),0 12px 20px rgba(0,0,0,0.4),0 0 12px rgba(66,212,255,0.25);
-}
+.zone{position:absolute;transform:translate(-50%,-50%);background:rgba(12,18,26,0.94);border:1.5px solid #42d4ff;
+  padding:6px 10px;border-radius:12px;font-size:11px;z-index:10;white-space:nowrap;cursor:pointer;text-align:center;
+  box-shadow:0 8px 0 rgba(0,0,0,0.35),0 12px 20px rgba(0,0,0,0.4),0 0 12px rgba(66,212,255,0.25)}
 .zone:active{transform:translate(-50%,-50%) scale(0.94) translateY(4px)}
 
-/* ===== HOUSES ===== */
-.house{
-  position:absolute;transform:translate(-50%,-50%);
-  width:40px;height:40px;border-radius:50%;
-  background:linear-gradient(145deg,#ffd54f,#f4c542);color:#111;
-  border:3px solid #fff;z-index:20;font-size:17px;
+.house{position:absolute;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(145deg,#ffd54f,#f4c542);color:#111;border:3px solid #fff;z-index:20;font-size:17px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 8px 0 rgba(0,0,0,0.3),0 12px 18px rgba(0,0,0,0.35);
-}
+  box-shadow:0 8px 0 rgba(0,0,0,0.3),0 12px 18px rgba(0,0,0,0.35)}
 .house.owned{background:linear-gradient(145deg,#4ade80,#36d278)}
 
-/* ===== PLAYER (faces direction) ===== */
-.player{
-  position:absolute;transform:translate(-50%,-50%);
-  z-index:30;transition:left 0.14s linear, top 0.14s linear;
-  filter:drop-shadow(0 10px 8px rgba(0,0,0,0.55));
-  width:28px;height:28px;
-  display:flex;align-items:center;justify-content:center;
-}
-.person{
-  width:20px;height:20px;border-radius:50%;
-  background:#f1c27d;border:2.5px solid #111;position:relative;
-}
-.person:after{
-  content:"";position:absolute;top:16px;left:1px;
-  width:16px;height:14px;background:#4d7cff;border-radius:7px;
-}
-/* direction indicators */
+.player{position:absolute;transform:translate(-50%,-50%);z-index:30;transition:left 0.14s linear,top 0.14s linear;
+  filter:drop-shadow(0 10px 8px rgba(0,0,0,0.55));width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.person{width:20px;height:20px;border-radius:50%;background:#f1c27d;border:2.5px solid #111;position:relative}
+.person:after{content:"";position:absolute;top:16px;left:1px;width:16px;height:14px;background:#4d7cff;border-radius:7px}
 .player.up .person:after{top:-4px;left:1px;transform:rotate(180deg)}
 .player.left .person:after{top:6px;left:-10px;transform:rotate(90deg);width:14px;height:16px}
 .player.right .person:after{top:6px;left:14px;transform:rotate(-90deg);width:14px;height:16px}
 
-.car{
-  width:42px;height:22px;background:#e63946;border-radius:7px;
-  border:2px solid #111;position:relative;
-}
+.car{width:42px;height:22px;background:#e63946;border-radius:7px;border:2px solid #111;position:relative}
 .car:before,.car:after{content:"";position:absolute;width:9px;height:9px;background:#111;border-radius:50%;bottom:-6px}
 .car:before{left:5px}.car:after{right:5px}
 .car span{position:absolute;left:12px;top:3px;width:16px;height:8px;background:#a0e0ff;border-radius:2px}
 
-/* ===== TRAFFIC CARS ===== */
-.traffic{
-  position:absolute;z-index:5;
-  width:28px;height:14px;border-radius:4px;
-  background:#c0392b;border:1.5px solid #111;
-  box-shadow:0 3px 0 #1a1a1a;
-}
-.traffic::after{
-  content:"";position:absolute;top:2px;left:6px;
-  width:10px;height:6px;background:#a0e0ff;border-radius:1px;
-}
-.traffic.blue{background:#2980b9}
-.traffic.yellow{background:#f1c40f}
-.traffic.green{background:#27ae60}
-
+.traffic{position:absolute;z-index:5;width:28px;height:14px;border-radius:4px;background:#c0392b;border:1.5px solid #111;box-shadow:0 3px 0 #1a1a1a}
+.traffic::after{content:"";position:absolute;top:2px;left:6px;width:10px;height:6px;background:#a0e0ff;border-radius:1px}
+.traffic.blue{background:#2980b9}.traffic.yellow{background:#f1c40f}.traffic.green{background:#27ae60}
 @keyframes moveH1{0%{left:-5%}100%{left:105%}}
 @keyframes moveH2{0%{left:105%}100%{left:-5%}}
 @keyframes moveV1{0%{top:-5%}100%{top:105%}}
 @keyframes moveV2{0%{top:105%}100%{top:-5%}}
-
 .t1{top:28%;animation:moveH1 18s linear infinite}
 .t2{top:54%;animation:moveH2 22s linear infinite;animation-delay:-6s}
 .t3{top:78%;animation:moveH1 20s linear infinite;animation-delay:-11s}
@@ -306,7 +201,6 @@ button:active{transform:scale(0.96)}
 .t5{left:49%;animation:moveV2 19s linear infinite;animation-delay:-4s}
 .t6{left:76%;animation:moveV1 21s linear infinite;animation-delay:-9s}
 
-/* ===== SIDE PANELS ===== */
 .side{display:flex;flex-direction:column;gap:11px}
 .panel{background:linear-gradient(180deg,#151d27,#10161e);border:1px solid #1e2a36;border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(0,0,0,0.25)}
 .panel h3{margin:0 0 11px;font-size:15px;font-weight:700}
@@ -321,16 +215,47 @@ button:active{transform:scale(0.96)}
 .action-btn{background:#1c2733;text-align:left;padding:10px 13px;border:1px solid #243040}
 .action-btn small{display:block;opacity:0.65;font-weight:400;margin-top:2px;font-size:11px}
 
-.interior{display:none;position:fixed;inset:0;background:#121212;z-index:100}
+/* ===== 3D HOUSE INTERIOR ===== */
+.interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100;overflow:hidden}
 .interior.show{display:block}
-.inhead{height:58px;background:#1c2530;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
-.room{position:absolute;top:58px;bottom:0;left:0;right:0;background:linear-gradient(#d4b896 0 52%,#6b4423 52%)}
-.window{position:absolute;left:11%;top:9%;width:150px;height:110px;background:#7ec8f5;border:12px solid #fff}
-.tv{position:absolute;right:9%;top:11%;width:190px;height:115px;background:#0a0a0a;border:7px solid #222}
-.tv:after{content:"OWERRI";display:flex;height:100%;align-items:center;justify-content:center;color:#42d4ff;font-weight:bold;font-size:19px}
-.sofa{position:absolute;left:9%;bottom:15%;width:250px;height:75px;background:#4a4060;border-radius:18px}
-.table{position:absolute;right:22%;bottom:13%;width:130px;height:58px;background:#6b4423;border-radius:7px}
-.bed{position:absolute;left:28%;bottom:3%;width:290px;height:90px;background:#e0e0ec;border-radius:18px}
+.inhead{height:58px;background:#1c2530;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;position:relative;z-index:20}
+.room{position:absolute;top:58px;bottom:0;left:0;right:0;background:#c4a882;perspective:900px;overflow:hidden}
+.wall{position:absolute;top:0;left:0;right:0;height:58%;background:linear-gradient(180deg,#d8c4a4 0%,#c4a882 100%);box-shadow:inset 0 -30px 60px rgba(0,0,0,0.15)}
+.floor{position:absolute;bottom:0;left:0;right:0;height:48%;background:linear-gradient(180deg,#6b4423 0%,#4a2e14 100%);transform-origin:center top;transform:rotateX(12deg);box-shadow:0 -20px 40px rgba(0,0,0,0.3)}
+.floor::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 32px,rgba(0,0,0,0.08) 32px 33px)}
+
+.window{position:absolute;left:7%;top:9%;width:155px;height:115px;background:linear-gradient(160deg,#7ec8f5,#4aa8d8);border:16px solid #f0e6d8;border-radius:4px;
+  box-shadow:8px 12px 0 rgba(0,0,0,0.18),0 20px 35px rgba(0,0,0,0.25),inset 0 0 40px rgba(255,255,255,0.35);z-index:5}
+.window::before{content:"";position:absolute;inset:0;background:linear-gradient(#f0e6d8,#f0e6d8) center/100% 9px no-repeat,linear-gradient(#f0e6d8,#f0e6d8) center/9px 100% no-repeat}
+
+.tv-unit{position:absolute;right:6%;top:11%;width:210px;z-index:6}
+.tv{width:100%;height:125px;background:#0a0a0a;border:9px solid #1a1a1a;border-radius:6px;box-shadow:10px 14px 0 rgba(0,0,0,0.25),0 22px 40px rgba(0,0,0,0.35);
+  display:flex;align-items:center;justify-content:center;color:#42d4ff;font-weight:800;font-size:22px;letter-spacing:1px;position:relative}
+.tv-stand{width:80px;height:16px;background:#2a2a2a;margin:8px auto 0;border-radius:3px;box-shadow:6px 6px 0 rgba(0,0,0,0.2)}
+
+.sofa{position:absolute;left:6%;bottom:22%;width:270px;height:90px;z-index:8}
+.sofa-base{position:absolute;inset:0;background:linear-gradient(180deg,#5c4d7e,#4a3f68);border-radius:18px 18px 12px 12px;box-shadow:12px 16px 0 #2a2438,0 22px 35px rgba(0,0,0,0.3)}
+.sofa-back{position:absolute;top:-32px;left:10px;right:10px;height:42px;background:linear-gradient(180deg,#6b5c8c,#5c4d7e);border-radius:14px 14px 6px 6px;box-shadow:8px 8px 0 rgba(0,0,0,0.15)}
+.sofa-arm-left,.sofa-arm-right{position:absolute;top:-8px;width:28px;height:70px;background:linear-gradient(180deg,#5c4d7e,#4a3f68);border-radius:10px;box-shadow:6px 8px 0 rgba(0,0,0,0.2)}
+.sofa-arm-left{left:-6px}.sofa-arm-right{right:-6px}
+
+.table{position:absolute;right:16%;bottom:20%;width:145px;height:58px;z-index:7}
+.table-top{position:absolute;inset:0;background:linear-gradient(180deg,#9a6b45,#7a5130);border-radius:8px;box-shadow:10px 12px 0 #4a2e14,0 18px 28px rgba(0,0,0,0.3)}
+.table-leg{position:absolute;bottom:-14px;width:12px;height:18px;background:#5a3a1e;border-radius:2px}
+.table-leg.l{left:18px}.table-leg.r{right:18px}
+
+.bed{position:absolute;left:24%;bottom:4%;width:310px;height:100px;z-index:9}
+.bed-base{position:absolute;inset:0;background:linear-gradient(180deg,#e0e0ec,#c8c8d8);border-radius:16px 16px 10px 10px;box-shadow:14px 16px 0 #8a8a9a,0 24px 35px rgba(0,0,0,0.28)}
+.bed-pillow{position:absolute;top:10px;left:20px;width:75px;height:32px;background:#fff;border-radius:10px;box-shadow:8px 6px 0 rgba(0,0,0,0.1)}
+.bed-pillow2{position:absolute;top:10px;left:110px;width:75px;height:32px;background:#fff;border-radius:10px;box-shadow:8px 6px 0 rgba(0,0,0,0.1)}
+.bed-blanket{position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(180deg,#c0c0d0,#a8a8b8);border-radius:0 0 10px 10px}
+
+.rug{position:absolute;left:20%;bottom:30%;width:240px;height:80px;background:radial-gradient(ellipse at center,#8b3a3a 0%,#5a2525 70%);border-radius:50%;opacity:0.75;box-shadow:0 8px 20px rgba(0,0,0,0.25);z-index:4;transform:rotateX(8deg)}
+
+.plant{position:absolute;right:5%;bottom:34%;width:30px;height:55px;z-index:6}
+.plant-pot{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:26px;height:16px;background:#8b5e3c;border-radius:3px 3px 6px 6px;box-shadow:5px 5px 0 rgba(0,0,0,0.2)}
+.plant-leaves{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:36px;height:45px;background:#2d6a27;border-radius:50% 50% 20% 20%;
+  box-shadow:-14px 6px 0 -6px #3a8a32,14px 8px 0 -8px #3a8a32}
 
 @media(min-width:900px){
   .layout{flex-direction:row;align-items:flex-start}
@@ -363,23 +288,13 @@ root.innerHTML = `
       <div class="block b7"></div><div class="block b8"></div>
       <div class="block b9"></div><div class="block b10"></div>
       <div class="block b11"></div><div class="block b12"></div>
-
       <div class="road h r1"></div><div class="road h r2"></div><div class="road h r3"></div>
       <div class="road v c1"></div><div class="road v c2"></div><div class="road v c3"></div>
-
-      <!-- street lights -->
       <div class="streetlight sl1"></div><div class="streetlight sl2"></div><div class="streetlight sl3"></div>
       <div class="streetlight sl4"></div><div class="streetlight sl5"></div><div class="streetlight sl6"></div>
       <div class="streetlight sl7"></div><div class="streetlight sl8"></div><div class="streetlight sl9"></div>
-
-      <!-- traffic -->
-      <div class="traffic t1"></div>
-      <div class="traffic t2 blue"></div>
-      <div class="traffic t3 yellow"></div>
-      <div class="traffic t4 green"></div>
-      <div class="traffic t5"></div>
-      <div class="traffic t6 blue"></div>
-
+      <div class="traffic t1"></div><div class="traffic t2 blue"></div><div class="traffic t3 yellow"></div>
+      <div class="traffic t4 green"></div><div class="traffic t5"></div><div class="traffic t6 blue"></div>
       <div id="zones"></div>
       <div id="houses"></div>
       <div class="player down" id="player"><div class="person"></div></div>
@@ -436,11 +351,35 @@ root.innerHTML = `
     <button id="leave">Leave</button>
   </div>
   <div class="room">
+    <div class="wall"></div>
+    <div class="floor"></div>
+    <div class="rug"></div>
     <div class="window"></div>
-    <div class="tv"></div>
-    <div class="sofa"></div>
-    <div class="table"></div>
-    <div class="bed"></div>
+    <div class="tv-unit">
+      <div class="tv">OWERRI</div>
+      <div class="tv-stand"></div>
+    </div>
+    <div class="sofa">
+      <div class="sofa-back"></div>
+      <div class="sofa-arm-left"></div>
+      <div class="sofa-arm-right"></div>
+      <div class="sofa-base"></div>
+    </div>
+    <div class="table">
+      <div class="table-top"></div>
+      <div class="table-leg l"></div>
+      <div class="table-leg r"></div>
+    </div>
+    <div class="bed">
+      <div class="bed-base"></div>
+      <div class="bed-pillow"></div>
+      <div class="bed-pillow2"></div>
+      <div class="bed-blanket"></div>
+    </div>
+    <div class="plant">
+      <div class="plant-leaves"></div>
+      <div class="plant-pot"></div>
+    </div>
   </div>
 </div>
 `;
@@ -521,13 +460,10 @@ function update() {
   $("mode").textContent = player.mode;
   $("player").style.left = player.x + "%";
   $("player").style.top = player.y + "%";
-
-  // Update player direction class
   $("player").className = `player ${player.direction}`;
   $("player").innerHTML = player.mode === "Drive"
     ? `<div class="car"><span></span></div>`
     : `<div class="person"></div>`;
-
   renderNeeds();
   renderHouses();
 }
@@ -683,15 +619,12 @@ setInterval(() => {
   player.social = clamp(player.social - 0.8);
   player.hygiene = clamp(player.hygiene - 0.7);
   player.bladder = clamp(player.bladder - 1.5);
-
   if (player.hunger < 15) log("⚠️ You are very hungry!");
   if (player.energy < 15) log("⚠️ Exhausted – rest soon");
   if (player.bladder < 10) log("⚠️ Need a toilet urgently!");
-
   update();
 }, 12000);
 
-// Auto day/night every 90 seconds
 setInterval(toggleTime, 90000);
 
 renderZones();
