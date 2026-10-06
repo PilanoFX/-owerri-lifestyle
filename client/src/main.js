@@ -1,6 +1,6 @@
 /* =========================================================
-   Owerri Lifestyle – Full Working Version
-   (3D Map + Needs + Locations + Mobile Fix)
+   Owerri Lifestyle – Full Upgrade
+   (3D buildings + windows + traffic + day/night + facing player)
    ========================================================= */
 
 const zones = [
@@ -79,6 +79,7 @@ const player = {
   mode: "Walk",
   fuel: 100,
   selected: null,
+  direction: "down", // up | down | left | right
   hunger: 80,
   energy: 85,
   fun: 60,
@@ -86,6 +87,8 @@ const player = {
   hygiene: 90,
   bladder: 70
 };
+
+let isNight = false;
 
 const root = document.getElementById("root");
 
@@ -108,6 +111,7 @@ button:active{transform:scale(0.96)}
 
 .layout{display:flex;flex-direction:column;gap:12px;padding:12px}
 
+/* ===== MAP BOX ===== */
 .mapbox{
   position:relative;
   width:100%;
@@ -115,66 +119,117 @@ button:active{transform:scale(0.96)}
   min-height:400px;
   border-radius:20px;
   overflow:hidden;
-  background:#1a2f22;
   border:2px solid #2a4a38;
   box-shadow:0 20px 40px rgba(0,0,0,0.55), inset 0 0 60px rgba(0,0,0,0.35);
+  transition: background 1.2s, border-color 1.2s;
 }
+.mapbox.day{background:#1a2f22;border-color:#2a4a38}
+.mapbox.night{background:#0d1a14;border-color:#1a3328}
 
 .map{
-  position:absolute;
-  inset:0;
+  position:absolute;inset:0;
   background:
-    linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px),
-    linear-gradient(0deg,rgba(255,255,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),
+    linear-gradient(0deg,rgba(255,255,255,0.025) 1px,transparent 1px),
     linear-gradient(160deg,#1e3a28 0%,#244830 40%,#1a3224 100%);
   background-size:48px 48px,48px 48px,auto;
+  transition: filter 1.2s;
 }
+.mapbox.night .map{filter:brightness(0.55) contrast(1.1)}
 
+/* ===== ROADS ===== */
 .road{
   position:absolute;
   background:#2c3238;
-  box-shadow:0 6px 0 #1a1e22, inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow:0 7px 0 #15191d, inset 0 1px 0 rgba(255,255,255,0.07);
   z-index:2;
 }
-.h{height:42px;width:100%}
-.v{width:42px;height:100%}
+.h{height:44px;width:100%}
+.v{width:44px;height:100%}
 .r1{top:26%}.r2{top:52%}.r3{top:76%}
 .c1{left:20%}.c2{left:47%}.c3{left:74%}
 
 .road.h::after{
   content:"";position:absolute;left:0;right:0;top:50%;
-  height:0;border-top:3px dashed rgba(255,220,80,0.55);transform:translateY(-50%);
+  height:0;border-top:3px dashed rgba(255,220,80,0.6);transform:translateY(-50%);
 }
 .road.v::after{
   content:"";position:absolute;top:0;bottom:0;left:50%;
-  width:0;border-left:3px dashed rgba(255,220,80,0.55);transform:translateX(-50%);
+  width:0;border-left:3px dashed rgba(255,220,80,0.6);transform:translateX(-50%);
 }
 
+/* Street lights (night only) */
+.streetlight{
+  position:absolute;width:6px;height:18px;background:#444;border-radius:2px;z-index:4;
+  box-shadow:0 0 12px 4px rgba(255,220,120,0.0);
+  transition: box-shadow 1s;
+}
+.mapbox.night .streetlight{box-shadow:0 0 18px 6px rgba(255,220,120,0.55)}
+.sl1{left:22%;top:24%}.sl2{left:49%;top:24%}.sl3{left:76%;top:24%}
+.sl4{left:22%;top:50%}.sl5{left:49%;top:50%}.sl6{left:76%;top:50%}
+.sl7{left:22%;top:74%}.sl8{left:49%;top:74%}.sl9{left:76%;top:74%}
+
+/* ===== 3D BUILDINGS WITH WINDOWS ===== */
 .block{
   position:absolute;
   background:linear-gradient(145deg,#2f4a36,#3a5c42);
-  border-radius:4px 4px 2px 2px;
-  box-shadow:0 10px 0 #1a2e20, 0 14px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+  border-radius:3px 3px 2px 2px;
+  box-shadow:
+    0 12px 0 #152218,
+    0 16px 22px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1);
   z-index:3;
+  overflow:hidden;
 }
-.block::before{
-  content:"";position:absolute;top:-8px;left:0;right:0;height:10px;
+.block::before{ /* roof */
+  content:"";position:absolute;top:-9px;left:-1px;right:-1px;height:11px;
   background:linear-gradient(90deg,#3d6048,#4a7255);
   border-radius:3px 3px 0 0;
+  box-shadow:0 -2px 0 rgba(0,0,0,0.25);
 }
-.b1{left:3%;top:5%;width:14%;height:14%}
-.b2{left:24%;top:4%;width:15%;height:16%}
-.b3{left:50%;top:5%;width:14%;height:15%}
-.b4{left:75%;top:6%;width:16%;height:14%}
-.b5{left:3%;top:36%;width:14%;height:13%}
-.b6{left:24%;top:35%;width:15%;height:14%}
-.b7{left:50%;top:37%;width:13%;height:12%}
-.b8{left:75%;top:36%;width:16%;height:13%}
-.b9{left:3%;top:62%;width:14%;height:24%}
-.b10{left:24%;top:61%;width:15%;height:25%}
-.b11{left:50%;top:63%;width:13%;height:23%}
-.b12{left:75%;top:61%;width:16%;height:25%}
+/* windows */
+.block::after{
+  content:"";
+  position:absolute;inset:8px 6px 6px 6px;
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(180,220,255,0.15) 0 8px,
+      transparent 8px 16px),
+    repeating-linear-gradient(0deg,
+      rgba(180,220,255,0.12) 0 7px,
+      transparent 7px 15px);
+  border-radius:2px;
+  opacity:0.7;
+}
+.mapbox.night .block::after{
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(255,230,150,0.45) 0 8px,
+      transparent 8px 16px),
+    repeating-linear-gradient(0deg,
+      rgba(255,230,150,0.35) 0 7px,
+      transparent 7px 15px);
+  opacity:0.9;
+  box-shadow:0 0 8px rgba(255,220,120,0.3);
+}
 
+.b1{left:3%;top:5%;width:13%;height:13%}
+.b2{left:23%;top:4%;width:14%;height:15%}
+.b3{left:49%;top:5%;width:13%;height:14%}
+.b4{left:74%;top:6%;width:15%;height:13%}
+.b5{left:3%;top:35%;width:13%;height:12%}
+.b6{left:23%;top:34%;width:14%;height:13%}
+.b7{left:49%;top:36%;width:12%;height:11%}
+.b8{left:74%;top:35%;width:15%;height:12%}
+.b9{left:3%;top:61%;width:13%;height:23%}
+.b10{left:23%;top:60%;width:14%;height:24%}
+.b11{left:49%;top:62%;width:12%;height:22%}
+.b12{left:74%;top:60%;width:15%;height:24%}
+
+/* taller buildings */
+.b2{height:18%}.b6{height:16%}.b10{height:27%}
+
+/* ===== LOCATION MARKERS ===== */
 .zone{
   position:absolute;transform:translate(-50%,-50%);
   background:rgba(12,18,26,0.94);border:1.5px solid #42d4ff;
@@ -184,6 +239,7 @@ button:active{transform:scale(0.96)}
 }
 .zone:active{transform:translate(-50%,-50%) scale(0.94) translateY(4px)}
 
+/* ===== HOUSES ===== */
 .house{
   position:absolute;transform:translate(-50%,-50%);
   width:40px;height:40px;border-radius:50%;
@@ -194,14 +250,63 @@ button:active{transform:scale(0.96)}
 }
 .house.owned{background:linear-gradient(145deg,#4ade80,#36d278)}
 
-.player{position:absolute;transform:translate(-50%,-50%);z-index:30;transition:left 0.14s linear,top 0.14s linear;filter:drop-shadow(0 10px 8px rgba(0,0,0,0.55))}
-.person{width:20px;height:20px;border-radius:50%;background:#f1c27d;border:2.5px solid #111;position:relative}
-.person:after{content:"";position:absolute;top:16px;left:1px;width:16px;height:14px;background:#4d7cff;border-radius:7px}
-.car{width:42px;height:22px;background:#e63946;border-radius:7px;border:2px solid #111;position:relative}
+/* ===== PLAYER (faces direction) ===== */
+.player{
+  position:absolute;transform:translate(-50%,-50%);
+  z-index:30;transition:left 0.14s linear, top 0.14s linear;
+  filter:drop-shadow(0 10px 8px rgba(0,0,0,0.55));
+  width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+}
+.person{
+  width:20px;height:20px;border-radius:50%;
+  background:#f1c27d;border:2.5px solid #111;position:relative;
+}
+.person:after{
+  content:"";position:absolute;top:16px;left:1px;
+  width:16px;height:14px;background:#4d7cff;border-radius:7px;
+}
+/* direction indicators */
+.player.up .person:after{top:-4px;left:1px;transform:rotate(180deg)}
+.player.left .person:after{top:6px;left:-10px;transform:rotate(90deg);width:14px;height:16px}
+.player.right .person:after{top:6px;left:14px;transform:rotate(-90deg);width:14px;height:16px}
+
+.car{
+  width:42px;height:22px;background:#e63946;border-radius:7px;
+  border:2px solid #111;position:relative;
+}
 .car:before,.car:after{content:"";position:absolute;width:9px;height:9px;background:#111;border-radius:50%;bottom:-6px}
 .car:before{left:5px}.car:after{right:5px}
 .car span{position:absolute;left:12px;top:3px;width:16px;height:8px;background:#a0e0ff;border-radius:2px}
 
+/* ===== TRAFFIC CARS ===== */
+.traffic{
+  position:absolute;z-index:5;
+  width:28px;height:14px;border-radius:4px;
+  background:#c0392b;border:1.5px solid #111;
+  box-shadow:0 3px 0 #1a1a1a;
+}
+.traffic::after{
+  content:"";position:absolute;top:2px;left:6px;
+  width:10px;height:6px;background:#a0e0ff;border-radius:1px;
+}
+.traffic.blue{background:#2980b9}
+.traffic.yellow{background:#f1c40f}
+.traffic.green{background:#27ae60}
+
+@keyframes moveH1{0%{left:-5%}100%{left:105%}}
+@keyframes moveH2{0%{left:105%}100%{left:-5%}}
+@keyframes moveV1{0%{top:-5%}100%{top:105%}}
+@keyframes moveV2{0%{top:105%}100%{top:-5%}}
+
+.t1{top:28%;animation:moveH1 18s linear infinite}
+.t2{top:54%;animation:moveH2 22s linear infinite;animation-delay:-6s}
+.t3{top:78%;animation:moveH1 20s linear infinite;animation-delay:-11s}
+.t4{left:22%;animation:moveV1 16s linear infinite}
+.t5{left:49%;animation:moveV2 19s linear infinite;animation-delay:-4s}
+.t6{left:76%;animation:moveV1 21s linear infinite;animation-delay:-9s}
+
+/* ===== SIDE PANELS ===== */
 .side{display:flex;flex-direction:column;gap:11px}
 .panel{background:linear-gradient(180deg,#151d27,#10161e);border:1px solid #1e2a36;border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(0,0,0,0.25)}
 .panel h3{margin:0 0 11px;font-size:15px;font-weight:700}
@@ -244,12 +349,13 @@ root.innerHTML = `
     <div class="stat">❤️ <b id="rep"></b></div>
     <div class="stat">⛽ <b id="fuel"></b>%</div>
     <div class="stat">🚶 <b id="mode"></b></div>
+    <div class="stat" id="timeLabel">☀️ Day</div>
   </div>
   <div class="needs" id="needs"></div>
 </div>
 
 <div class="layout">
-  <div class="mapbox">
+  <div class="mapbox day" id="mapbox">
     <div class="map">
       <div class="block b1"></div><div class="block b2"></div>
       <div class="block b3"></div><div class="block b4"></div>
@@ -257,11 +363,26 @@ root.innerHTML = `
       <div class="block b7"></div><div class="block b8"></div>
       <div class="block b9"></div><div class="block b10"></div>
       <div class="block b11"></div><div class="block b12"></div>
+
       <div class="road h r1"></div><div class="road h r2"></div><div class="road h r3"></div>
       <div class="road v c1"></div><div class="road v c2"></div><div class="road v c3"></div>
+
+      <!-- street lights -->
+      <div class="streetlight sl1"></div><div class="streetlight sl2"></div><div class="streetlight sl3"></div>
+      <div class="streetlight sl4"></div><div class="streetlight sl5"></div><div class="streetlight sl6"></div>
+      <div class="streetlight sl7"></div><div class="streetlight sl8"></div><div class="streetlight sl9"></div>
+
+      <!-- traffic -->
+      <div class="traffic t1"></div>
+      <div class="traffic t2 blue"></div>
+      <div class="traffic t3 yellow"></div>
+      <div class="traffic t4 green"></div>
+      <div class="traffic t5"></div>
+      <div class="traffic t6 blue"></div>
+
       <div id="zones"></div>
       <div id="houses"></div>
-      <div class="player" id="player"><div class="person"></div></div>
+      <div class="player down" id="player"><div class="person"></div></div>
     </div>
   </div>
 
@@ -280,6 +401,7 @@ root.innerHTML = `
         <button data-move="down">▼</button>
         <button data-move="right">▶</button>
       </div>
+      <button id="toggleTime" class="full" style="margin-top:10px">🌙 Toggle Night</button>
     </div>
 
     <div class="panel">
@@ -399,9 +521,13 @@ function update() {
   $("mode").textContent = player.mode;
   $("player").style.left = player.x + "%";
   $("player").style.top = player.y + "%";
+
+  // Update player direction class
+  $("player").className = `player ${player.direction}`;
   $("player").innerHTML = player.mode === "Drive"
     ? `<div class="car"><span></span></div>`
     : `<div class="person"></div>`;
+
   renderNeeds();
   renderHouses();
 }
@@ -488,6 +614,7 @@ function move(dir) {
     if (player.fuel <= 0) { log("⛽ Out of fuel"); return; }
     player.fuel--;
   }
+  player.direction = dir;
   if (dir === "up") player.y -= step;
   if (dir === "down") player.y += step;
   if (dir === "left") player.x -= step;
@@ -516,12 +643,22 @@ function travel() {
   selectZone(zones.indexOf(z));
 }
 
+function toggleTime() {
+  isNight = !isNight;
+  const box = $("mapbox");
+  box.classList.toggle("day", !isNight);
+  box.classList.toggle("night", isNight);
+  $("timeLabel").textContent = isNight ? "🌙 Night" : "☀️ Day";
+  log(isNight ? "🌙 Night has fallen" : "☀️ Daytime");
+}
+
 $("walk").onclick = () => { player.mode = "Walk"; update(); log("🚶 Walking"); };
 $("drive").onclick = () => { player.mode = "Drive"; update(); log("🚗 Driving"); };
 $("work").onclick = work;
 $("travel").onclick = travel;
 $("buy").onclick = buyHouse;
 $("enter").onclick = enterHouse;
+$("toggleTime").onclick = toggleTime;
 $("leave").onclick = () => {
   $("interior").classList.remove("show");
   log("🚶 Left the house");
@@ -553,6 +690,9 @@ setInterval(() => {
 
   update();
 }, 12000);
+
+// Auto day/night every 90 seconds
+setInterval(toggleTime, 90000);
 
 renderZones();
 renderHouses();
