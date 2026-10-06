@@ -19,28 +19,32 @@ const properties = [
     x: 59,
     y: 24,
     price: 1800000,
-    description: "A premium apartment close to downtown nightlife."
+    description: "A premium apartment close to downtown nightlife.",
+    owned: false
   },
   {
     name: "Wetheral City Apartment",
     x: 72,
     y: 30,
     price: 1200000,
-    description: "A modern apartment in the heart of the city."
+    description: "A modern apartment in the heart of the city.",
+    owned: false
   },
   {
     name: "New Owerri Villa",
     x: 80,
     y: 72,
     price: 2500000,
-    description: "A beautiful villa in one of Owerri's growing residential areas."
+    description: "A beautiful villa in a growing residential area.",
+    owned: false
   },
   {
     name: "Nekede Starter House",
     x: 11,
     y: 68,
     price: 650000,
-    description: "An affordable home close to the student district."
+    description: "An affordable home close to the student district.",
+    owned: false
   }
 ];
 
@@ -94,7 +98,6 @@ button {
 .logo {
   font-size: 24px;
   font-weight: 900;
-  letter-spacing: .5px;
 }
 
 .subtitle {
@@ -149,10 +152,6 @@ button {
   cursor: pointer;
 }
 
-.toolbar button:hover {
-  background: #263548;
-}
-
 .layout {
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -167,22 +166,17 @@ button {
   border-radius: 18px;
   overflow: hidden;
   background: #467d42;
-  box-shadow: 0 15px 50px rgba(0,0,0,.35);
 }
 
 .map {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,.05), transparent 18%),
-    radial-gradient(circle at 80% 70%, rgba(0,0,0,.08), transparent 25%),
-    #4c8548;
+  background: #4c8548;
 }
 
 .road {
   position: absolute;
   background: #303842;
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,.04);
 }
 
 .road::after {
@@ -198,7 +192,6 @@ button {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  opacity: .8;
 }
 
 .road1 {
@@ -252,7 +245,6 @@ button {
   background: #d9b382;
   border: 3px solid #714c2c;
   border-radius: 5px;
-  box-shadow: 0 7px 12px rgba(0,0,0,.25);
 }
 
 .house::before {
@@ -296,7 +288,6 @@ button {
   font-weight: 900;
   color: #3b3022;
   padding-top: 15px;
-  box-shadow: 0 6px 12px rgba(0,0,0,.2);
 }
 
 .shop1 { left: 32%; top: 33%; }
@@ -336,7 +327,6 @@ button {
   background: #fff0a8;
   left: -5px;
   top: -6px;
-  box-shadow: 0 0 18px rgba(255,240,168,.7);
 }
 
 .l1 { left: 45%; top: 35%; }
@@ -352,25 +342,6 @@ button {
   background: #263b55;
   border: 2px solid #101923;
   transform: rotate(90deg);
-}
-
-.city-car::before,
-.city-car::after {
-  content: "";
-  position: absolute;
-  width: 9px;
-  height: 5px;
-  background: #080b10;
-  bottom: -5px;
-  border-radius: 2px;
-}
-
-.city-car::before {
-  left: 4px;
-}
-
-.city-car::after {
-  right: 4px;
 }
 
 .city-car1 { left: 31%; top: 41%; }
@@ -392,31 +363,21 @@ button {
   z-index: 8;
 }
 
-.zone-btn:hover {
-  background: #182536;
-}
-
 .property {
   position: absolute;
   transform: translate(-50%, -50%);
   width: 42px;
   height: 42px;
   border: 2px solid #f4d35e;
-  background: rgba(16, 24, 39, .95);
+  background: rgba(16,24,39,.95);
   border-radius: 50%;
   font-size: 21px;
   cursor: pointer;
   z-index: 12;
-  box-shadow: 0 0 16px rgba(244,211,94,.35);
-}
-
-.property:hover {
-  transform: translate(-50%, -50%) scale(1.12);
 }
 
 .property.owned {
   border-color: #22c55e;
-  box-shadow: 0 0 18px rgba(34,197,94,.5);
 }
 
 #player {
@@ -428,7 +389,6 @@ button {
   border: 3px solid white;
   transform: translate(-50%, -50%);
   z-index: 20;
-  transition: left .12s, top .12s;
 }
 
 #player::before {
@@ -452,8 +412,6 @@ button {
   border-radius: 10px 14px 9px 9px;
   transform: translate(-50%, -50%);
   z-index: 21;
-  transition: left .12s, top .12s;
-  box-shadow: 0 7px 15px rgba(0,0,0,.35);
 }
 
 #player-car::before {
@@ -468,23 +426,13 @@ button {
   border-radius: 7px 7px 2px 2px;
 }
 
-#player-car::after {
-  content: "●     ●";
-  position: absolute;
-  color: #080b10;
-  left: 7px;
-  bottom: -12px;
-  font-size: 16px;
-  letter-spacing: 4px;
-}
-
 .sidebar {
   background: #101722;
   border: 1px solid #263244;
   border-radius: 18px;
   padding: 14px;
-  overflow-y: auto;
   max-height: 650px;
+  overflow-y: auto;
 }
 
 .panel {
@@ -510,25 +458,34 @@ button {
   background: #0c131d;
   border-radius: 10px;
   padding: 10px;
-  color: #dbe4ef;
   font-size: 12px;
   line-height: 1.6;
-  min-height: 100px;
+  min-height: 90px;
 }
 
-.buy-btn {
+.buy-btn,
+.enter-btn {
   width: 100%;
   margin-top: 9px;
   padding: 12px;
   border: 0;
   border-radius: 10px;
-  background: #eab308;
-  color: #171717;
   font-weight: 900;
   cursor: pointer;
 }
 
-.buy-btn:disabled {
+.buy-btn {
+  background: #eab308;
+  color: #171717;
+}
+
+.enter-btn {
+  background: #22c55e;
+  color: #052e16;
+}
+
+.buy-btn:disabled,
+.enter-btn:disabled {
   background: #374151;
   color: #9ca3af;
   cursor: not-allowed;
@@ -580,6 +537,210 @@ button {
   border-bottom: 1px solid rgba(255,255,255,.05);
 }
 
+/* HOUSE INTERIOR */
+
+.interior {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: #c7b299;
+  color: #171717;
+}
+
+.interior.active {
+  display: block;
+}
+
+.interior-header {
+  height: 58px;
+  background: #171c24;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+}
+
+.interior-title {
+  font-weight: 900;
+}
+
+.leave-house {
+  border: 0;
+  background: #dc2626;
+  color: white;
+  border-radius: 9px;
+  padding: 9px 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.room {
+  position: absolute;
+  inset: 58px 0 0;
+  background:
+    linear-gradient(#d6c4ad 0 65%, #8a6549 65% 100%);
+  overflow: hidden;
+}
+
+.wall {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 7%;
+  height: 54%;
+  background: #eadcc9;
+  border: 8px solid #8d674d;
+  border-bottom-width: 12px;
+}
+
+.window {
+  position: absolute;
+  left: 13%;
+  top: 14%;
+  width: 105px;
+  height: 85px;
+  background: #8ec5e6;
+  border: 9px solid #704b37;
+}
+
+.window::after {
+  content: "";
+  position: absolute;
+  left: 47%;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: #704b37;
+}
+
+.window::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 47%;
+  height: 5px;
+  background: #704b37;
+}
+
+.tv {
+  position: absolute;
+  right: 14%;
+  top: 18%;
+  width: 135px;
+  height: 80px;
+  background: #111827;
+  border: 8px solid #30343b;
+  border-radius: 5px;
+}
+
+.tv::after {
+  content: "OWERRI LIFE";
+  color: #67e8f9;
+  font-size: 10px;
+  font-weight: 900;
+  position: absolute;
+  top: 30px;
+  left: 25px;
+}
+
+.sofa {
+  position: absolute;
+  left: 14%;
+  bottom: 16%;
+  width: 230px;
+  height: 75px;
+  background: #31566b;
+  border-radius: 20px 20px 8px 8px;
+  border: 6px solid #253b4a;
+}
+
+.sofa::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  bottom: 0;
+  width: 24px;
+  height: 65px;
+  background: #253b4a;
+  border-radius: 10px;
+}
+
+.table {
+  position: absolute;
+  right: 18%;
+  bottom: 16%;
+  width: 125px;
+  height: 55px;
+  background: #704b37;
+  border-radius: 10px;
+}
+
+.table::before,
+.table::after {
+  content: "";
+  position: absolute;
+  bottom: -42px;
+  width: 9px;
+  height: 45px;
+  background: #4d3326;
+}
+
+.table::before {
+  left: 15px;
+}
+
+.table::after {
+  right: 15px;
+}
+
+.rug {
+  position: absolute;
+  left: 32%;
+  right: 32%;
+  bottom: 7%;
+  height: 65px;
+  background: #7d3f4a;
+  border-radius: 50%;
+  border: 5px solid #63303a;
+}
+
+.bedroom-door {
+  position: absolute;
+  right: 8%;
+  top: 18%;
+  width: 70px;
+  height: 145px;
+  background: #714c35;
+  border: 7px solid #4c3426;
+}
+
+.bedroom-door::after {
+  content: "BEDROOM";
+  position: absolute;
+  color: white;
+  font-size: 8px;
+  font-weight: bold;
+  transform: rotate(-90deg);
+  top: 63px;
+  left: 15px;
+}
+
+.interior-note {
+  position: absolute;
+  bottom: 9%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.75);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 12px;
+  text-align: center;
+}
+
 @media (max-width: 900px) {
   .layout {
     grid-template-columns: 1fr;
@@ -605,11 +766,6 @@ button {
 
   .map-wrap {
     min-height: 500px;
-    border-radius: 12px;
-  }
-
-  .house {
-    transform: scale(.8);
   }
 }
 `;
@@ -619,174 +775,229 @@ document.head.appendChild(style);
 root.innerHTML = `
 <div class="game">
 
-  <header class="header">
-    <div class="logo">🌆 Owerri Lifestyle</div>
-    <div class="subtitle">Live the city. Build your lifestyle.</div>
+<header class="header">
+  <div class="logo">🌆 Owerri Lifestyle</div>
+  <div class="subtitle">Live the city. Build your lifestyle.</div>
 
-    <div class="stats">
-      <div class="stat">
-        <small>💰 CASH</small>
-        <strong id="cash">₦2,500,000</strong>
-      </div>
-
-      <div class="stat">
-        <small>⭐ LEVEL</small>
-        <strong id="level">1</strong>
-      </div>
-
-      <div class="stat">
-        <small>🔥 REP</small>
-        <strong id="rep">100</strong>
-      </div>
-
-      <div class="stat">
-        <small>⛽ FUEL</small>
-        <strong id="fuel">100%</strong>
-      </div>
+  <div class="stats">
+    <div class="stat">
+      <small>💰 CASH</small>
+      <strong id="cash">₦2,500,000</strong>
     </div>
-  </header>
 
-  <div class="toolbar">
-    <button id="walkBtn">🚶 Walk</button>
-    <button id="driveBtn">🚗 Drive</button>
-    <button id="workBtn">💼 Work +₦75k</button>
-    <button id="clubBtn">🎵 Clubs</button>
+    <div class="stat">
+      <small>⭐ LEVEL</small>
+      <strong id="level">1</strong>
+    </div>
+
+    <div class="stat">
+      <small>🔥 REP</small>
+      <strong id="rep">100</strong>
+    </div>
+
+    <div class="stat">
+      <small>⛽ FUEL</small>
+      <strong id="fuel">100%</strong>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button id="walkBtn">🚶 Walk</button>
+  <button id="driveBtn">🚗 Drive</button>
+  <button id="workBtn">💼 Work +₦75k</button>
+  <button id="clubBtn">🎵 Clubs</button>
+</div>
+
+<main class="layout">
+
+<section class="map-wrap">
+
+  <div class="map">
+
+    <div class="road road1"></div>
+    <div class="road road2"></div>
+    <div class="road road3"></div>
+    <div class="road road4"></div>
+
+    <div class="house h1"></div>
+    <div class="house h2"></div>
+    <div class="house h3"></div>
+    <div class="house h4"></div>
+    <div class="house h5"></div>
+    <div class="house h6"></div>
+    <div class="house h7"></div>
+
+    <div class="shop shop1">SHOP</div>
+    <div class="shop shop2">MART</div>
+    <div class="shop shop3">FOOD</div>
+
+    <div class="tree t1"></div>
+    <div class="tree t2"></div>
+    <div class="tree t3"></div>
+    <div class="tree t4"></div>
+    <div class="tree t5"></div>
+    <div class="tree t6"></div>
+    <div class="tree t7"></div>
+
+    <div class="light l1"></div>
+    <div class="light l2"></div>
+    <div class="light l3"></div>
+    <div class="light l4"></div>
+
+    <div class="city-car city-car1"></div>
+    <div class="city-car city-car2"></div>
+    <div class="city-car city-car3"></div>
+    <div class="city-car city-car4"></div>
+
+    ${zones.map((zone, index) => `
+      <button
+        class="zone-btn"
+        style="left:${zone[1]}%;top:${zone[2]}%"
+        data-zone="${index}"
+      >
+        📍 ${zone[0]}
+      </button>
+    `).join("")}
+
+    ${properties.map((property, index) => `
+      <button
+        class="property"
+        id="property-${index}"
+        style="left:${property.x}%;top:${property.y}%"
+        data-property="${index}"
+      >
+        🏠
+      </button>
+    `).join("")}
+
+    <div id="player"></div>
+    <div id="player-car" style="display:none;"></div>
+
+    <div id="interior" class="interior">
+
+      <div class="interior-header">
+        <div>
+          <div class="interior-title">🏠 <span id="interiorName">My Home</span></div>
+        </div>
+
+        <button id="leaveHouse" class="leave-house">
+          🚪 Leave House
+        </button>
+      </div>
+
+      <div class="room">
+
+        <div class="wall"></div>
+
+        <div class="window"></div>
+
+        <div class="tv"></div>
+
+        <div class="bedroom-door"></div>
+
+        <div class="sofa"></div>
+
+        <div class="table"></div>
+
+        <div class="rug"></div>
+
+        <div class="interior-note">
+          🛋️ Welcome home!<br>
+          Your Owerri Life home is yours.
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
-  <main class="layout">
+</section>
 
-    <section class="map-wrap">
-      <div class="map">
+<aside class="sidebar">
 
-        <div class="road road1"></div>
-        <div class="road road2"></div>
-        <div class="road road3"></div>
-        <div class="road road4"></div>
+<section class="panel">
+  <h3>📍 Current Location</h3>
 
-        <div class="house h1"></div>
-        <div class="house h2"></div>
-        <div class="house h3"></div>
-        <div class="house h4"></div>
-        <div class="house h5"></div>
-        <div class="house h6"></div>
-        <div class="house h7"></div>
+  <div class="info">
+    Zone: <strong id="zone">Fire Service</strong><br>
+    Status: <strong id="status">Walking</strong>
+  </div>
+</section>
 
-        <div class="shop shop1">SHOP</div>
-        <div class="shop shop2">MART</div>
-        <div class="shop shop3">FOOD</div>
+<section class="panel">
 
-        <div class="tree t1"></div>
-        <div class="tree t2"></div>
-        <div class="tree t3"></div>
-        <div class="tree t4"></div>
-        <div class="tree t5"></div>
-        <div class="tree t6"></div>
-        <div class="tree t7"></div>
+  <h3>🏠 Properties</h3>
 
-        <div class="light l1"></div>
-        <div class="light l2"></div>
-        <div class="light l3"></div>
-        <div class="light l4"></div>
+  <div class="info">
+    Owned: <strong id="ownedCount">0 / 4</strong>
+  </div>
 
-        <div class="city-car city-car1"></div>
-        <div class="city-car city-car2"></div>
-        <div class="city-car city-car3"></div>
-        <div class="city-car city-car4"></div>
+  <div id="propertyInfo" class="property-info">
+    Tap a 🏠 house on the map to view the property.
+  </div>
 
-        ${zones.map((zone, index) => `
-          <button
-            class="zone-btn"
-            style="left:${zone[1]}%;top:${zone[2]}%"
-            data-zone="${index}"
-          >
-            📍 ${zone[0]}
-          </button>
-        `).join("")}
+  <button id="buyPropertyBtn" class="buy-btn" disabled>
+    🔑 Buy House
+  </button>
 
-        ${properties.map((property, index) => `
-          <button
-            class="property"
-            id="property-${index}"
-            style="left:${property.x}%;top:${property.y}%"
-            data-property="${index}"
-            title="${property.name}"
-          >
-            🏠
-          </button>
-        `).join("")}
+  <button id="enterHouseBtn" class="enter-btn" disabled>
+    🚪 Enter House
+  </button>
 
-        <div id="player"></div>
-        <div id="player-car" style="display:none;"></div>
+</section>
 
-      </div>
-    </section>
+<section class="panel">
 
-    <aside class="sidebar">
+  <h3>🎵 Nightlife</h3>
 
-      <section class="panel">
-        <h3>📍 Current Location</h3>
-        <div class="info">
-          Zone: <strong id="zone">Fire Service</strong><br>
-          Status: <strong id="status">Walking</strong>
-        </div>
-      </section>
+  <button class="club-btn" data-club="0">
+    🎧 Cartel Lifestyle
+  </button>
 
-      <section class="panel">
-        <h3>🏠 Properties</h3>
+  <button class="club-btn" data-club="1">
+    🎶 De Angels
+  </button>
 
-        <div class="info">
-          Owned: <strong id="ownedCount">0 / 4</strong>
-        </div>
+</section>
 
-        <div id="propertyInfo" class="property-info">
-          Tap a 🏠 house on the map to view the property.
-        </div>
+<section class="panel">
 
-        <button id="buyPropertyBtn" class="buy-btn" disabled>
-          🔑 Buy House
-        </button>
-      </section>
+  <h3>🎮 Controls</h3>
 
-      <section class="panel">
-        <h3>🎵 Nightlife</h3>
+  <div class="info">
+    Desktop: WASD or Arrow Keys<br>
+    Walk = normal movement<br>
+    Drive = faster movement + fuel
+  </div>
 
-        <button class="club-btn" data-club="0">
-          🎧 Cartel Lifestyle
-        </button>
+  <div class="mobile-controls">
 
-        <button class="club-btn" data-club="1">
-          🎶 De Angels
-        </button>
-      </section>
+    <button class="empty">•</button>
+    <button data-move="up">⬆️</button>
+    <button class="empty">•</button>
 
-      <section class="panel">
-        <h3>🎮 Controls</h3>
+    <button data-move="left">⬅️</button>
+    <button data-move="down">⬇️</button>
+    <button data-move="right">➡️</button>
 
-        <div class="info">
-          Desktop: WASD or Arrow Keys<br>
-          Walk = normal movement<br>
-          Drive = faster movement + fuel
-        </div>
+  </div>
 
-        <div class="mobile-controls">
-          <button class="empty">•</button>
-          <button data-move="up">⬆️</button>
-          <button class="empty">•</button>
+</section>
 
-          <button data-move="left">⬅️</button>
-          <button data-move="down">⬇️</button>
-          <button data-move="right">➡️</button>
-        </div>
-      </section>
+<section class="panel">
 
-      <section class="panel">
-        <h3>📜 Activity</h3>
-        <div id="log" class="log"></div>
-      </section>
+  <h3>📜 Activity</h3>
 
-    </aside>
+  <div id="log" class="log"></div>
 
-  </main>
+</section>
+
+</aside>
+
+</main>
+
 </div>
 `;
 
@@ -796,12 +1007,20 @@ const repEl = document.querySelector("#rep");
 const fuelEl = document.querySelector("#fuel");
 const zoneEl = document.querySelector("#zone");
 const statusEl = document.querySelector("#status");
+
 const playerEl = document.querySelector("#player");
 const playerCarEl = document.querySelector("#player-car");
+
 const logEl = document.querySelector("#log");
+
 const propertyInfoEl = document.querySelector("#propertyInfo");
 const buyPropertyBtn = document.querySelector("#buyPropertyBtn");
+const enterHouseBtn = document.querySelector("#enterHouseBtn");
 const ownedCountEl = document.querySelector("#ownedCount");
+
+const interior = document.querySelector("#interior");
+const interiorName = document.querySelector("#interiorName");
+const leaveHouseBtn = document.querySelector("#leaveHouse");
 
 let selectedProperty = null;
 
@@ -809,13 +1028,25 @@ function money(value) {
   return "₦" + value.toLocaleString("en-NG");
 }
 
+function log(message) {
+  const entry = document.createElement("div");
+  entry.textContent = "• " + message;
+  logEl.prepend(entry);
+}
+
 function update() {
+
   cashEl.textContent = money(player.cash);
   levelEl.textContent = player.level;
   repEl.textContent = player.reputation;
   fuelEl.textContent = Math.max(0, Math.floor(player.fuel)) + "%";
+
   zoneEl.textContent = player.zone;
-  statusEl.textContent = player.mode === "Drive" ? "Driving" : "Walking";
+
+  statusEl.textContent =
+    player.mode === "Drive"
+      ? "Driving"
+      : "Walking";
 
   playerEl.style.left = player.x + "%";
   playerEl.style.top = player.y + "%";
@@ -834,13 +1065,8 @@ function update() {
   updateProperties();
 }
 
-function log(message) {
-  const entry = document.createElement("div");
-  entry.textContent = "• " + message;
-  logEl.prepend(entry);
-}
-
 function setMode(mode) {
+
   if (mode === "Drive" && player.fuel <= 0) {
     log("⛽ You are out of fuel.");
     return;
@@ -858,6 +1084,7 @@ function setMode(mode) {
 }
 
 function work() {
+
   player.cash += 75000;
   player.reputation += 5;
 
@@ -869,238 +1096,27 @@ function work() {
   }
 
   log("💼 You completed a job and earned ₦75,000.");
+
   update();
 }
 
 function travel(index) {
+
   const zone = zones[index];
 
   player.x = zone[1];
   player.y = zone[2];
   player.zone = zone[0];
+
   player.reputation += 2;
 
   log("📍 You travelled to " + zone[0] + ".");
+
   update();
 }
 
 function joinClub(index) {
+
   const club = clubs[index];
 
-  player.reputation += 10;
-
-  log("🎵 You visited " + club + " and gained reputation.");
-  update();
-}
-
-function visitClub() {
-  const index = zones.findIndex(z => z[0] === "Douglas");
-
-  if (index !== -1) {
-    travel(index);
-  }
-}
-
-function movePlayer(direction) {
-  let step = player.mode === "Drive" ? 3 : 1.5;
-
-  if (player.mode === "Drive") {
-    if (player.fuel <= 0) {
-      log("⛽ Your car has run out of fuel.");
-      setMode("Walk");
-      return;
-    }
-
-    player.fuel -= 0.4;
-  }
-
-  if (direction === "up") {
-    player.y -= step;
-  }
-
-  if (direction === "down") {
-    player.y += step;
-  }
-
-  if (direction === "left") {
-    player.x -= step;
-  }
-
-  if (direction === "right") {
-    player.x += step;
-  }
-
-  player.x = Math.max(2, Math.min(98, player.x));
-  player.y = Math.max(5, Math.min(95, player.y));
-
-  update();
-}
-
-function selectProperty(index) {
-  selectedProperty = index;
-
-  const property = properties[index];
-
-  const ownedText = property.owned
-    ? "✅ YOU OWN THIS PROPERTY"
-    : "🏷️ Available for purchase";
-
-  propertyInfoEl.innerHTML = `
-    <strong>${property.name}</strong><br>
-    ${property.description}<br><br>
-    💰 Price: <strong>${money(property.price)}</strong><br>
-    ${ownedText}
-  `;
-
-  buyPropertyBtn.disabled = property.owned;
-
-  if (property.owned) {
-    buyPropertyBtn.textContent = "✅ Property Owned";
-  } else {
-    buyPropertyBtn.textContent = "🔑 Buy House";
-  }
-
-  update();
-}
-
-function updateProperties() {
-  const owned = properties.filter(property => property.owned).length;
-
-  ownedCountEl.textContent = owned + " / " + properties.length;
-
-  properties.forEach((property, index) => {
-    const marker = document.querySelector("#property-" + index);
-
-    if (!marker) return;
-
-    if (property.owned) {
-      marker.textContent = "🔑";
-      marker.classList.add("owned");
-    } else {
-      marker.textContent = "🏠";
-      marker.classList.remove("owned");
-    }
-  });
-
-  if (selectedProperty !== null) {
-    const property = properties[selectedProperty];
-
-    const ownedText = property.owned
-      ? "✅ YOU OWN THIS PROPERTY"
-      : "🏷️ Available for purchase";
-
-    propertyInfoEl.innerHTML = `
-      <strong>${property.name}</strong><br>
-      ${property.description}<br><br>
-      💰 Price: <strong>${money(property.price)}</strong><br>
-      ${ownedText}
-    `;
-
-    buyPropertyBtn.disabled = property.owned;
-
-    if (property.owned) {
-      buyPropertyBtn.textContent = "✅ Property Owned";
-    } else {
-      buyPropertyBtn.textContent = "🔑 Buy House";
-    }
-  }
-}
-
-function buyProperty() {
-  if (selectedProperty === null) {
-    log("🏠 Select a property first.");
-    return;
-  }
-
-  const property = properties[selectedProperty];
-
-  if (property.owned) {
-    log("🏠 You already own this property.");
-    return;
-  }
-
-  if (player.cash < property.price) {
-    log("❌ You do not have enough money to buy this house.");
-    return;
-  }
-
-  player.cash -= property.price;
-  property.owned = true;
-  player.reputation += 15;
-
-  log(
-    "🎉 Congratulations! You bought " +
-    property.name +
-    " for " +
-    money(property.price) +
-    "."
-  );
-
-  log("🔑 This property is now YOUR PROPERTY.");
-
-  update();
-}
-
-document.querySelector("#walkBtn").addEventListener("click", () => {
-  setMode("Walk");
-});
-
-document.querySelector("#driveBtn").addEventListener("click", () => {
-  setMode("Drive");
-});
-
-document.querySelector("#workBtn").addEventListener("click", work);
-
-document.querySelector("#clubBtn").addEventListener("click", visitClub);
-
-document.querySelector("#buyPropertyBtn").addEventListener("click", buyProperty);
-
-document.querySelectorAll("[data-zone]").forEach(button => {
-  button.addEventListener("click", () => {
-    travel(Number(button.dataset.zone));
-  });
-});
-
-document.querySelectorAll("[data-property]").forEach(button => {
-  button.addEventListener("click", () => {
-    selectProperty(Number(button.dataset.property));
-  });
-});
-
-document.querySelectorAll("[data-club]").forEach(button => {
-  button.addEventListener("click", () => {
-    joinClub(Number(button.dataset.club));
-  });
-});
-
-document.querySelectorAll("[data-move]").forEach(button => {
-  button.addEventListener("click", () => {
-    movePlayer(button.dataset.move);
-  });
-});
-
-document.addEventListener("keydown", event => {
-  const key = event.key.toLowerCase();
-
-  if (key === "w" || event.key === "ArrowUp") {
-    movePlayer("up");
-  }
-
-  if (key === "s" || event.key === "ArrowDown") {
-    movePlayer("down");
-  }
-
-  if (key === "a" || event.key === "ArrowLeft") {
-    movePlayer("left");
-  }
-
-  if (key === "d" || event.key === "ArrowRight") {
-    movePlayer("right");
-  }
-});
-
-log("🌆 Welcome to Owerri Lifestyle.");
-log("🏠 Four properties are available to buy.");
-log("💡 Tap a 🏠 marker to inspect a property.");
-
-update();
+  player.reputation += 10
