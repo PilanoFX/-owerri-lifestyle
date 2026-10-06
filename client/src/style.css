@@ -1,0 +1,130 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #10141c;
+  color: white;
+}
+
+.game {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+}
+
+header h1 {
+  margin-bottom: 5px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.stats div {
+  background: #1b2230;
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 15px;
+}
+
+.map {
+  position: relative;
+  min-height: 600px;
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, transparent 48%, #555 49%, #555 51%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, #555 49%, #555 51%, transparent 52%),
+    #496b4c;
+}
+
+.road {
+  position: absolute;
+  background: #3a3d42;
+}
+
+.road1 {
+  width: 100%;
+  height: 50px;
+  top: 45%;
+}
+
+.road2 {
+  height: 100%;
+  width: 50px;
+  left: 50%;
+}
+
+.location {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: white;
+  color: #111;
+  z-index: 3;
+  font-size: 12px;
+}
+
+.player {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 30px;
+  z-index: 5;
+  transition: left 0.1s, top 0.1s;
+}
+
+aside {
+  background: #1b2230;
+  padding: 20px;
+  border-radius: 18px;
+}
+
+.club {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+}
+
+@media (max-width: 800px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .map {
+    min-height: 500px;
+  }
+}
