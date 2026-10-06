@@ -351,3 +351,59 @@ height: 38px;
 font-size: 25px;
 }
 }
+/* GAME CHARACTER */
+
+.player {
+  width: 42px;
+  height: 58px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  z-index: 10;
+}
+
+.character {
+  position: relative;
+  width: 42px;
+  height: 58px;
+  filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.45));
+}
+
+.character-head {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 12px;
+  top: 2px;
+  background: #8d5a3b;
+  border-radius: 50%;
+  border: 2px solid #171717;
+}
+
+.character-body {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 9px;
+  top: 19px;
+  background: #1769aa;
+  border-radius: 7px 7px 4px 4px;
+  border: 2px solid #111;
+}
+
+.character-leg {
+  position: absolute;
+  width: 8px;
+  height: 17px;
+  top: 42px;
+  background: #20252c;
+  border-radius: 3px;
+}
+
+.character-leg.left {
+  left: 10px;
+}
+
+.character-leg.right {
+  right: 10px;
+}
