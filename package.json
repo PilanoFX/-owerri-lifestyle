@@ -1,0 +1,22 @@
+{
+  "name": "owerri-lifestyle",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:client\" \"npm:server\"",
+    "client": "vite client --host 0.0.0.0",
+    "server": "node server/index.js",
+    "build": "vite build client",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "vite": "^7.1.7"
+  }
+}
