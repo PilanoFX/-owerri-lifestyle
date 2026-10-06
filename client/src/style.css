@@ -2,165 +2,476 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  min-height: 100%;
   font-family: Arial, sans-serif;
-  background: #10141c;
+  background: #08100c;
   color: white;
 }
 
-.game {
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
+body {
+  overflow-x: hidden;
 }
 
+button {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+/* =========================
+   GAME
+========================= */
+
+.game {
+  width: 100%;
+  max-width: 1450px;
+  margin: auto;
+  padding: 16px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
 header {
+  padding: 20px;
+  margin-bottom: 14px;
+  border-radius: 18px;
   text-align: center;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(23, 32, 27, 0.98),
+      rgba(8, 14, 11, 0.98)
+    );
+  border: 1px solid #344238;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 header h1 {
-  margin-bottom: 5px;
+  margin: 0;
+  font-size: clamp(26px, 5vw, 42px);
+  letter-spacing: 1px;
 }
+
+header p {
+  margin: 8px 0 0;
+  color: #b8c7bc;
+}
+
+/* =========================
+   STATS
+========================= */
 
 .stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  margin: 20px 0;
+  margin-bottom: 14px;
 }
 
 .stats div {
-  background: #1b2230;
   padding: 14px;
-  border-radius: 12px;
+  border-radius: 14px;
   text-align: center;
+  background: #172019;
+  border: 1px solid #2e3d32;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.25);
 }
+
+.stats span {
+  font-weight: 800;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
 
 .toolbar {
   display: flex;
-  gap: 10px;
+  gap: 9px;
   flex-wrap: wrap;
-  margin-bottom: 15px;
+  margin-bottom: 14px;
 }
 
-button {
-  border: 0;
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  font-weight: bold;
+.toolbar button {
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: white;
+  background: #202c24;
+  border: 1px solid #3c4b40;
+  transition: 0.2s;
 }
+
+.toolbar button:hover {
+  transform: translateY(-2px);
+  background: #2d3d31;
+}
+
+/* =========================
+   MAIN LAYOUT
+========================= */
 
 main {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: minmax(0, 1fr) 310px;
   gap: 15px;
 }
 
+/* =========================
+   CITY MAP
+========================= */
+
 .map {
   position: relative;
-  min-height: 600px;
+  min-height: 650px;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: 22px;
+  border: 3px solid #3f5144;
+
   background:
-    linear-gradient(90deg, transparent 48%, #555 49%, #555 51%, transparent 52%),
-    linear-gradient(0deg, transparent 48%, #555 49%, #555 51%, transparent 52%),
-    #496b4c;
+    /* small city blocks */
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      0deg,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px
+    ),
+    /* grass */
+    linear-gradient(
+      135deg,
+      #315c3a,
+      #3c7044 45%,
+      #285336
+    );
+
+  background-size:
+    42px 42px,
+    42px 42px,
+    auto;
+
+  box-shadow:
+    inset 0 0 120px rgba(0, 0, 0, 0.5),
+    0 18px 45px rgba(0, 0, 0, 0.45);
 }
+
+/* =========================
+   CITY BLOCKS
+========================= */
+
+.map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      25deg,
+      transparent 0 22%,
+      rgba(19, 27, 21, 0.5) 22% 28%,
+      transparent 28% 100%
+    ),
+    linear-gradient(
+      150deg,
+      transparent 0 62%,
+      rgba(18, 27, 21, 0.45) 62% 68%,
+      transparent 68% 100%
+    );
+
+  pointer-events: none;
+}
+
+/* =========================
+   ROADS
+========================= */
 
 .road {
   position: absolute;
-  background: #3a3d42;
+  z-index: 1;
+  background: #292e30;
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,0.04),
+    0 5px 15px rgba(0,0,0,0.3);
 }
 
 .road1 {
   width: 100%;
-  height: 50px;
-  top: 45%;
+  height: 78px;
+  top: 44%;
 }
 
 .road2 {
+  width: 78px;
   height: 100%;
-  width: 50px;
-  left: 50%;
+  left: 48%;
 }
+
+/* road markings */
+
+.road1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 3px dashed #d7bd4d;
+  opacity: 0.7;
+}
+
+.road2::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 3px dashed #d7bd4d;
+  opacity: 0.7;
+}
+
+/* =========================
+   EXTRA ROADS
+========================= */
+
+.map::after {
+  content: "";
+  position: absolute;
+  width: 150%;
+  height: 58px;
+  left: -25%;
+  top: 24%;
+  transform: rotate(-18deg);
+  background: #303537;
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,0.04),
+    0 5px 15px rgba(0,0,0,0.3);
+  z-index: 1;
+}
+
+/* =========================
+   LOCATION BUTTONS
+========================= */
 
 .location {
   position: absolute;
+  z-index: 4;
+
   transform: translate(-50%, -50%);
-  background: white;
-  color: #111;
-  z-index: 3;
+
+  padding: 9px 12px;
+  border-radius: 12px;
+
+  color: white;
+  background: rgba(10, 18, 13, 0.92);
+
+  border: 1px solid rgba(255,255,255,0.22);
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+
   font-size: 12px;
+  white-space: nowrap;
+
+  transition:
+    transform 0.2s,
+    background 0.2s;
 }
+
+.location:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: #263b2b;
+}
+
+/* =========================
+   PLAYER
+========================= */
 
 .player {
   position: absolute;
+  z-index: 8;
+
+  width: 58px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   transform: translate(-50%, -50%);
-  font-size: 30px;
-  z-index: 5;
-  transition: left 0.1s, top 0.1s;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 205, 60, 0.5),
+      rgba(255, 205, 60, 0.08) 60%,
+      transparent 70%
+    );
+
+  border: 3px solid white;
+
+  font-size: 32px;
+
+  box-shadow:
+    0 0 0 5px rgba(255,255,255,0.08),
+    0 0 30px rgba(255,200,40,0.55);
+
+  transition:
+    left 0.12s linear,
+    top 0.12s linear;
 }
 
+/* =========================
+   SIDE PANEL
+========================= */
+
 aside {
-  background: #1b2230;
+  background:
+    linear-gradient(
+      180deg,
+      #172019,
+      #101710
+    );
+
   padding: 20px;
-  border-radius: 18px;
+
+  border-radius: 20px;
+
+  border: 1px solid #354438;
+
+  box-shadow:
+    0 15px 35px rgba(0,0,0,0.35);
 }
+
+aside h2 {
+  margin-top: 0;
+}
+
+aside h3 {
+  margin-top: 24px;
+  color: #d8e4db;
+}
+
+aside p {
+  color: #aebbb2;
+  line-height: 1.5;
+}
+
+/* =========================
+   CLUB BUTTONS
+========================= */
 
 .club {
   display: block;
   width: 100%;
-  margin: 8px 0;
+  margin: 9px 0;
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  color: white;
+
+  background: #243128;
+
+  border: 1px solid #3a4b3e;
+
+  transition: 0.2s;
 }
 
-@media (max-width: 800px) {
+.club:hover {
+  background: #304435;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   ACTIVITY
+========================= */
+
+#activity {
+  margin-top: 20px;
+  padding: 12px;
+
+  max-height: 180px;
+  overflow-y: auto;
+
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.18);
+  border: 1px solid #2c3a30;
+}
+
+#activity p {
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 900px) {
+
+  .game {
+    padding: 10px;
+  }
+
   main {
     grid-template-columns: 1fr;
   }
+
+  aside {
+    order: 2;
+  }
+
+  .map {
+    min-height: 560px;
+  }
+}
+
+@media (max-width: 600px) {
 
   .stats {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .stats div {
+    padding: 11px 6px;
+    font-size: 13px;
+  }
+
+  .toolbar button {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 130px;
+  }
+
   .map {
     min-height: 500px;
+    border-radius: 17px;
   }
-}
-.game {
-  max-width: 1400px;
-}
 
-header {
-  background: linear-gradient(135deg, #171d28, #0c1118);
-  border: 1px solid #343d4c;
-}
+  .location {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
 
-.map {
-  background-color: #31563b;
-  border: 3px solid #3f4b5b;
-  box-shadow:
-    inset 0 0 100px rgba(0, 0, 0, 0.45),
-    0 15px 40px rgba(0, 0, 0, 0.5);
-}
+  .player {
+    width: 50px;
+    height: 50px;
+    font-size: 28px;
+  }
 
-.road {
-  background: #292d33;
-}
-
-.location {
-  background: #111820;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
-}
-
-.player {
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 196, 0, 0.2);
-  border: 3px solid #fff;
-  font-size: 31px;
-  box-shadow: 0 0 20px rgba(255, 196, 0, 0.45);
+  aside {
+    padding: 15px;
+  }
 }
