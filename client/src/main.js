@@ -1,49 +1,49 @@
 /* =========================================================
-   Owerri Lifestyle – Complete Version
-   (3D Map + Traffic + Day/Night + Facing Player + 3D House Interior)
+   Owerri Lifestyle – Full Complete Version
+   A+B+C+D+E (House actions + Better player + More locations + Multiplayer + Save)
    ========================================================= */
 
 const zones = [
-  { name: "IMSU Junction", x: 48, y: 22, type: "Campus", emoji: "🎓",
+  { name: "IMSU Junction", x: 48, y: 20, type: "Campus", emoji: "🎓",
     actions: [
       { label: "Attend Lecture", cost: 0, hunger: -5, energy: -15, fun: -5, social: 10, hygiene: 0, bladder: -5, cash: 0 },
       { label: "Eat at Cafeteria", cost: 2500, hunger: 40, energy: 10, fun: 5, social: 5, hygiene: -5, bladder: -10, cash: 0 },
       { label: "Hang with Friends", cost: 0, hunger: -5, energy: -10, fun: 25, social: 30, hygiene: 0, bladder: -5, cash: 0 }
     ]
   },
-  { name: "Fire Service", x: 38, y: 42, type: "City Hub", emoji: "🚒",
+  { name: "Fire Service", x: 36, y: 40, type: "City Hub", emoji: "🚒",
     actions: [
       { label: "Volunteer", cost: 0, hunger: -10, energy: -20, fun: 5, social: 15, hygiene: -10, bladder: -5, cash: 8000 },
       { label: "Buy Snacks", cost: 1500, hunger: 25, energy: 5, fun: 5, social: 0, hygiene: 0, bladder: -5, cash: 0 }
     ]
   },
-  { name: "Douglas", x: 55, y: 48, type: "Downtown", emoji: "🏙️",
+  { name: "Douglas", x: 54, y: 46, type: "Downtown", emoji: "🏙️",
     actions: [
       { label: "Shop", cost: 5000, hunger: 0, energy: -10, fun: 20, social: 10, hygiene: 0, bladder: -5, cash: 0 },
       { label: "Eat Out", cost: 4500, hunger: 45, energy: 10, fun: 15, social: 10, hygiene: -5, bladder: -10, cash: 0 },
       { label: "Bank Work", cost: 0, hunger: -5, energy: -25, fun: -10, social: 5, hygiene: 0, bladder: -5, cash: 35000 }
     ]
   },
-  { name: "Wetheral", x: 68, y: 30, type: "Urban", emoji: "🏘️",
+  { name: "Wetheral", x: 70, y: 28, type: "Urban", emoji: "🏘️",
     actions: [
       { label: "Visit Club", cost: 12000, hunger: -5, energy: -20, fun: 40, social: 35, hygiene: -15, bladder: -10, cash: 0 },
       { label: "Late Night Food", cost: 3000, hunger: 35, energy: 5, fun: 10, social: 5, hygiene: -5, bladder: -10, cash: 0 }
     ]
   },
-  { name: "New Owerri", x: 72, y: 68, type: "Residential", emoji: "🏡",
+  { name: "New Owerri", x: 74, y: 70, type: "Residential", emoji: "🏡",
     actions: [
       { label: "Rest at Home", cost: 0, hunger: -5, energy: 40, fun: 5, social: -5, hygiene: 10, bladder: 20, cash: 0 },
       { label: "Neighbour Visit", cost: 0, hunger: -5, energy: -10, fun: 15, social: 25, hygiene: 0, bladder: -5, cash: 0 }
     ]
   },
-  { name: "Nekede", x: 18, y: 58, type: "Student Area", emoji: "📚",
+  { name: "Nekede", x: 16, y: 58, type: "Student Area", emoji: "📚",
     actions: [
       { label: "Study", cost: 0, hunger: -5, energy: -20, fun: -10, social: -5, hygiene: 0, bladder: -5, cash: 0 },
       { label: "Party", cost: 8000, hunger: -10, energy: -25, fun: 45, social: 40, hygiene: -20, bladder: -15, cash: 0 },
       { label: "Buy Food", cost: 2000, hunger: 35, energy: 5, fun: 5, social: 0, hygiene: 0, bladder: -5, cash: 0 }
     ]
   },
-  { name: "FUTO", x: 28, y: 78, type: "University", emoji: "🔬",
+  { name: "FUTO", x: 26, y: 80, type: "University", emoji: "🔬",
     actions: [
       { label: "Lab Work", cost: 0, hunger: -5, energy: -25, fun: -5, social: 5, hygiene: -5, bladder: -5, cash: 18000 },
       { label: "Campus Hangout", cost: 0, hunger: -5, energy: -10, fun: 20, social: 25, hygiene: 0, bladder: -5, cash: 0 }
@@ -55,10 +55,29 @@ const zones = [
       { label: "Cinema", cost: 4000, hunger: -5, energy: -10, fun: 35, social: 15, hygiene: 0, bladder: -5, cash: 0 }
     ]
   },
-  { name: "Sam Mbakwe Airport", x: 82, y: 18, type: "Travel", emoji: "✈️",
+  { name: "Sam Mbakwe Airport", x: 84, y: 16, type: "Travel", emoji: "✈️",
     actions: [
       { label: "Watch Planes", cost: 0, hunger: -5, energy: -5, fun: 15, social: 5, hygiene: 0, bladder: -5, cash: 0 },
       { label: "Airport Job", cost: 0, hunger: -10, energy: -20, fun: -5, social: 5, hygiene: 0, bladder: -5, cash: 28000 }
+    ]
+  },
+  // Extra locations (C)
+  { name: "Control Post", x: 42, y: 68, type: "Junction", emoji: "🚦",
+    actions: [
+      { label: "Buy Pure Water", cost: 200, hunger: 5, energy: 0, fun: 0, social: 0, hygiene: 0, bladder: -2, cash: 0 },
+      { label: "Okada Ride", cost: 800, hunger: -2, energy: -5, fun: 10, social: 5, hygiene: -5, bladder: -3, cash: 0 }
+    ]
+  },
+  { name: "World Bank", x: 62, y: 22, type: "Area", emoji: "🏦",
+    actions: [
+      { label: "Bank Transaction", cost: 0, hunger: -3, energy: -8, fun: -5, social: 0, hygiene: 0, bladder: -3, cash: 5000 },
+      { label: "Meet People", cost: 0, hunger: -5, energy: -8, fun: 15, social: 25, hygiene: 0, bladder: -5, cash: 0 }
+    ]
+  },
+  { name: "Amakohia", x: 30, y: 30, type: "Residential", emoji: "🏠",
+    actions: [
+      { label: "Visit Relative", cost: 0, hunger: 10, energy: 5, fun: 15, social: 30, hygiene: 0, bladder: -5, cash: 0 },
+      { label: "Buy Local Food", cost: 1800, hunger: 40, energy: 8, fun: 8, social: 5, hygiene: -5, bladder: -8, cash: 0 }
     ]
   }
 ];
@@ -70,25 +89,29 @@ const properties = [
   { name: "New Owerri Villa", x: 78, y: 72, price: 2500000, owned: false }
 ];
 
-const player = {
-  x: 49,
-  y: 38,
-  cash: 2500000,
-  level: 1,
-  reputation: 100,
-  mode: "Walk",
-  fuel: 100,
-  selected: null,
-  direction: "down",
-  hunger: 80,
-  energy: 85,
-  fun: 60,
-  social: 55,
-  hygiene: 90,
-  bladder: 70
+// Load saved data (E)
+const saved = JSON.parse(localStorage.getItem("owerriSave") || "null");
+
+const player = saved?.player || {
+  x: 49, y: 38, cash: 2500000, level: 1, reputation: 100,
+  mode: "Walk", fuel: 100, selected: null, direction: "down",
+  hunger: 80, energy: 85, fun: 60, social: 55, hygiene: 90, bladder: 70
 };
 
+if (saved?.properties) {
+  saved.properties.forEach((p, i) => {
+    if (properties[i]) properties[i].owned = p.owned;
+  });
+}
+
 let isNight = false;
+
+// Simple multiplayer – other players (D)
+const others = [
+  { id: 1, name: "Chidi", x: 40, y: 35, color: "#e74c3c" },
+  { id: 2, name: "Ada", x: 65, y: 55, color: "#9b59b6" },
+  { id: 3, name: "Emeka", x: 25, y: 70, color: "#3498db" }
+];
 
 const root = document.getElementById("root");
 
@@ -111,27 +134,15 @@ button:active{transform:scale(0.96)}
 
 .layout{display:flex;flex-direction:column;gap:12px;padding:12px}
 
-.mapbox{
-  position:relative;width:100%;height:min(62vh,560px);min-height:400px;
-  border-radius:20px;overflow:hidden;border:2px solid #2a4a38;
-  box-shadow:0 20px 40px rgba(0,0,0,0.55), inset 0 0 60px rgba(0,0,0,0.35);
-  transition: background 1.2s, border-color 1.2s;
-}
+.mapbox{position:relative;width:100%;height:min(62vh,560px);min-height:400px;border-radius:20px;overflow:hidden;border:2px solid #2a4a38;
+  box-shadow:0 20px 40px rgba(0,0,0,0.55),inset 0 0 60px rgba(0,0,0,0.35);transition:background 1.2s,border-color 1.2s}
 .mapbox.day{background:#1a2f22;border-color:#2a4a38}
 .mapbox.night{background:#0d1a14;border-color:#1a3328}
 
-.map{
-  position:absolute;inset:0;
-  background:
-    linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),
-    linear-gradient(0deg,rgba(255,255,255,0.025) 1px,transparent 1px),
-    linear-gradient(160deg,#1e3a28 0%,#244830 40%,#1a3224 100%);
-  background-size:48px 48px,48px 48px,auto;
-  transition: filter 1.2s;
-}
+.map{position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(0deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(160deg,#1e3a28 0%,#244830 40%,#1a3224 100%);background-size:48px 48px,48px 48px,auto;transition:filter 1.2s}
 .mapbox.night .map{filter:brightness(0.55) contrast(1.1)}
 
-.road{position:absolute;background:#2c3238;box-shadow:0 7px 0 #15191d, inset 0 1px 0 rgba(255,255,255,0.07);z-index:2}
+.road{position:absolute;background:#2c3238;box-shadow:0 7px 0 #15191d,inset 0 1px 0 rgba(255,255,255,0.07);z-index:2}
 .h{height:44px;width:100%}.v{width:44px;height:100%}
 .r1{top:26%}.r2{top:52%}.r3{top:76%}
 .c1{left:20%}.c2{left:47%}.c3{left:74%}
@@ -144,17 +155,10 @@ button:active{transform:scale(0.96)}
 .sl4{left:22%;top:50%}.sl5{left:49%;top:50%}.sl6{left:76%;top:50%}
 .sl7{left:22%;top:74%}.sl8{left:49%;top:74%}.sl9{left:76%;top:74%}
 
-.block{position:absolute;background:linear-gradient(145deg,#2f4a36,#3a5c42);border-radius:3px 3px 2px 2px;
-  box-shadow:0 12px 0 #152218,0 16px 22px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1);z-index:3;overflow:hidden}
-.block::before{content:"";position:absolute;top:-9px;left:-1px;right:-1px;height:11px;background:linear-gradient(90deg,#3d6048,#4a7255);border-radius:3px 3px 0 0;box-shadow:0 -2px 0 rgba(0,0,0,0.25)}
-.block::after{content:"";position:absolute;inset:8px 6px 6px 6px;
-  background:repeating-linear-gradient(90deg,rgba(180,220,255,0.15) 0 8px,transparent 8px 16px),
-             repeating-linear-gradient(0deg,rgba(180,220,255,0.12) 0 7px,transparent 7px 15px);
-  border-radius:2px;opacity:0.7}
-.mapbox.night .block::after{
-  background:repeating-linear-gradient(90deg,rgba(255,230,150,0.45) 0 8px,transparent 8px 16px),
-             repeating-linear-gradient(0deg,rgba(255,230,150,0.35) 0 7px,transparent 7px 15px);
-  opacity:0.9;box-shadow:0 0 8px rgba(255,220,120,0.3)}
+.block{position:absolute;background:linear-gradient(145deg,#2f4a36,#3a5c42);border-radius:3px 3px 2px 2px;box-shadow:0 12px 0 #152218,0 16px 22px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1);z-index:3;overflow:hidden}
+.block::before{content:"";position:absolute;top:-9px;left:-1px;right:-1px;height:11px;background:linear-gradient(90deg,#3d6048,#4a7255);border-radius:3px 3px 0 0}
+.block::after{content:"";position:absolute;inset:8px 6px 6px 6px;background:repeating-linear-gradient(90deg,rgba(180,220,255,0.15) 0 8px,transparent 8px 16px),repeating-linear-gradient(0deg,rgba(180,220,255,0.12) 0 7px,transparent 7px 15px);border-radius:2px;opacity:0.7}
+.mapbox.night .block::after{background:repeating-linear-gradient(90deg,rgba(255,230,150,0.45) 0 8px,transparent 8px 16px),repeating-linear-gradient(0deg,rgba(255,230,150,0.35) 0 7px,transparent 7px 15px);opacity:0.9}
 
 .b1{left:3%;top:5%;width:13%;height:13%}.b2{left:23%;top:4%;width:14%;height:18%}
 .b3{left:49%;top:5%;width:13%;height:14%}.b4{left:74%;top:6%;width:15%;height:13%}
@@ -163,42 +167,34 @@ button:active{transform:scale(0.96)}
 .b9{left:3%;top:61%;width:13%;height:23%}.b10{left:23%;top:60%;width:14%;height:27%}
 .b11{left:49%;top:62%;width:12%;height:22%}.b12{left:74%;top:60%;width:15%;height:24%}
 
-.zone{position:absolute;transform:translate(-50%,-50%);background:rgba(12,18,26,0.94);border:1.5px solid #42d4ff;
-  padding:6px 10px;border-radius:12px;font-size:11px;z-index:10;white-space:nowrap;cursor:pointer;text-align:center;
-  box-shadow:0 8px 0 rgba(0,0,0,0.35),0 12px 20px rgba(0,0,0,0.4),0 0 12px rgba(66,212,255,0.25)}
+.zone{position:absolute;transform:translate(-50%,-50%);background:rgba(12,18,26,0.94);border:1.5px solid #42d4ff;padding:6px 10px;border-radius:12px;font-size:11px;z-index:10;white-space:nowrap;cursor:pointer;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,0.35),0 12px 20px rgba(0,0,0,0.4),0 0 12px rgba(66,212,255,0.25)}
 .zone:active{transform:translate(-50%,-50%) scale(0.94) translateY(4px)}
 
-.house{position:absolute;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;
-  background:linear-gradient(145deg,#ffd54f,#f4c542);color:#111;border:3px solid #fff;z-index:20;font-size:17px;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 8px 0 rgba(0,0,0,0.3),0 12px 18px rgba(0,0,0,0.35)}
+.house{position:absolute;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:linear-gradient(145deg,#ffd54f,#f4c542);color:#111;border:3px solid #fff;z-index:20;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 0 rgba(0,0,0,0.3),0 12px 18px rgba(0,0,0,0.35)}
 .house.owned{background:linear-gradient(145deg,#4ade80,#36d278)}
 
-.player{position:absolute;transform:translate(-50%,-50%);z-index:30;transition:left 0.14s linear,top 0.14s linear;
-  filter:drop-shadow(0 10px 8px rgba(0,0,0,0.55));width:28px;height:28px;display:flex;align-items:center;justify-content:center}
-.person{width:20px;height:20px;border-radius:50%;background:#f1c27d;border:2.5px solid #111;position:relative}
-.person:after{content:"";position:absolute;top:16px;left:1px;width:16px;height:14px;background:#4d7cff;border-radius:7px}
-.player.up .person:after{top:-4px;left:1px;transform:rotate(180deg)}
-.player.left .person:after{top:6px;left:-10px;transform:rotate(90deg);width:14px;height:16px}
-.player.right .person:after{top:6px;left:14px;transform:rotate(-90deg);width:14px;height:16px}
+.player{position:absolute;transform:translate(-50%,-50%);z-index:30;transition:left 0.14s linear,top 0.14s linear;filter:drop-shadow(0 10px 8px rgba(0,0,0,0.55));width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.person{width:22px;height:22px;border-radius:50%;background:#f1c27d;border:2.5px solid #111;position:relative}
+.person:after{content:"";position:absolute;top:18px;left:2px;width:16px;height:14px;background:#4d7cff;border-radius:7px}
+.player.up .person:after{top:-5px;left:2px;transform:rotate(180deg)}
+.player.left .person:after{top:6px;left:-11px;transform:rotate(90deg);width:14px;height:16px}
+.player.right .person:after{top:6px;left:16px;transform:rotate(-90deg);width:14px;height:16px}
 
-.car{width:42px;height:22px;background:#e63946;border-radius:7px;border:2px solid #111;position:relative}
-.car:before,.car:after{content:"";position:absolute;width:9px;height:9px;background:#111;border-radius:50%;bottom:-6px}
+.car{width:44px;height:24px;background:#e63946;border-radius:8px;border:2px solid #111;position:relative}
+.car:before,.car:after{content:"";position:absolute;width:10px;height:10px;background:#111;border-radius:50%;bottom:-6px}
 .car:before{left:5px}.car:after{right:5px}
-.car span{position:absolute;left:12px;top:3px;width:16px;height:8px;background:#a0e0ff;border-radius:2px}
+.car span{position:absolute;left:13px;top:3px;width:16px;height:9px;background:#a0e0ff;border-radius:2px}
+
+.other{position:absolute;transform:translate(-50%,-50%);z-index:25;width:26px;height:26px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;box-shadow:0 6px 12px rgba(0,0,0,0.4);transition:left 0.8s,top 0.8s}
 
 .traffic{position:absolute;z-index:5;width:28px;height:14px;border-radius:4px;background:#c0392b;border:1.5px solid #111;box-shadow:0 3px 0 #1a1a1a}
 .traffic::after{content:"";position:absolute;top:2px;left:6px;width:10px;height:6px;background:#a0e0ff;border-radius:1px}
 .traffic.blue{background:#2980b9}.traffic.yellow{background:#f1c40f}.traffic.green{background:#27ae60}
-@keyframes moveH1{0%{left:-5%}100%{left:105%}}
-@keyframes moveH2{0%{left:105%}100%{left:-5%}}
-@keyframes moveV1{0%{top:-5%}100%{top:105%}}
-@keyframes moveV2{0%{top:105%}100%{top:-5%}}
-.t1{top:28%;animation:moveH1 18s linear infinite}
-.t2{top:54%;animation:moveH2 22s linear infinite;animation-delay:-6s}
+@keyframes moveH1{0%{left:-5%}100%{left:105%}}@keyframes moveH2{0%{left:105%}100%{left:-5%}}
+@keyframes moveV1{0%{top:-5%}100%{top:105%}}@keyframes moveV2{0%{top:105%}100%{top:-5%}}
+.t1{top:28%;animation:moveH1 18s linear infinite}.t2{top:54%;animation:moveH2 22s linear infinite;animation-delay:-6s}
 .t3{top:78%;animation:moveH1 20s linear infinite;animation-delay:-11s}
-.t4{left:22%;animation:moveV1 16s linear infinite}
-.t5{left:49%;animation:moveV2 19s linear infinite;animation-delay:-4s}
+.t4{left:22%;animation:moveV1 16s linear infinite}.t5{left:49%;animation:moveV2 19s linear infinite;animation-delay:-4s}
 .t6{left:76%;animation:moveV1 21s linear infinite;animation-delay:-9s}
 
 .side{display:flex;flex-direction:column;gap:11px}
@@ -215,7 +211,7 @@ button:active{transform:scale(0.96)}
 .action-btn{background:#1c2733;text-align:left;padding:10px 13px;border:1px solid #243040}
 .action-btn small{display:block;opacity:0.65;font-weight:400;margin-top:2px;font-size:11px}
 
-/* ===== 3D HOUSE INTERIOR ===== */
+/* 3D House Interior + Actions */
 .interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100;overflow:hidden}
 .interior.show{display:block}
 .inhead{height:58px;background:#1c2530;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;position:relative;z-index:20}
@@ -224,13 +220,11 @@ button:active{transform:scale(0.96)}
 .floor{position:absolute;bottom:0;left:0;right:0;height:48%;background:linear-gradient(180deg,#6b4423 0%,#4a2e14 100%);transform-origin:center top;transform:rotateX(12deg);box-shadow:0 -20px 40px rgba(0,0,0,0.3)}
 .floor::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 32px,rgba(0,0,0,0.08) 32px 33px)}
 
-.window{position:absolute;left:7%;top:9%;width:155px;height:115px;background:linear-gradient(160deg,#7ec8f5,#4aa8d8);border:16px solid #f0e6d8;border-radius:4px;
-  box-shadow:8px 12px 0 rgba(0,0,0,0.18),0 20px 35px rgba(0,0,0,0.25),inset 0 0 40px rgba(255,255,255,0.35);z-index:5}
+.window{position:absolute;left:7%;top:9%;width:155px;height:115px;background:linear-gradient(160deg,#7ec8f5,#4aa8d8);border:16px solid #f0e6d8;border-radius:4px;box-shadow:8px 12px 0 rgba(0,0,0,0.18),0 20px 35px rgba(0,0,0,0.25),inset 0 0 40px rgba(255,255,255,0.35);z-index:5}
 .window::before{content:"";position:absolute;inset:0;background:linear-gradient(#f0e6d8,#f0e6d8) center/100% 9px no-repeat,linear-gradient(#f0e6d8,#f0e6d8) center/9px 100% no-repeat}
 
 .tv-unit{position:absolute;right:6%;top:11%;width:210px;z-index:6}
-.tv{width:100%;height:125px;background:#0a0a0a;border:9px solid #1a1a1a;border-radius:6px;box-shadow:10px 14px 0 rgba(0,0,0,0.25),0 22px 40px rgba(0,0,0,0.35);
-  display:flex;align-items:center;justify-content:center;color:#42d4ff;font-weight:800;font-size:22px;letter-spacing:1px;position:relative}
+.tv{width:100%;height:125px;background:#0a0a0a;border:9px solid #1a1a1a;border-radius:6px;box-shadow:10px 14px 0 rgba(0,0,0,0.25),0 22px 40px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:#42d4ff;font-weight:800;font-size:22px;letter-spacing:1px}
 .tv-stand{width:80px;height:16px;background:#2a2a2a;margin:8px auto 0;border-radius:3px;box-shadow:6px 6px 0 rgba(0,0,0,0.2)}
 
 .sofa{position:absolute;left:6%;bottom:22%;width:270px;height:90px;z-index:8}
@@ -251,17 +245,14 @@ button:active{transform:scale(0.96)}
 .bed-blanket{position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(180deg,#c0c0d0,#a8a8b8);border-radius:0 0 10px 10px}
 
 .rug{position:absolute;left:20%;bottom:30%;width:240px;height:80px;background:radial-gradient(ellipse at center,#8b3a3a 0%,#5a2525 70%);border-radius:50%;opacity:0.75;box-shadow:0 8px 20px rgba(0,0,0,0.25);z-index:4;transform:rotateX(8deg)}
-
 .plant{position:absolute;right:5%;bottom:34%;width:30px;height:55px;z-index:6}
 .plant-pot{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:26px;height:16px;background:#8b5e3c;border-radius:3px 3px 6px 6px;box-shadow:5px 5px 0 rgba(0,0,0,0.2)}
-.plant-leaves{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:36px;height:45px;background:#2d6a27;border-radius:50% 50% 20% 20%;
-  box-shadow:-14px 6px 0 -6px #3a8a32,14px 8px 0 -8px #3a8a32}
+.plant-leaves{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:36px;height:45px;background:#2d6a27;border-radius:50% 50% 20% 20%;box-shadow:-14px 6px 0 -6px #3a8a32,14px 8px 0 -8px #3a8a32}
 
-@media(min-width:900px){
-  .layout{flex-direction:row;align-items:flex-start}
-  .mapbox{flex:1;height:640px;min-height:640px}
-  .side{width:310px;flex-shrink:0}
-}
+.house-actions{position:absolute;bottom:12px;left:12px;right:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;z-index:15}
+.house-actions button{background:#1c2733;border:1px solid #2a3542;font-size:13px;padding:12px}
+
+@media(min-width:900px){.layout{flex-direction:row;align-items:flex-start}.mapbox{flex:1;height:640px;min-height:640px}.side{width:310px;flex-shrink:0}}
 `;
 document.head.appendChild(style);
 
@@ -282,12 +273,9 @@ root.innerHTML = `
 <div class="layout">
   <div class="mapbox day" id="mapbox">
     <div class="map">
-      <div class="block b1"></div><div class="block b2"></div>
-      <div class="block b3"></div><div class="block b4"></div>
-      <div class="block b5"></div><div class="block b6"></div>
-      <div class="block b7"></div><div class="block b8"></div>
-      <div class="block b9"></div><div class="block b10"></div>
-      <div class="block b11"></div><div class="block b12"></div>
+      <div class="block b1"></div><div class="block b2"></div><div class="block b3"></div><div class="block b4"></div>
+      <div class="block b5"></div><div class="block b6"></div><div class="block b7"></div><div class="block b8"></div>
+      <div class="block b9"></div><div class="block b10"></div><div class="block b11"></div><div class="block b12"></div>
       <div class="road h r1"></div><div class="road h r2"></div><div class="road h r3"></div>
       <div class="road v c1"></div><div class="road v c2"></div><div class="road v c3"></div>
       <div class="streetlight sl1"></div><div class="streetlight sl2"></div><div class="streetlight sl3"></div>
@@ -297,6 +285,7 @@ root.innerHTML = `
       <div class="traffic t4 green"></div><div class="traffic t5"></div><div class="traffic t6 blue"></div>
       <div id="zones"></div>
       <div id="houses"></div>
+      <div id="others"></div>
       <div class="player down" id="player"><div class="person"></div></div>
     </div>
   </div>
@@ -329,6 +318,7 @@ root.innerHTML = `
       <h3>💼 Quick Actions</h3>
       <button id="work" class="full">💼 Go To Work</button>
       <button id="travel" class="full">🗺️ Random Travel</button>
+      <button id="save" class="full">💾 Save Game</button>
     </div>
 
     <div class="panel">
@@ -355,30 +345,19 @@ root.innerHTML = `
     <div class="floor"></div>
     <div class="rug"></div>
     <div class="window"></div>
-    <div class="tv-unit">
-      <div class="tv">OWERRI</div>
-      <div class="tv-stand"></div>
-    </div>
-    <div class="sofa">
-      <div class="sofa-back"></div>
-      <div class="sofa-arm-left"></div>
-      <div class="sofa-arm-right"></div>
-      <div class="sofa-base"></div>
-    </div>
-    <div class="table">
-      <div class="table-top"></div>
-      <div class="table-leg l"></div>
-      <div class="table-leg r"></div>
-    </div>
-    <div class="bed">
-      <div class="bed-base"></div>
-      <div class="bed-pillow"></div>
-      <div class="bed-pillow2"></div>
-      <div class="bed-blanket"></div>
-    </div>
-    <div class="plant">
-      <div class="plant-leaves"></div>
-      <div class="plant-pot"></div>
+    <div class="tv-unit"><div class="tv">OWERRI</div><div class="tv-stand"></div></div>
+    <div class="sofa"><div class="sofa-back"></div><div class="sofa-arm-left"></div><div class="sofa-arm-right"></div><div class="sofa-base"></div></div>
+    <div class="table"><div class="table-top"></div><div class="table-leg l"></div><div class="table-leg r"></div></div>
+    <div class="bed"><div class="bed-base"></div><div class="bed-pillow"></div><div class="bed-pillow2"></div><div class="bed-blanket"></div></div>
+    <div class="plant"><div class="plant-leaves"></div><div class="plant-pot"></div></div>
+
+    <div class="house-actions">
+      <button id="actSleep">😴 Sleep</button>
+      <button id="actTV">📺 Watch TV</button>
+      <button id="actSofa">🛋 Sit on Sofa</button>
+      <button id="actEat">🍽️ Eat</button>
+      <button id="actShower">🚿 Shower</button>
+      <button id="actToilet">🚽 Toilet</button>
     </div>
   </div>
 </div>
@@ -386,248 +365,211 @@ root.innerHTML = `
 
 const $ = id => document.getElementById(id);
 
-function money(n) {
-  return "₦" + Math.floor(n).toLocaleString();
+function money(n){return "₦"+Math.floor(n).toLocaleString()}
+function log(msg){const el=document.createElement("div");el.textContent=msg;$("log").prepend(el)}
+function clamp(v){return Math.max(0,Math.min(100,v))}
+function needColor(v){if(v>60)return"#36d278";if(v>30)return"#f4c542";return"#e74c3c"}
+
+function saveGame(){
+  localStorage.setItem("owerriSave", JSON.stringify({
+    player,
+    properties: properties.map(p => ({owned: p.owned}))
+  }));
+  log("💾 Game saved!");
 }
 
-function log(msg) {
-  const el = document.createElement("div");
-  el.textContent = msg;
-  $("log").prepend(el);
+function renderNeeds(){
+  const needs=[{key:"hunger",label:"Hunger",emoji:"🍽️"},{key:"energy",label:"Energy",emoji:"⚡"},{key:"fun",label:"Fun",emoji:"🎉"},{key:"social",label:"Social",emoji:"👥"},{key:"hygiene",label:"Hygiene",emoji:"🚿"},{key:"bladder",label:"Bladder",emoji:"🚽"}];
+  $("needs").innerHTML=needs.map(n=>`<div class="need">${n.emoji} ${n.label} ${Math.round(player[n.key])}<div class="need-bar"><div class="need-fill" style="width:${player[n.key]}%;background:${needColor(player[n.key])}"></div></div></div>`).join("");
 }
 
-function clamp(v) {
-  return Math.max(0, Math.min(100, v));
+function renderZones(){
+  const c=$("zones");c.innerHTML="";
+  zones.forEach((z,i)=>{const el=document.createElement("div");el.className="zone";el.style.left=z.x+"%";el.style.top=z.y+"%";el.innerHTML=`${z.emoji}<br><b>${z.name}</b>`;el.onclick=()=>selectZone(i);c.appendChild(el)});
 }
 
-function needColor(v) {
-  if (v > 60) return "#36d278";
-  if (v > 30) return "#f4c542";
-  return "#e74c3c";
+function renderHouses(){
+  const c=$("houses");c.innerHTML="";
+  properties.forEach((p,i)=>{const el=document.createElement("button");el.type="button";el.className=p.owned?"house owned":"house";el.style.left=p.x+"%";el.style.top=p.y+"%";el.textContent=p.owned?"✓":"🏠";el.onclick=()=>selectHouse(i);c.appendChild(el)});
 }
 
-function renderNeeds() {
-  const needs = [
-    { key: "hunger", label: "Hunger", emoji: "🍽️" },
-    { key: "energy", label: "Energy", emoji: "⚡" },
-    { key: "fun", label: "Fun", emoji: "🎉" },
-    { key: "social", label: "Social", emoji: "👥" },
-    { key: "hygiene", label: "Hygiene", emoji: "🚿" },
-    { key: "bladder", label: "Bladder", emoji: "🚽" }
-  ];
-  $("needs").innerHTML = needs.map(n => `
-    <div class="need">
-      ${n.emoji} ${n.label} ${Math.round(player[n.key])}
-      <div class="need-bar"><div class="need-fill" style="width:${player[n.key]}%;background:${needColor(player[n.key])}"></div></div>
-    </div>
-  `).join("");
-}
-
-function renderZones() {
-  const container = $("zones");
-  container.innerHTML = "";
-  zones.forEach((z, i) => {
-    const el = document.createElement("div");
-    el.className = "zone";
-    el.style.left = z.x + "%";
-    el.style.top = z.y + "%";
-    el.innerHTML = `${z.emoji}<br><b>${z.name}</b>`;
-    el.onclick = () => selectZone(i);
-    container.appendChild(el);
+function renderOthers(){
+  const c=$("others");c.innerHTML="";
+  others.forEach(o=>{
+    const el=document.createElement("div");
+    el.className="other";
+    el.style.left=o.x+"%";
+    el.style.top=o.y+"%";
+    el.style.background=o.color;
+    el.textContent=o.name[0];
+    el.title=o.name;
+    c.appendChild(el);
   });
 }
 
-function renderHouses() {
-  const container = $("houses");
-  container.innerHTML = "";
-  properties.forEach((p, i) => {
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = p.owned ? "house owned" : "house";
-    el.style.left = p.x + "%";
-    el.style.top = p.y + "%";
-    el.textContent = p.owned ? "✓" : "🏠";
-    el.onclick = () => selectHouse(i);
-    container.appendChild(el);
-  });
-}
-
-function update() {
-  $("cash").textContent = money(player.cash);
-  $("level").textContent = player.level;
-  $("rep").textContent = player.reputation;
-  $("fuel").textContent = player.fuel;
-  $("mode").textContent = player.mode;
-  $("player").style.left = player.x + "%";
-  $("player").style.top = player.y + "%";
-  $("player").className = `player ${player.direction}`;
-  $("player").innerHTML = player.mode === "Drive"
-    ? `<div class="car"><span></span></div>`
-    : `<div class="person"></div>`;
+function update(){
+  $("cash").textContent=money(player.cash);
+  $("level").textContent=player.level;
+  $("rep").textContent=player.reputation;
+  $("fuel").textContent=player.fuel;
+  $("mode").textContent=player.mode;
+  $("player").style.left=player.x+"%";
+  $("player").style.top=player.y+"%";
+  $("player").className=`player ${player.direction}`;
+  $("player").innerHTML=player.mode==="Drive"?`<div class="car"><span></span></div>`:`<div class="person"></div>`;
   renderNeeds();
   renderHouses();
+  renderOthers();
 }
 
-function selectZone(index) {
-  const z = zones[index];
-  player.x = z.x;
-  player.y = z.y;
-  $("locInfo").innerHTML = `<b>${z.emoji} ${z.name}</b><br><small>${z.type}</small>`;
-  const actionsEl = $("actions");
-  actionsEl.innerHTML = "";
-  z.actions.forEach(a => {
-    const btn = document.createElement("button");
-    btn.className = "action-btn";
-    btn.innerHTML = `${a.label}<small>${a.cost > 0 ? money(a.cost) : "Free"}</small>`;
-    btn.onclick = () => doAction(a);
-    actionsEl.appendChild(btn);
+function selectZone(i){
+  const z=zones[i];
+  player.x=z.x;player.y=z.y;
+  $("locInfo").innerHTML=`<b>${z.emoji} ${z.name}</b><br><small>${z.type}</small>`;
+  const a=$("actions");a.innerHTML="";
+  z.actions.forEach(act=>{
+    const btn=document.createElement("button");
+    btn.className="action-btn";
+    btn.innerHTML=`${act.label}<small>${act.cost>0?money(act.cost):"Free"}</small>`;
+    btn.onclick=()=>doAction(act);
+    a.appendChild(btn);
   });
   log(`📍 Arrived at ${z.name}`);
   update();
 }
 
-function doAction(a) {
-  if (player.cash < a.cost) {
-    log("❌ Not enough money");
-    return;
-  }
-  player.cash -= a.cost;
-  player.hunger = clamp(player.hunger + a.hunger);
-  player.energy = clamp(player.energy + a.energy);
-  player.fun = clamp(player.fun + a.fun);
-  player.social = clamp(player.social + a.social);
-  player.hygiene = clamp(player.hygiene + a.hygiene);
-  player.bladder = clamp(player.bladder + a.bladder);
-  if (a.cash) player.cash += a.cash;
-  player.reputation += 2;
+function doAction(a){
+  if(player.cash<a.cost){log("❌ Not enough money");return}
+  player.cash-=a.cost;
+  player.hunger=clamp(player.hunger+a.hunger);
+  player.energy=clamp(player.energy+a.energy);
+  player.fun=clamp(player.fun+a.fun);
+  player.social=clamp(player.social+a.social);
+  player.hygiene=clamp(player.hygiene+a.hygiene);
+  player.bladder=clamp(player.bladder+a.bladder);
+  if(a.cash)player.cash+=a.cash;
+  player.reputation+=2;
   log(`✅ ${a.label}`);
   update();
+  saveGame();
 }
 
-function selectHouse(index) {
-  const house = properties[index];
-  player.selected = house;
-  $("info").innerHTML = `
-    <b>${house.name}</b><br>
-    💰 ${money(house.price)}<br>
-    ${house.owned ? "✅ You own this" : "🏷️ Available"}
-  `;
-  $("buy").style.display = house.owned ? "none" : "block";
-  $("enter").style.display = house.owned ? "block" : "none";
-  log("🏠 Selected " + house.name);
+function selectHouse(i){
+  const h=properties[i];
+  player.selected=h;
+  $("info").innerHTML=`<b>${h.name}</b><br>💰 ${money(h.price)}<br>${h.owned?"✅ You own this":"🏷️ Available"}`;
+  $("buy").style.display=h.owned?"none":"block";
+  $("enter").style.display=h.owned?"block":"none";
+  log("🏠 Selected "+h.name);
 }
 
-function buyHouse() {
-  const house = player.selected;
-  if (!house || house.owned) return;
-  if (player.cash < house.price) {
-    log("❌ Not enough money");
-    return;
-  }
-  player.cash -= house.price;
-  house.owned = true;
-  player.reputation += 15;
-  log("🎉 Bought " + house.name);
-  update();
-  selectHouse(properties.indexOf(house));
+function buyHouse(){
+  const h=player.selected;
+  if(!h||h.owned)return;
+  if(player.cash<h.price){log("❌ Not enough money");return}
+  player.cash-=h.price;h.owned=true;player.reputation+=15;
+  log("🎉 Bought "+h.name);
+  update();selectHouse(properties.indexOf(h));saveGame();
 }
 
-function enterHouse() {
-  const house = player.selected;
-  if (!house || !house.owned) return;
-  $("houseTitle").textContent = "🏠 " + house.name;
+function enterHouse(){
+  const h=player.selected;
+  if(!h||!h.owned)return;
+  $("houseTitle").textContent="🏠 "+h.name;
   $("interior").classList.add("show");
-  player.energy = clamp(player.energy + 25);
-  player.hygiene = clamp(player.hygiene + 15);
-  player.bladder = clamp(player.bladder + 30);
-  log("🚪 Entered house – resting…");
+  log("🚪 Entered house");
   update();
 }
 
-function move(dir) {
-  const step = player.mode === "Drive" ? 3.2 : 1.6;
-  if (player.mode === "Drive") {
-    if (player.fuel <= 0) { log("⛽ Out of fuel"); return; }
-    player.fuel--;
-  }
-  player.direction = dir;
-  if (dir === "up") player.y -= step;
-  if (dir === "down") player.y += step;
-  if (dir === "left") player.x -= step;
-  if (dir === "right") player.x += step;
-  player.x = Math.max(4, Math.min(96, player.x));
-  player.y = Math.max(6, Math.min(94, player.y));
+function houseAction(type){
+  if(type==="sleep"){player.energy=clamp(player.energy+45);player.fun=clamp(player.fun-5);log("😴 You slept well")}
+  if(type==="tv"){player.fun=clamp(player.fun+25);player.energy=clamp(player.energy-5);log("📺 Watching TV")}
+  if(type==="sofa"){player.fun=clamp(player.fun+15);player.energy=clamp(player.energy+10);log("🛋 Relaxing on the sofa")}
+  if(type==="eat"){player.hunger=clamp(player.hunger+35);player.bladder=clamp(player.bladder-8);log("🍽️ Had a meal")}
+  if(type==="shower"){player.hygiene=100;player.fun=clamp(player.fun+5);log("🚿 Took a shower")}
+  if(type==="toilet"){player.bladder=100;log("🚽 Used the toilet")}
+  update();saveGame();
+}
+
+function move(dir){
+  const step=player.mode==="Drive"?3.2:1.6;
+  if(player.mode==="Drive"){if(player.fuel<=0){log("⛽ Out of fuel");return}player.fuel--}
+  player.direction=dir;
+  if(dir==="up")player.y-=step;
+  if(dir==="down")player.y+=step;
+  if(dir==="left")player.x-=step;
+  if(dir==="right")player.x+=step;
+  player.x=Math.max(4,Math.min(96,player.x));
+  player.y=Math.max(6,Math.min(94,player.y));
   update();
 }
 
-function work() {
-  const pay = player.mode === "Drive" ? 42000 : 28000;
-  player.cash += pay;
-  player.energy = clamp(player.energy - 20);
-  player.hunger = clamp(player.hunger - 10);
-  player.reputation += 4;
-  if (player.reputation >= player.level * 120) {
-    player.level++;
-    log("⭐ Level up!");
-  }
-  log("💼 Earned " + money(pay));
-  update();
+function work(){
+  const pay=player.mode==="Drive"?42000:28000;
+  player.cash+=pay;player.energy=clamp(player.energy-20);player.hunger=clamp(player.hunger-10);player.reputation+=4;
+  if(player.reputation>=player.level*120){player.level++;log("⭐ Level up!")}
+  log("💼 Earned "+money(pay));update();saveGame();
 }
 
-function travel() {
-  const z = zones[Math.floor(Math.random() * zones.length)];
-  selectZone(zones.indexOf(z));
+function travel(){const z=zones[Math.floor(Math.random()*zones.length)];selectZone(zones.indexOf(z))}
+
+function toggleTime(){
+  isNight=!isNight;
+  $("mapbox").classList.toggle("day",!isNight);
+  $("mapbox").classList.toggle("night",isNight);
+  $("timeLabel").textContent=isNight?"🌙 Night":"☀️ Day";
+  log(isNight?"🌙 Night has fallen":"☀️ Daytime");
 }
 
-function toggleTime() {
-  isNight = !isNight;
-  const box = $("mapbox");
-  box.classList.toggle("day", !isNight);
-  box.classList.toggle("night", isNight);
-  $("timeLabel").textContent = isNight ? "🌙 Night" : "☀️ Day";
-  log(isNight ? "🌙 Night has fallen" : "☀️ Daytime");
-}
+// Move other players randomly (simple multiplayer)
+setInterval(()=>{
+  others.forEach(o=>{
+    o.x=Math.max(10,Math.min(90,o.x+(Math.random()-0.5)*8));
+    o.y=Math.max(10,Math.min(90,o.y+(Math.random()-0.5)*8));
+  });
+  renderOthers();
+},4000);
 
-$("walk").onclick = () => { player.mode = "Walk"; update(); log("🚶 Walking"); };
-$("drive").onclick = () => { player.mode = "Drive"; update(); log("🚗 Driving"); };
-$("work").onclick = work;
-$("travel").onclick = travel;
-$("buy").onclick = buyHouse;
-$("enter").onclick = enterHouse;
-$("toggleTime").onclick = toggleTime;
-$("leave").onclick = () => {
-  $("interior").classList.remove("show");
-  log("🚶 Left the house");
-};
+$("walk").onclick=()=>{player.mode="Walk";update();log("🚶 Walking")};
+$("drive").onclick=()=>{player.mode="Drive";update();log("🚗 Driving")};
+$("work").onclick=work;
+$("travel").onclick=travel;
+$("save").onclick=saveGame;
+$("buy").onclick=buyHouse;
+$("enter").onclick=enterHouse;
+$("toggleTime").onclick=toggleTime;
+$("leave").onclick=()=>{$("interior").classList.remove("show");log("🚶 Left the house")};
 
-document.querySelectorAll("[data-move]").forEach(btn => {
-  btn.onclick = () => move(btn.dataset.move);
+$("actSleep").onclick=()=>houseAction("sleep");
+$("actTV").onclick=()=>houseAction("tv");
+$("actSofa").onclick=()=>houseAction("sofa");
+$("actEat").onclick=()=>houseAction("eat");
+$("actShower").onclick=()=>houseAction("shower");
+$("actToilet").onclick=()=>houseAction("toilet");
+
+document.querySelectorAll("[data-move]").forEach(btn=>btn.onclick=()=>move(btn.dataset.move));
+document.addEventListener("keydown",e=>{
+  const k=e.key.toLowerCase();
+  if(k==="arrowup"||k==="w")move("up");
+  if(k==="arrowdown"||k==="s")move("down");
+  if(k==="arrowleft"||k==="a")move("left");
+  if(k==="arrowright"||k==="d")move("right");
 });
 
-document.addEventListener("keydown", e => {
-  const k = e.key.toLowerCase();
-  if (k === "arrowup" || k === "w") move("up");
-  if (k === "arrowdown" || k === "s") move("down");
-  if (k === "arrowleft" || k === "a") move("left");
-  if (k === "arrowright" || k === "d") move("right");
-});
-
-setInterval(() => {
-  player.hunger = clamp(player.hunger - 1.8);
-  player.energy = clamp(player.energy - 1.2);
-  player.fun = clamp(player.fun - 1.0);
-  player.social = clamp(player.social - 0.8);
-  player.hygiene = clamp(player.hygiene - 0.7);
-  player.bladder = clamp(player.bladder - 1.5);
-  if (player.hunger < 15) log("⚠️ You are very hungry!");
-  if (player.energy < 15) log("⚠️ Exhausted – rest soon");
-  if (player.bladder < 10) log("⚠️ Need a toilet urgently!");
+setInterval(()=>{
+  player.hunger=clamp(player.hunger-1.8);
+  player.energy=clamp(player.energy-1.2);
+  player.fun=clamp(player.fun-1.0);
+  player.social=clamp(player.social-0.8);
+  player.hygiene=clamp(player.hygiene-0.7);
+  player.bladder=clamp(player.bladder-1.5);
+  if(player.hunger<15)log("⚠️ You are very hungry!");
+  if(player.energy<15)log("⚠️ Exhausted – rest soon");
+  if(player.bladder<10)log("⚠️ Need a toilet urgently!");
   update();
-}, 12000);
+},12000);
 
-setInterval(toggleTime, 90000);
+setInterval(toggleTime,90000);
 
-renderZones();
-renderHouses();
-update();
-log("🌆 Welcome to Owerri Lifestyle");
+renderZones();renderHouses();renderOthers();update();
+log("🌆 Welcome to Owerri Lifestyle – progress is now saved!");
