@@ -1,5 +1,5 @@
 /* =========================================================
-   Owerri Lifestyle – Fixed Stage 1 Isometric House
+   Owerri Lifestyle – Clean Polished House Version
    ========================================================= */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -175,125 +175,166 @@ input:focus{outline:none;border-color:#42d4ff}
 .action-btn{background:#1c2733;text-align:left;padding:10px 13px}
 .logout-btn{background:#3d1a1a;margin-top:10px}
 
-/* ===== FIXED STAGE 1 HOUSE ===== */
-.interior{display:none;position:fixed;inset:0;background:#111;z-index:100;overflow:hidden}
+/* ===== CLEAN POLISHED HOUSE ===== */
+.interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100;overflow:hidden}
 .interior.show{display:block}
-.inhead{height:56px;background:#1c2530;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;z-index:20;position:relative}
+.inhead{height:56px;background:#1c2530;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;position:relative;z-index:20}
 
-.house-view{
+.room{
   position:absolute;
   top:56px;
-  bottom:100px;
+  bottom:110px;
   left:0;
   right:0;
-  background:#1a1410;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background:linear-gradient(to bottom,#2a2118 0%,#1a1410 100%);
   overflow:hidden;
-}
-
-.room-container{
-  position:relative;
-  width:340px;
-  height:300px;
 }
 
 /* Floor */
 .floor{
   position:absolute;
-  bottom:30px;
-  left:50%;
-  transform:translateX(-50%) rotateX(60deg) rotateZ(45deg);
-  width:260px;
-  height:260px;
-  background:#8B5E3C;
-  box-shadow:0 20px 40px rgba(0,0,0,0.5);
-  border:1px solid #6b4423;
+  bottom:0;
+  left:0;
+  right:0;
+  height:45%;
+  background:linear-gradient(to bottom,#6b4423,#4a2e14);
+  border-top:3px solid #3a2410;
 }
-
-/* Walls */
-.wall-back{
-  position:absolute;
-  bottom:160px;
-  left:50%;
-  transform:translateX(-50%);
-  width:260px;
-  height:140px;
-  background:linear-gradient(to bottom,#e8d5b7,#d4b896);
-  clip-path:polygon(0 100%, 50% 0, 100% 100%);
-}
-
-.wall-left{
-  position:absolute;
-  bottom:30px;
-  left:50%;
-  transform:translateX(-130%) rotateY(60deg);
-  width:130px;
-  height:160px;
-  background:linear-gradient(to right,#d4b896,#c4a882);
-  transform-origin:right;
-}
-
-.wall-right{
-  position:absolute;
-  bottom:30px;
-  left:50%;
-  transform:translateX(0%) rotateY(-60deg);
-  width:130px;
-  height:160px;
-  background:linear-gradient(to left,#d4b896,#c4a882);
-  transform-origin:left;
-}
-
-/* Furniture */
-.bed{
-  position:absolute;
-  bottom:70px;
-  left:70px;
-  width:90px;
-  height:55px;
-  background:#e0e0ec;
-  border-radius:6px;
-  box-shadow:4px 4px 0 rgba(0,0,0,0.2);
-  z-index:5;
-}
-.bed::before{
+.floor::before{
   content:"";
   position:absolute;
-  top:6px;left:8px;
-  width:30px;height:18px;
-  background:#fff;
-  border-radius:4px;
+  inset:0;
+  background:repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 40px,
+    rgba(0,0,0,0.1) 40px,
+    rgba(0,0,0,0.1) 41px
+  );
 }
 
+/* Back wall */
+.wall{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:55%;
+  background:linear-gradient(to bottom,#d4b896,#c4a882);
+}
+
+/* Window */
+.window{
+  position:absolute;
+  top:18%;
+  left:8%;
+  width:110px;
+  height:80px;
+  background:linear-gradient(160deg,#7ec8f5,#4aa8d8);
+  border:10px solid #f0e6d8;
+  border-radius:4px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+.window::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(#f0e6d8,#f0e6d8) center/100% 6px no-repeat,
+    linear-gradient(#f0e6d8,#f0e6d8) center/6px 100% no-repeat;
+}
+
+/* Bed */
+.bed{
+  position:absolute;
+  bottom:12%;
+  left:8%;
+  width:160px;
+  height:70px;
+  background:#e8e8f0;
+  border-radius:8px;
+  box-shadow:6px 8px 0 rgba(0,0,0,0.25);
+}
+.pillow{
+  position:absolute;
+  top:8px;
+  left:12px;
+  width:50px;
+  height:22px;
+  background:#fff;
+  border-radius:6px;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.1);
+}
+.blanket{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:28px;
+  background:#c0c0d0;
+  border-radius:0 0 8px 8px;
+}
+
+/* Sofa */
 .sofa{
   position:absolute;
-  bottom:110px;
-  right:80px;
-  width:80px;
-  height:40px;
+  bottom:18%;
+  right:10%;
+  width:130px;
+  height:55px;
   background:#5c4d7e;
-  border-radius:8px;
-  box-shadow:4px 4px 0 rgba(0,0,0,0.25);
-  z-index:5;
+  border-radius:12px 12px 6px 6px;
+  box-shadow:5px 7px 0 rgba(0,0,0,0.3);
+}
+.sofa::before{
+  content:"";
+  position:absolute;
+  top:-18px;
+  left:8px;
+  right:8px;
+  height:22px;
+  background:#6b5c8c;
+  border-radius:8px 8px 0 0;
 }
 
+/* TV */
+.tv-stand{
+  position:absolute;
+  bottom:28%;
+  right:18%;
+  width:90px;
+  height:12px;
+  background:#2a2a2a;
+  border-radius:3px;
+}
 .tv{
   position:absolute;
-  bottom:150px;
-  right:90px;
-  width:60px;
-  height:38px;
+  bottom:32%;
+  right:16%;
+  width:100px;
+  height:60px;
   background:#111;
-  border:3px solid #333;
+  border:6px solid #222;
+  border-radius:4px;
   display:flex;
   align-items:center;
   justify-content:center;
   color:#42d4ff;
-  font-size:11px;
-  font-weight:bold;
-  z-index:6;
+  font-weight:800;
+  font-size:16px;
+  box-shadow:0 10px 20px rgba(0,0,0,0.4);
+}
+
+/* Rug */
+.rug{
+  position:absolute;
+  bottom:22%;
+  left:30%;
+  width:140px;
+  height:50px;
+  background:radial-gradient(ellipse,#8b3a3a,#5a2525);
+  border-radius:50%;
+  opacity:0.7;
 }
 
 .house-actions{
@@ -315,7 +356,7 @@ input:focus{outline:none;border-color:#42d4ff}
 `
 document.head.appendChild(style)
 
-// ---------- AUTH + GAME LOGIC (same as before) ----------
+// ---------- AUTH + GAME (same as before) ----------
 function showAuthScreen() {
   root.innerHTML = `
     <div class="auth-screen">
@@ -506,21 +547,25 @@ function renderGame() {
       </div>
     </div>
 
-    <!-- FIXED STAGE 1 HOUSE -->
+    <!-- CLEAN POLISHED HOUSE -->
     <div class="interior" id="interior">
       <div class="inhead">
         <b id="houseTitle">🏠 My House</b>
         <button id="leave">Leave</button>
       </div>
 
-      <div class="house-view">
-        <div class="room-container">
-          <div class="floor"></div>
-          <div class="wall-back"></div>
-          <div class="bed"></div>
-          <div class="sofa"></div>
-          <div class="tv">TV</div>
+      <div class="room">
+        <div class="wall"></div>
+        <div class="floor"></div>
+        <div class="window"></div>
+        <div class="rug"></div>
+        <div class="bed">
+          <div class="pillow"></div>
+          <div class="blanket"></div>
         </div>
+        <div class="sofa"></div>
+        <div class="tv-stand"></div>
+        <div class="tv">OWERRI</div>
       </div>
 
       <div class="house-actions">
