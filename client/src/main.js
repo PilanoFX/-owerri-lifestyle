@@ -1,11 +1,9 @@
 /* =========================================================
-   Owerri Lifestyle – Full Version
-   (Login + Game + Stage 1 Isometric House)
+   Owerri Lifestyle – Fixed Stage 1 Isometric House
    ========================================================= */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-// Your Supabase credentials
 const SUPABASE_URL = 'https://rjpampbvxqjvocwltrxw.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcGFtcGJ2eHFqdm9jd2x0cnh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzNjA5MDAsImV4cCI6MjEwNjkzNjkwMH0.XgKigi0a8tlrz3qtZBhefgoQc3hkOUDm6Gy69QZ64kQ'
 
@@ -177,91 +175,132 @@ input:focus{outline:none;border-color:#42d4ff}
 .action-btn{background:#1c2733;text-align:left;padding:10px 13px}
 .logout-btn{background:#3d1a1a;margin-top:10px}
 
-/* ===== STAGE 1 ISOMETRIC HOUSE ===== */
-.interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100;overflow:hidden}
+/* ===== FIXED STAGE 1 HOUSE ===== */
+.interior{display:none;position:fixed;inset:0;background:#111;z-index:100;overflow:hidden}
 .interior.show{display:block}
-.inhead{height:56px;background:#1c2530;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;position:relative;z-index:20}
+.inhead{height:56px;background:#1c2530;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;z-index:20;position:relative}
 
-.iso-scene{
-  position:absolute;top:56px;bottom:90px;left:0;right:0;
-  display:flex;align-items:center;justify-content:center;
-  background:#1a1410;overflow:hidden;
+.house-view{
+  position:absolute;
+  top:56px;
+  bottom:100px;
+  left:0;
+  right:0;
+  background:#1a1410;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
 
-.iso-room{
+.room-container{
   position:relative;
-  width:320px;height:260px;
-  transform-style:preserve-3d;
-  transform:rotateX(58deg) rotateZ(-45deg);
-  margin-top:-30px;
+  width:340px;
+  height:300px;
 }
 
-.iso-floor{
+/* Floor */
+.floor{
   position:absolute;
-  width:320px;height:320px;
-  background:linear-gradient(135deg,#8b5e3c,#6b4423);
-  box-shadow:0 0 50px rgba(0,0,0,0.6);
+  bottom:30px;
+  left:50%;
+  transform:translateX(-50%) rotateX(60deg) rotateZ(45deg);
+  width:260px;
+  height:260px;
+  background:#8B5E3C;
+  box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  border:1px solid #6b4423;
 }
-.iso-floor::before{
+
+/* Walls */
+.wall-back{
+  position:absolute;
+  bottom:160px;
+  left:50%;
+  transform:translateX(-50%);
+  width:260px;
+  height:140px;
+  background:linear-gradient(to bottom,#e8d5b7,#d4b896);
+  clip-path:polygon(0 100%, 50% 0, 100% 100%);
+}
+
+.wall-left{
+  position:absolute;
+  bottom:30px;
+  left:50%;
+  transform:translateX(-130%) rotateY(60deg);
+  width:130px;
+  height:160px;
+  background:linear-gradient(to right,#d4b896,#c4a882);
+  transform-origin:right;
+}
+
+.wall-right{
+  position:absolute;
+  bottom:30px;
+  left:50%;
+  transform:translateX(0%) rotateY(-60deg);
+  width:130px;
+  height:160px;
+  background:linear-gradient(to left,#d4b896,#c4a882);
+  transform-origin:left;
+}
+
+/* Furniture */
+.bed{
+  position:absolute;
+  bottom:70px;
+  left:70px;
+  width:90px;
+  height:55px;
+  background:#e0e0ec;
+  border-radius:6px;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.2);
+  z-index:5;
+}
+.bed::before{
   content:"";
-  position:absolute;inset:0;
-  background:
-    repeating-linear-gradient(90deg,transparent,transparent 26px,rgba(0,0,0,0.07) 26px,rgba(0,0,0,0.07) 27px),
-    repeating-linear-gradient(0deg,transparent,transparent 26px,rgba(0,0,0,0.07) 26px,rgba(0,0,0,0.07) 27px);
-}
-
-.iso-wall-left{
   position:absolute;
-  width:320px;height:160px;
-  background:linear-gradient(to bottom,#d4b896,#c4a882);
-  transform-origin:bottom;
-  transform:rotateX(-90deg);
-  bottom:0;left:0;
-}
-
-.iso-wall-right{
-  position:absolute;
-  width:320px;height:160px;
-  background:linear-gradient(to bottom,#c4a882,#b89a72);
-  transform-origin:bottom left;
-  transform:rotateY(90deg);
-  bottom:0;left:0;
-}
-
-.iso-bed{
-  position:absolute;
-  width:100px;height:65px;
-  background:#e8e8f0;
-  bottom:50px;left:35px;
-  transform:translateZ(14px);
-  box-shadow:8px 8px 0 rgba(0,0,0,0.25);
+  top:6px;left:8px;
+  width:30px;height:18px;
+  background:#fff;
   border-radius:4px;
 }
 
-.iso-sofa{
+.sofa{
   position:absolute;
-  width:90px;height:45px;
+  bottom:110px;
+  right:80px;
+  width:80px;
+  height:40px;
   background:#5c4d7e;
-  bottom:150px;left:170px;
-  transform:translateZ(12px);
-  box-shadow:6px 6px 0 rgba(0,0,0,0.3);
-  border-radius:6px;
+  border-radius:8px;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.25);
+  z-index:5;
 }
 
-.iso-tv{
+.tv{
   position:absolute;
-  width:65px;height:40px;
+  bottom:150px;
+  right:90px;
+  width:60px;
+  height:38px;
   background:#111;
-  bottom:190px;left:185px;
-  transform:translateZ(22px);
   border:3px solid #333;
-  display:flex;align-items:center;justify-content:center;
-  color:#42d4ff;font-size:11px;font-weight:bold;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#42d4ff;
+  font-size:11px;
+  font-weight:bold;
+  z-index:6;
 }
 
 .house-actions{
   position:absolute;
-  bottom:12px;left:12px;right:12px;
+  bottom:12px;
+  left:12px;
+  right:12px;
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   gap:8px;
@@ -276,7 +315,7 @@ input:focus{outline:none;border-color:#42d4ff}
 `
 document.head.appendChild(style)
 
-// ---------- AUTH ----------
+// ---------- AUTH + GAME LOGIC (same as before) ----------
 function showAuthScreen() {
   root.innerHTML = `
     <div class="auth-screen">
@@ -303,7 +342,6 @@ function showAuthScreen() {
       </div>
     </div>
   `
-
   document.getElementById("tabLogin").onclick = () => {
     document.getElementById("tabLogin").classList.add("active")
     document.getElementById("tabSignup").classList.remove("active")
@@ -345,11 +383,7 @@ async function signup() {
   const password = document.getElementById("signupPassword").value
   if (!name || !email || !password) return showError("Please fill all fields")
   if (password.length < 6) return showError("Password must be at least 6 characters")
-
-  const { error } = await supabase.auth.signUp({
-    email, password,
-    options: { data: { display_name: name } }
-  })
+  const { error } = await supabase.auth.signUp({ email, password, options: { data: { display_name: name } } })
   if (error) return showError(error.message)
   showSuccess("Account created! You can now log in.")
   document.getElementById("tabLogin").click()
@@ -359,10 +393,8 @@ async function login() {
   const email = document.getElementById("loginEmail").value.trim()
   const password = document.getElementById("loginPassword").value
   if (!email || !password) return showError("Please enter email and password")
-
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) return showError(error.message)
-
   currentUser = data.user
   startGame()
 }
@@ -383,9 +415,7 @@ async function checkSession() {
   }
 }
 
-function startGame() {
-  renderGame()
-}
+function startGame() { renderGame() }
 
 function $(id) { return document.getElementById(id) }
 function money(n) { return "₦" + Math.floor(n).toLocaleString() }
@@ -476,21 +506,20 @@ function renderGame() {
       </div>
     </div>
 
-    <!-- STAGE 1 ISOMETRIC HOUSE -->
+    <!-- FIXED STAGE 1 HOUSE -->
     <div class="interior" id="interior">
       <div class="inhead">
         <b id="houseTitle">🏠 My House</b>
         <button id="leave">Leave</button>
       </div>
 
-      <div class="iso-scene">
-        <div class="iso-room">
-          <div class="iso-floor"></div>
-          <div class="iso-wall-left"></div>
-          <div class="iso-wall-right"></div>
-          <div class="iso-bed"></div>
-          <div class="iso-sofa"></div>
-          <div class="iso-tv">TV</div>
+      <div class="house-view">
+        <div class="room-container">
+          <div class="floor"></div>
+          <div class="wall-back"></div>
+          <div class="bed"></div>
+          <div class="sofa"></div>
+          <div class="tv">TV</div>
         </div>
       </div>
 
@@ -602,9 +631,7 @@ function update() {
   $("player").style.left = player.x + "%"
   $("player").style.top = player.y + "%"
   $("player").className = `player ${player.direction}`
-  $("player").innerHTML = player.mode === "Drive"
-    ? `<div class="car"><span></span></div>`
-    : `<div class="person"></div>`
+  $("player").innerHTML = player.mode === "Drive" ? `<div class="car"><span></span></div>` : `<div class="person"></div>`
   renderNeeds()
   renderHouses()
   renderOthers()
@@ -740,5 +767,4 @@ setInterval(() => {
   update()
 }, 12000)
 
-// Start
 checkSession()
