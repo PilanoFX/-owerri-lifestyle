@@ -1,5 +1,6 @@
 /* =========================================================
-   Owerri Lifestyle – With Real Email Login (Supabase)
+   Owerri Lifestyle – Full Version
+   (Login + Game + Stage 1 Isometric House)
    ========================================================= */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -122,6 +123,7 @@ button:active{transform:scale(0.96)}
 input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid #2a3542;background:#151d27;color:#fff;font-size:15px;margin-bottom:12px}
 input:focus{outline:none;border-color:#42d4ff}
 
+/* AUTH */
 .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#0a0e14,#121820)}
 .auth-box{width:100%;max-width:400px;background:#151d27;border:1px solid #1e2a36;border-radius:20px;padding:32px 28px;box-shadow:0 20px 50px rgba(0,0,0,0.4)}
 .auth-box h1{font-size:26px;margin-bottom:6px;text-align:center}
@@ -134,6 +136,7 @@ input:focus{outline:none;border-color:#42d4ff}
 .auth-success{background:#1a3d2a;color:#4ade80;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:13px;display:none}
 .full{width:100%}
 
+/* GAME */
 .top{padding:14px 16px 10px;background:linear-gradient(180deg,#121820 0%,#0d1218 100%);border-bottom:1px solid #1e2a36;position:sticky;top:0;z-index:50}
 .logo{font-size:20px;font-weight:800;margin-bottom:10px}.logo span{color:#42d4ff}
 .stats{display:flex;gap:7px;flex-wrap:wrap;font-size:12px;margin-bottom:10px}
@@ -174,38 +177,125 @@ input:focus{outline:none;border-color:#42d4ff}
 .action-btn{background:#1c2733;text-align:left;padding:10px 13px}
 .logout-btn{background:#3d1a1a;margin-top:10px}
 
-.interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100}
+/* ===== STAGE 1 ISOMETRIC HOUSE ===== */
+.interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100;overflow:hidden}
 .interior.show{display:block}
-.inhead{height:58px;background:#1c2530;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
-.room{position:absolute;top:58px;bottom:0;left:0;right:0;background:#c4a882}
-.house-actions{position:absolute;bottom:12px;left:12px;right:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;z-index:15}
-.house-actions button{background:#1c2733;font-size:13px;padding:12px}
+.inhead{height:56px;background:#1c2530;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;position:relative;z-index:20}
+
+.iso-scene{
+  position:absolute;top:56px;bottom:90px;left:0;right:0;
+  display:flex;align-items:center;justify-content:center;
+  background:#1a1410;overflow:hidden;
+}
+
+.iso-room{
+  position:relative;
+  width:320px;height:260px;
+  transform-style:preserve-3d;
+  transform:rotateX(58deg) rotateZ(-45deg);
+  margin-top:-30px;
+}
+
+.iso-floor{
+  position:absolute;
+  width:320px;height:320px;
+  background:linear-gradient(135deg,#8b5e3c,#6b4423);
+  box-shadow:0 0 50px rgba(0,0,0,0.6);
+}
+.iso-floor::before{
+  content:"";
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(90deg,transparent,transparent 26px,rgba(0,0,0,0.07) 26px,rgba(0,0,0,0.07) 27px),
+    repeating-linear-gradient(0deg,transparent,transparent 26px,rgba(0,0,0,0.07) 26px,rgba(0,0,0,0.07) 27px);
+}
+
+.iso-wall-left{
+  position:absolute;
+  width:320px;height:160px;
+  background:linear-gradient(to bottom,#d4b896,#c4a882);
+  transform-origin:bottom;
+  transform:rotateX(-90deg);
+  bottom:0;left:0;
+}
+
+.iso-wall-right{
+  position:absolute;
+  width:320px;height:160px;
+  background:linear-gradient(to bottom,#c4a882,#b89a72);
+  transform-origin:bottom left;
+  transform:rotateY(90deg);
+  bottom:0;left:0;
+}
+
+.iso-bed{
+  position:absolute;
+  width:100px;height:65px;
+  background:#e8e8f0;
+  bottom:50px;left:35px;
+  transform:translateZ(14px);
+  box-shadow:8px 8px 0 rgba(0,0,0,0.25);
+  border-radius:4px;
+}
+
+.iso-sofa{
+  position:absolute;
+  width:90px;height:45px;
+  background:#5c4d7e;
+  bottom:150px;left:170px;
+  transform:translateZ(12px);
+  box-shadow:6px 6px 0 rgba(0,0,0,0.3);
+  border-radius:6px;
+}
+
+.iso-tv{
+  position:absolute;
+  width:65px;height:40px;
+  background:#111;
+  bottom:190px;left:185px;
+  transform:translateZ(22px);
+  border:3px solid #333;
+  display:flex;align-items:center;justify-content:center;
+  color:#42d4ff;font-size:11px;font-weight:bold;
+}
+
+.house-actions{
+  position:absolute;
+  bottom:12px;left:12px;right:12px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  z-index:30;
+}
+.house-actions button{
+  background:#1c2733;
+  border:1px solid #2a3542;
+  font-size:13px;
+  padding:12px 6px;
+}
 `
 document.head.appendChild(style)
 
+// ---------- AUTH ----------
 function showAuthScreen() {
   root.innerHTML = `
     <div class="auth-screen">
       <div class="auth-box">
         <h1>🌆 Owerri <span>Lifestyle</span></h1>
         <p>Create an account or log in to play</p>
-
         <div class="auth-tabs">
           <button id="tabLogin" class="active">Log In</button>
           <button id="tabSignup">Sign Up</button>
         </div>
-
         <div id="authError" class="auth-error"></div>
         <div id="authSuccess" class="auth-success"></div>
-
         <div id="loginForm">
           <input type="email" id="loginEmail" placeholder="Email address" />
           <input type="password" id="loginPassword" placeholder="Password" />
           <button id="btnLogin" class="full">Log In</button>
         </div>
-
         <div id="signupForm" style="display:none">
-          <input type="text" id="signupName" placeholder="Display name (e.g. Chidi)" />
+          <input type="text" id="signupName" placeholder="Display name" />
           <input type="email" id="signupEmail" placeholder="Email address" />
           <input type="password" id="signupPassword" placeholder="Password (min 6 characters)" />
           <button id="btnSignup" class="full">Create Account</button>
@@ -221,7 +311,6 @@ function showAuthScreen() {
     document.getElementById("signupForm").style.display = "none"
     hideMessages()
   }
-
   document.getElementById("tabSignup").onclick = () => {
     document.getElementById("tabSignup").classList.add("active")
     document.getElementById("tabLogin").classList.remove("active")
@@ -229,7 +318,6 @@ function showAuthScreen() {
     document.getElementById("loginForm").style.display = "none"
     hideMessages()
   }
-
   document.getElementById("btnLogin").onclick = login
   document.getElementById("btnSignup").onclick = signup
 }
@@ -238,14 +326,12 @@ function hideMessages() {
   document.getElementById("authError").style.display = "none"
   document.getElementById("authSuccess").style.display = "none"
 }
-
 function showError(msg) {
   const el = document.getElementById("authError")
   el.textContent = msg
   el.style.display = "block"
   document.getElementById("authSuccess").style.display = "none"
 }
-
 function showSuccess(msg) {
   const el = document.getElementById("authSuccess")
   el.textContent = msg
@@ -257,30 +343,24 @@ async function signup() {
   const name = document.getElementById("signupName").value.trim()
   const email = document.getElementById("signupEmail").value.trim()
   const password = document.getElementById("signupPassword").value
-
   if (!name || !email || !password) return showError("Please fill all fields")
   if (password.length < 6) return showError("Password must be at least 6 characters")
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
+  const { error } = await supabase.auth.signUp({
+    email, password,
     options: { data: { display_name: name } }
   })
-
   if (error) return showError(error.message)
-
-  showSuccess("Account created! Check your email to confirm, then log in.")
+  showSuccess("Account created! You can now log in.")
   document.getElementById("tabLogin").click()
 }
 
 async function login() {
   const email = document.getElementById("loginEmail").value.trim()
   const password = document.getElementById("loginPassword").value
-
   if (!email || !password) return showError("Please enter email and password")
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-
   if (error) return showError(error.message)
 
   currentUser = data.user
@@ -396,20 +476,31 @@ function renderGame() {
       </div>
     </div>
 
+    <!-- STAGE 1 ISOMETRIC HOUSE -->
     <div class="interior" id="interior">
       <div class="inhead">
         <b id="houseTitle">🏠 My House</b>
         <button id="leave">Leave</button>
       </div>
-      <div class="room">
-        <div class="house-actions">
-          <button id="actSleep">😴 Sleep</button>
-          <button id="actTV">📺 Watch TV</button>
-          <button id="actSofa">🛋 Sit</button>
-          <button id="actEat">🍽️ Eat</button>
-          <button id="actShower">🚿 Shower</button>
-          <button id="actToilet">🚽 Toilet</button>
+
+      <div class="iso-scene">
+        <div class="iso-room">
+          <div class="iso-floor"></div>
+          <div class="iso-wall-left"></div>
+          <div class="iso-wall-right"></div>
+          <div class="iso-bed"></div>
+          <div class="iso-sofa"></div>
+          <div class="iso-tv">TV</div>
         </div>
+      </div>
+
+      <div class="house-actions">
+        <button id="actSleep">😴 Sleep</button>
+        <button id="actTV">📺 TV</button>
+        <button id="actSofa">🛋 Sit</button>
+        <button id="actEat">🍽️ Eat</button>
+        <button id="actShower">🚿 Shower</button>
+        <button id="actToilet">🚽 Toilet</button>
       </div>
     </div>
   `
@@ -439,7 +530,7 @@ function renderGame() {
   renderHouses()
   renderOthers()
   update()
-  log(`Welcome back, ${currentUser.user_metadata?.display_name || currentUser.email}!`)
+  log(`Welcome, ${currentUser.user_metadata?.display_name || currentUser.email}!`)
 }
 
 function renderNeeds() {
@@ -649,5 +740,5 @@ setInterval(() => {
   update()
 }, 12000)
 
-// Start the app
+// Start
 checkSession()
