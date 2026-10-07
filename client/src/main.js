@@ -1,5 +1,5 @@
 /* =========================================================
-   Owerri Lifestyle – Clean Polished House Version
+   Owerri Lifestyle – Stage A (Multi-Room House)
    ========================================================= */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -103,6 +103,7 @@ let player = {
 
 let currentUser = null
 let isNight = false
+let currentRoom = "living" // living | bedroom | kitchen | bathroom
 
 const others = [
   { id: 1, name: "Chidi", x: 40, y: 35, color: "#e74c3c" },
@@ -121,7 +122,6 @@ button:active{transform:scale(0.96)}
 input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid #2a3542;background:#151d27;color:#fff;font-size:15px;margin-bottom:12px}
 input:focus{outline:none;border-color:#42d4ff}
 
-/* AUTH */
 .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#0a0e14,#121820)}
 .auth-box{width:100%;max-width:400px;background:#151d27;border:1px solid #1e2a36;border-radius:20px;padding:32px 28px;box-shadow:0 20px 50px rgba(0,0,0,0.4)}
 .auth-box h1{font-size:26px;margin-bottom:6px;text-align:center}
@@ -134,7 +134,6 @@ input:focus{outline:none;border-color:#42d4ff}
 .auth-success{background:#1a3d2a;color:#4ade80;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:13px;display:none}
 .full{width:100%}
 
-/* GAME */
 .top{padding:14px 16px 10px;background:linear-gradient(180deg,#121820 0%,#0d1218 100%);border-bottom:1px solid #1e2a36;position:sticky;top:0;z-index:50}
 .logo{font-size:20px;font-weight:800;margin-bottom:10px}.logo span{color:#42d4ff}
 .stats{display:flex;gap:7px;flex-wrap:wrap;font-size:12px;margin-bottom:10px}
@@ -175,167 +174,80 @@ input:focus{outline:none;border-color:#42d4ff}
 .action-btn{background:#1c2733;text-align:left;padding:10px 13px}
 .logout-btn{background:#3d1a1a;margin-top:10px}
 
-/* ===== CLEAN POLISHED HOUSE ===== */
+/* ===== MULTI-ROOM HOUSE ===== */
 .interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100;overflow:hidden}
 .interior.show{display:block}
 .inhead{height:56px;background:#1c2530;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;position:relative;z-index:20}
 
-.room{
+.room-tabs{
+  display:flex;
+  gap:6px;
+  padding:10px 12px;
+  background:#151d27;
+  border-bottom:1px solid #2a3542;
+  overflow-x:auto;
+}
+.room-tabs button{
+  flex-shrink:0;
+  padding:8px 14px;
+  font-size:13px;
+  background:#1c2733;
+  border:1px solid #2a3542;
+}
+.room-tabs button.active{
+  background:#42d4ff;
+  color:#0a0e14;
+  border-color:#42d4ff;
+}
+
+.room-view{
   position:absolute;
-  top:56px;
-  bottom:110px;
+  top:110px;
+  bottom:100px;
   left:0;
   right:0;
-  background:linear-gradient(to bottom,#2a2118 0%,#1a1410 100%);
+  background:#1a1410;
   overflow:hidden;
 }
 
-/* Floor */
-.floor{
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  height:45%;
-  background:linear-gradient(to bottom,#6b4423,#4a2e14);
-  border-top:3px solid #3a2410;
-}
-.floor::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:repeating-linear-gradient(
-    90deg,
-    transparent 0px,
-    transparent 40px,
-    rgba(0,0,0,0.1) 40px,
-    rgba(0,0,0,0.1) 41px
-  );
+.room-content{
+  position:relative;
+  width:100%;
+  height:100%;
 }
 
-/* Back wall */
-.wall{
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:55%;
-  background:linear-gradient(to bottom,#d4b896,#c4a882);
-}
+/* Common room styles */
+.wall{position:absolute;top:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,#d4b896,#c4a882)}
+.floor{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to bottom,#6b4423,#4a2e14)}
+.floor::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 38px,rgba(0,0,0,0.08) 38px 39px)}
 
-/* Window */
-.window{
-  position:absolute;
-  top:18%;
-  left:8%;
-  width:110px;
-  height:80px;
-  background:linear-gradient(160deg,#7ec8f5,#4aa8d8);
-  border:10px solid #f0e6d8;
-  border-radius:4px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.2);
-}
-.window::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(#f0e6d8,#f0e6d8) center/100% 6px no-repeat,
-    linear-gradient(#f0e6d8,#f0e6d8) center/6px 100% no-repeat;
-}
+/* Living Room */
+.living .window{position:absolute;top:12%;left:8%;width:100px;height:70px;background:linear-gradient(160deg,#7ec8f5,#4aa8d8);border:8px solid #f0e6d8;border-radius:4px}
+.living .sofa{position:absolute;bottom:18%;left:8%;width:140px;height:55px;background:#5c4d7e;border-radius:12px;box-shadow:5px 6px 0 rgba(0,0,0,0.3)}
+.living .sofa::before{content:"";position:absolute;top:-16px;left:10px;right:10px;height:20px;background:#6b5c8c;border-radius:8px 8px 0 0}
+.living .tv{position:absolute;bottom:28%;right:10%;width:90px;height:55px;background:#111;border:5px solid #222;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#42d4ff;font-weight:800;font-size:14px}
+.living .rug{position:absolute;bottom:20%;left:30%;width:130px;height:45px;background:radial-gradient(ellipse,#8b3a3a,#5a2525);border-radius:50%;opacity:0.7}
 
-/* Bed */
-.bed{
-  position:absolute;
-  bottom:12%;
-  left:8%;
-  width:160px;
-  height:70px;
-  background:#e8e8f0;
-  border-radius:8px;
-  box-shadow:6px 8px 0 rgba(0,0,0,0.25);
-}
-.pillow{
-  position:absolute;
-  top:8px;
-  left:12px;
-  width:50px;
-  height:22px;
-  background:#fff;
-  border-radius:6px;
-  box-shadow:2px 2px 0 rgba(0,0,0,0.1);
-}
-.blanket{
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  height:28px;
-  background:#c0c0d0;
-  border-radius:0 0 8px 8px;
-}
+/* Bedroom */
+.bedroom .bed{position:absolute;bottom:12%;left:10%;width:170px;height:75px;background:#e8e8f0;border-radius:8px;box-shadow:6px 8px 0 rgba(0,0,0,0.25)}
+.bedroom .pillow{position:absolute;top:8px;left:12px;width:55px;height:24px;background:#fff;border-radius:6px}
+.bedroom .blanket{position:absolute;bottom:0;left:0;right:0;height:30px;background:#c0c0d0;border-radius:0 0 8px 8px}
+.bedroom .wardrobe{position:absolute;bottom:15%;right:8%;width:60px;height:110px;background:#8b5e3c;border-radius:4px;box-shadow:4px 4px 0 rgba(0,0,0,0.2)}
+.bedroom .wardrobe::before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:#333;border-radius:50%}
 
-/* Sofa */
-.sofa{
-  position:absolute;
-  bottom:18%;
-  right:10%;
-  width:130px;
-  height:55px;
-  background:#5c4d7e;
-  border-radius:12px 12px 6px 6px;
-  box-shadow:5px 7px 0 rgba(0,0,0,0.3);
-}
-.sofa::before{
-  content:"";
-  position:absolute;
-  top:-18px;
-  left:8px;
-  right:8px;
-  height:22px;
-  background:#6b5c8c;
-  border-radius:8px 8px 0 0;
-}
+/* Kitchen */
+.kitchen .counter{position:absolute;bottom:15%;left:5%;right:5%;height:50px;background:#d4d4d4;border-radius:6px;box-shadow:0 6px 0 #999}
+.kitchen .sink{position:absolute;bottom:22%;left:15%;width:50px;height:25px;background:#a0c4e8;border-radius:4px;border:2px solid #7aa0c4}
+.kitchen .stove{position:absolute;bottom:22%;right:20%;width:55px;height:30px;background:#333;border-radius:4px}
+.kitchen .stove::before{content:"";position:absolute;top:5px;left:8px;width:14px;height:14px;background:#555;border-radius:50%}
+.kitchen .stove::after{content:"";position:absolute;top:5px;right:8px;width:14px;height:14px;background:#555;border-radius:50%}
+.kitchen .fridge{position:absolute;bottom:15%;right:5%;width:50px;height:90px;background:#e8e8e8;border-radius:4px;box-shadow:3px 3px 0 rgba(0,0,0,0.2)}
 
-/* TV */
-.tv-stand{
-  position:absolute;
-  bottom:28%;
-  right:18%;
-  width:90px;
-  height:12px;
-  background:#2a2a2a;
-  border-radius:3px;
-}
-.tv{
-  position:absolute;
-  bottom:32%;
-  right:16%;
-  width:100px;
-  height:60px;
-  background:#111;
-  border:6px solid #222;
-  border-radius:4px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#42d4ff;
-  font-weight:800;
-  font-size:16px;
-  box-shadow:0 10px 20px rgba(0,0,0,0.4);
-}
-
-/* Rug */
-.rug{
-  position:absolute;
-  bottom:22%;
-  left:30%;
-  width:140px;
-  height:50px;
-  background:radial-gradient(ellipse,#8b3a3a,#5a2525);
-  border-radius:50%;
-  opacity:0.7;
-}
+/* Bathroom */
+.bathroom .bathtub{position:absolute;bottom:12%;left:8%;width:150px;height:70px;background:#e0f0ff;border:4px solid #b0d0e8;border-radius:12px}
+.bathroom .toilet{position:absolute;bottom:15%;right:12%;width:45px;height:55px;background:#f0f0f0;border-radius:8px 8px 4px 4px}
+.bathroom .toilet::before{content:"";position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:30px;height:20px;background:#f0f0f0;border-radius:6px 6px 0 0}
+.bathroom .sink-b{position:absolute;bottom:35%;right:15%;width:50px;height:25px;background:#d0e8f8;border-radius:4px;border:2px solid #a0c4e0}
 
 .house-actions{
   position:absolute;
@@ -356,7 +268,7 @@ input:focus{outline:none;border-color:#42d4ff}
 `
 document.head.appendChild(style)
 
-// ---------- AUTH + GAME (same as before) ----------
+// ---------- AUTH ----------
 function showAuthScreen() {
   root.innerHTML = `
     <div class="auth-screen">
@@ -472,6 +384,54 @@ function needColor(v) {
   return "#e74c3c"
 }
 
+function renderRoom() {
+  const view = $("roomView")
+  if (!view) return
+
+  let html = `<div class="room-content ${currentRoom}">`
+  html += `<div class="wall"></div><div class="floor"></div>`
+
+  if (currentRoom === "living") {
+    html += `
+      <div class="window"></div>
+      <div class="sofa"></div>
+      <div class="tv">OWERRI</div>
+      <div class="rug"></div>
+    `
+  } else if (currentRoom === "bedroom") {
+    html += `
+      <div class="bed"><div class="pillow"></div><div class="blanket"></div></div>
+      <div class="wardrobe"></div>
+    `
+  } else if (currentRoom === "kitchen") {
+    html += `
+      <div class="counter"></div>
+      <div class="sink"></div>
+      <div class="stove"></div>
+      <div class="fridge"></div>
+    `
+  } else if (currentRoom === "bathroom") {
+    html += `
+      <div class="bathtub"></div>
+      <div class="toilet"></div>
+      <div class="sink-b"></div>
+    `
+  }
+
+  html += `</div>`
+  view.innerHTML = html
+
+  // Update active tab
+  document.querySelectorAll(".room-tabs button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.room === currentRoom)
+  })
+}
+
+function switchRoom(room) {
+  currentRoom = room
+  renderRoom()
+}
+
 function renderGame() {
   root.innerHTML = `
     <div class="top">
@@ -547,26 +507,21 @@ function renderGame() {
       </div>
     </div>
 
-    <!-- CLEAN POLISHED HOUSE -->
+    <!-- MULTI-ROOM HOUSE -->
     <div class="interior" id="interior">
       <div class="inhead">
         <b id="houseTitle">🏠 My House</b>
         <button id="leave">Leave</button>
       </div>
 
-      <div class="room">
-        <div class="wall"></div>
-        <div class="floor"></div>
-        <div class="window"></div>
-        <div class="rug"></div>
-        <div class="bed">
-          <div class="pillow"></div>
-          <div class="blanket"></div>
-        </div>
-        <div class="sofa"></div>
-        <div class="tv-stand"></div>
-        <div class="tv">OWERRI</div>
+      <div class="room-tabs">
+        <button data-room="living" class="active">🛋 Living</button>
+        <button data-room="bedroom">🛏 Bedroom</button>
+        <button data-room="kitchen">🍳 Kitchen</button>
+        <button data-room="bathroom">🚿 Bathroom</button>
       </div>
+
+      <div class="room-view" id="roomView"></div>
 
       <div class="house-actions">
         <button id="actSleep">😴 Sleep</button>
@@ -595,6 +550,10 @@ function renderGame() {
   $("actEat").onclick = () => houseAction("eat")
   $("actShower").onclick = () => houseAction("shower")
   $("actToilet").onclick = () => houseAction("toilet")
+
+  document.querySelectorAll(".room-tabs button").forEach(btn => {
+    btn.onclick = () => switchRoom(btn.dataset.room)
+  })
 
   document.querySelectorAll("[data-move]").forEach(btn => {
     btn.onclick = () => move(btn.dataset.move)
@@ -739,7 +698,9 @@ function enterHouse() {
   const h = player.selected
   if (!h || !h.owned) return
   $("houseTitle").textContent = "🏠 " + h.name
+  currentRoom = "living"
   $("interior").classList.add("show")
+  renderRoom()
 }
 
 function houseAction(type) {
