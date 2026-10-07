@@ -1,5 +1,5 @@
 /* =========================================================
-   Owerri Lifestyle – Stage A (Multi-Room House)
+   Owerri Lifestyle – Stage B (Save Progress)
    ========================================================= */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -103,7 +103,8 @@ let player = {
 
 let currentUser = null
 let isNight = false
-let currentRoom = "living" // living | bedroom | kitchen | bathroom
+let currentRoom = "living"
+let saveTimeout = null
 
 const others = [
   { id: 1, name: "Chidi", x: 40, y: 35, color: "#e74c3c" },
@@ -174,99 +175,132 @@ input:focus{outline:none;border-color:#42d4ff}
 .action-btn{background:#1c2733;text-align:left;padding:10px 13px}
 .logout-btn{background:#3d1a1a;margin-top:10px}
 
-/* ===== MULTI-ROOM HOUSE ===== */
 .interior{display:none;position:fixed;inset:0;background:#0f0c0a;z-index:100;overflow:hidden}
 .interior.show{display:block}
 .inhead{height:56px;background:#1c2530;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2a3542;position:relative;z-index:20}
 
-.room-tabs{
-  display:flex;
-  gap:6px;
-  padding:10px 12px;
-  background:#151d27;
-  border-bottom:1px solid #2a3542;
-  overflow-x:auto;
-}
-.room-tabs button{
-  flex-shrink:0;
-  padding:8px 14px;
-  font-size:13px;
-  background:#1c2733;
-  border:1px solid #2a3542;
-}
-.room-tabs button.active{
-  background:#42d4ff;
-  color:#0a0e14;
-  border-color:#42d4ff;
-}
+.room-tabs{display:flex;gap:6px;padding:10px 12px;background:#151d27;border-bottom:1px solid #2a3542;overflow-x:auto}
+.room-tabs button{flex-shrink:0;padding:8px 14px;font-size:13px;background:#1c2733;border:1px solid #2a3542}
+.room-tabs button.active{background:#42d4ff;color:#0a0e14;border-color:#42d4ff}
 
-.room-view{
-  position:absolute;
-  top:110px;
-  bottom:100px;
-  left:0;
-  right:0;
-  background:#1a1410;
-  overflow:hidden;
-}
-
-.room-content{
-  position:relative;
-  width:100%;
-  height:100%;
-}
-
-/* Common room styles */
+.room-view{position:absolute;top:110px;bottom:100px;left:0;right:0;background:#1a1410;overflow:hidden}
+.room-content{position:relative;width:100%;height:100%}
 .wall{position:absolute;top:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,#d4b896,#c4a882)}
 .floor{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to bottom,#6b4423,#4a2e14)}
 .floor::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 38px,rgba(0,0,0,0.08) 38px 39px)}
 
-/* Living Room */
 .living .window{position:absolute;top:12%;left:8%;width:100px;height:70px;background:linear-gradient(160deg,#7ec8f5,#4aa8d8);border:8px solid #f0e6d8;border-radius:4px}
 .living .sofa{position:absolute;bottom:18%;left:8%;width:140px;height:55px;background:#5c4d7e;border-radius:12px;box-shadow:5px 6px 0 rgba(0,0,0,0.3)}
 .living .sofa::before{content:"";position:absolute;top:-16px;left:10px;right:10px;height:20px;background:#6b5c8c;border-radius:8px 8px 0 0}
 .living .tv{position:absolute;bottom:28%;right:10%;width:90px;height:55px;background:#111;border:5px solid #222;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#42d4ff;font-weight:800;font-size:14px}
 .living .rug{position:absolute;bottom:20%;left:30%;width:130px;height:45px;background:radial-gradient(ellipse,#8b3a3a,#5a2525);border-radius:50%;opacity:0.7}
 
-/* Bedroom */
 .bedroom .bed{position:absolute;bottom:12%;left:10%;width:170px;height:75px;background:#e8e8f0;border-radius:8px;box-shadow:6px 8px 0 rgba(0,0,0,0.25)}
 .bedroom .pillow{position:absolute;top:8px;left:12px;width:55px;height:24px;background:#fff;border-radius:6px}
 .bedroom .blanket{position:absolute;bottom:0;left:0;right:0;height:30px;background:#c0c0d0;border-radius:0 0 8px 8px}
 .bedroom .wardrobe{position:absolute;bottom:15%;right:8%;width:60px;height:110px;background:#8b5e3c;border-radius:4px;box-shadow:4px 4px 0 rgba(0,0,0,0.2)}
-.bedroom .wardrobe::before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:#333;border-radius:50%}
 
-/* Kitchen */
 .kitchen .counter{position:absolute;bottom:15%;left:5%;right:5%;height:50px;background:#d4d4d4;border-radius:6px;box-shadow:0 6px 0 #999}
 .kitchen .sink{position:absolute;bottom:22%;left:15%;width:50px;height:25px;background:#a0c4e8;border-radius:4px;border:2px solid #7aa0c4}
 .kitchen .stove{position:absolute;bottom:22%;right:20%;width:55px;height:30px;background:#333;border-radius:4px}
-.kitchen .stove::before{content:"";position:absolute;top:5px;left:8px;width:14px;height:14px;background:#555;border-radius:50%}
-.kitchen .stove::after{content:"";position:absolute;top:5px;right:8px;width:14px;height:14px;background:#555;border-radius:50%}
 .kitchen .fridge{position:absolute;bottom:15%;right:5%;width:50px;height:90px;background:#e8e8e8;border-radius:4px;box-shadow:3px 3px 0 rgba(0,0,0,0.2)}
 
-/* Bathroom */
 .bathroom .bathtub{position:absolute;bottom:12%;left:8%;width:150px;height:70px;background:#e0f0ff;border:4px solid #b0d0e8;border-radius:12px}
 .bathroom .toilet{position:absolute;bottom:15%;right:12%;width:45px;height:55px;background:#f0f0f0;border-radius:8px 8px 4px 4px}
-.bathroom .toilet::before{content:"";position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:30px;height:20px;background:#f0f0f0;border-radius:6px 6px 0 0}
 .bathroom .sink-b{position:absolute;bottom:35%;right:15%;width:50px;height:25px;background:#d0e8f8;border-radius:4px;border:2px solid #a0c4e0}
 
-.house-actions{
-  position:absolute;
-  bottom:12px;
-  left:12px;
-  right:12px;
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-  z-index:30;
-}
-.house-actions button{
-  background:#1c2733;
-  border:1px solid #2a3542;
-  font-size:13px;
-  padding:12px 6px;
-}
+.house-actions{position:absolute;bottom:12px;left:12px;right:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;z-index:30}
+.house-actions button{background:#1c2733;border:1px solid #2a3542;font-size:13px;padding:12px 6px}
 `
 document.head.appendChild(style)
+
+// ---------- SAVE / LOAD SYSTEM ----------
+async function loadPlayerData() {
+  if (!currentUser) return
+
+  const { data, error } = await supabase
+    .from('players')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single()
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Load error:', error)
+    return
+  }
+
+  if (data) {
+    // Load existing data
+    player.cash = data.cash ?? 2500000
+    player.level = data.level ?? 1
+    player.reputation = data.reputation ?? 100
+    player.fuel = data.fuel ?? 100
+    player.hunger = data.hunger ?? 80
+    player.energy = data.energy ?? 85
+    player.fun = data.fun ?? 60
+    player.social = data.social ?? 55
+    player.hygiene = data.hygiene ?? 90
+    player.bladder = data.bladder ?? 70
+
+    // Restore owned houses
+    const owned = data.owned_houses || []
+    properties.forEach((p, i) => {
+      p.owned = owned.includes(i)
+    })
+  } else {
+    // First time – create player record
+    await supabase.from('players').insert({
+      id: currentUser.id,
+      display_name: currentUser.user_metadata?.display_name || currentUser.email,
+      cash: player.cash,
+      level: player.level,
+      reputation: player.reputation,
+      fuel: player.fuel,
+      hunger: player.hunger,
+      energy: player.energy,
+      fun: player.fun,
+      social: player.social,
+      hygiene: player.hygiene,
+      bladder: player.bladder,
+      owned_houses: []
+    })
+  }
+}
+
+async function savePlayerData() {
+  if (!currentUser) return
+
+  const ownedIndexes = properties
+    .map((p, i) => p.owned ? i : null)
+    .filter(i => i !== null)
+
+  const { error } = await supabase
+    .from('players')
+    .upsert({
+      id: currentUser.id,
+      display_name: currentUser.user_metadata?.display_name || currentUser.email,
+      cash: player.cash,
+      level: player.level,
+      reputation: player.reputation,
+      fuel: player.fuel,
+      hunger: Math.round(player.hunger),
+      energy: Math.round(player.energy),
+      fun: Math.round(player.fun),
+      social: Math.round(player.social),
+      hygiene: Math.round(player.hygiene),
+      bladder: Math.round(player.bladder),
+      owned_houses: ownedIndexes,
+      updated_at: new Date().toISOString()
+    })
+
+  if (error) console.error('Save error:', error)
+}
+
+// Debounced save (saves 1.5 seconds after last change)
+function scheduleSave() {
+  clearTimeout(saveTimeout)
+  saveTimeout = setTimeout(savePlayerData, 1500)
+}
 
 // ---------- AUTH ----------
 function showAuthScreen() {
@@ -349,10 +383,12 @@ async function login() {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) return showError(error.message)
   currentUser = data.user
+  await loadPlayerData()
   startGame()
 }
 
 async function logout() {
+  await savePlayerData()
   await supabase.auth.signOut()
   currentUser = null
   showAuthScreen()
@@ -362,6 +398,7 @@ async function checkSession() {
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {
     currentUser = session.user
+    await loadPlayerData()
     startGame()
   } else {
     showAuthScreen()
@@ -387,41 +424,19 @@ function needColor(v) {
 function renderRoom() {
   const view = $("roomView")
   if (!view) return
-
   let html = `<div class="room-content ${currentRoom}">`
   html += `<div class="wall"></div><div class="floor"></div>`
-
   if (currentRoom === "living") {
-    html += `
-      <div class="window"></div>
-      <div class="sofa"></div>
-      <div class="tv">OWERRI</div>
-      <div class="rug"></div>
-    `
+    html += `<div class="window"></div><div class="sofa"></div><div class="tv">OWERRI</div><div class="rug"></div>`
   } else if (currentRoom === "bedroom") {
-    html += `
-      <div class="bed"><div class="pillow"></div><div class="blanket"></div></div>
-      <div class="wardrobe"></div>
-    `
+    html += `<div class="bed"><div class="pillow"></div><div class="blanket"></div></div><div class="wardrobe"></div>`
   } else if (currentRoom === "kitchen") {
-    html += `
-      <div class="counter"></div>
-      <div class="sink"></div>
-      <div class="stove"></div>
-      <div class="fridge"></div>
-    `
+    html += `<div class="counter"></div><div class="sink"></div><div class="stove"></div><div class="fridge"></div>`
   } else if (currentRoom === "bathroom") {
-    html += `
-      <div class="bathtub"></div>
-      <div class="toilet"></div>
-      <div class="sink-b"></div>
-    `
+    html += `<div class="bathtub"></div><div class="toilet"></div><div class="sink-b"></div>`
   }
-
   html += `</div>`
   view.innerHTML = html
-
-  // Update active tab
   document.querySelectorAll(".room-tabs button").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.room === currentRoom)
   })
@@ -507,22 +522,18 @@ function renderGame() {
       </div>
     </div>
 
-    <!-- MULTI-ROOM HOUSE -->
     <div class="interior" id="interior">
       <div class="inhead">
         <b id="houseTitle">🏠 My House</b>
         <button id="leave">Leave</button>
       </div>
-
       <div class="room-tabs">
         <button data-room="living" class="active">🛋 Living</button>
         <button data-room="bedroom">🛏 Bedroom</button>
         <button data-room="kitchen">🍳 Kitchen</button>
         <button data-room="bathroom">🚿 Bathroom</button>
       </div>
-
       <div class="room-view" id="roomView"></div>
-
       <div class="house-actions">
         <button id="actSleep">😴 Sleep</button>
         <button id="actTV">📺 TV</button>
@@ -563,7 +574,7 @@ function renderGame() {
   renderHouses()
   renderOthers()
   update()
-  log(`Welcome, ${currentUser.user_metadata?.display_name || currentUser.email}!`)
+  log(`Welcome back, ${currentUser.user_metadata?.display_name || currentUser.email}!`)
 }
 
 function renderNeeds() {
@@ -639,6 +650,7 @@ function update() {
   renderNeeds()
   renderHouses()
   renderOthers()
+  scheduleSave()
 }
 
 function selectZone(i) {
