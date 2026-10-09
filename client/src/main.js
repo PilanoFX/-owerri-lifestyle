@@ -133,7 +133,7 @@ let player = {
   mode:"Walk", fuel:100, direction:"down",
   hunger:78, energy:82, fun:55, social:50, hygiene:88, bladder:68,
   username:"Player", houseId:null, vehicles:[], currentVehicle:null,
-  friends:[]
+  friends:[], fitness:12, job:"Unemployed", homeRoomPosition:50
 }
 
 let currentUser = null
@@ -726,11 +726,78 @@ function renderRoom(){
     ${details.toilet?'<div class="toilet-real"></div>':''}
     <div class="avatar3d"><div class="avatar-hair"></div><div class="avatar-head"></div><div class="avatar-body"></div><div class="avatar-arm left"></div><div class="avatar-arm right"></div><div class="avatar-leg left"></div><div class="avatar-leg right"></div><div class="avatar-shoe left"></div><div class="avatar-shoe right"></div></div>
     <div class="room-caption">${details.title} <span>• OWERRI RESIDENCE</span></div>
+     <div style="position:absolute;left:12px;bottom:42px;display:flex;gap:6px;flex-wrap:wrap;max-width:90%">
+       ${Object.entries({sofa:"🛋 Sofa",tv:"📺 TV",bed:"🛏 Bed",fridge:"🧊 Fridge",stove:"🍳 Stove",shower:"🚿 Shower",toilet:"🚽 Toilet",wardrobe:"👕 Wardrobe",table:"🪑 Table"}).filter(([key])=>details[key]).map(([key,label])=>`<button type="button" data-furniture="${key}" style="padding:7px 9px;background:#182634;border:1px solid #304458">${label}</button>`).join("")}
+     </div>
   </div>`
   view.innerHTML=html
+  view.querySelectorAll("[data-furniture]").forEach(b=>b.onclick=()=>useFurniture(b.dataset.furniture))
   document.querySelectorAll(".room-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.room===currentRoom))
 }
-function switchRoom(r){currentRoom=r;renderRoom()}
+function switchRoom(r){currentRoom=r;renderRoom();log("🚪 Walked into the "+r)}
+function useFurniture(item){
+  const actions={
+    sofa:()=>{player.fun=clamp(player.fun+10);player.energy=clamp(player.energy+7);log("🛋 You relaxed on the sofa")},
+    tv:()=>{player.fun=clamp(player.fun+16);player.energy=clamp(player.energy-3);log("📺 You watched Owerri TV")},
+    bed:()=>{player.energy=clamp(player.energy+22);log("🛏 You rested on the bed")},
+    fridge:()=>{if(player.cash<500)return log("❌ You need ₦500 to get a snack");player.cash-=500;player.hunger=clamp(player.hunger+12);log("🧊 You took a snack from the fridge")},
+    stove:()=>{if(player.cash<1200)return log("❌ You need ₦1,200 for ingredients");player.cash-=1200;player.hunger=clamp(player.hunger+24);log("🍳 You cooked a meal")},
+    shower:()=>{player.hygiene=100;player.energy=clamp(player.energy-4);log("🚿 You took a shower")},
+    toilet:()=>{player.bladder=100;log("🚽 You used the bathroom")},
+    wardrobe:()=>{player.reputation+=1;log("👕 You changed your outfit")},
+    table:()=>{player.social=clamp(player.social+4);log("🪑 You sat at the table")}
+  };
+  if(actions[item]){actions[item]();update()}
+}
+function openFeature(type){
+  const modal=$("featureModal"),title=$("featureTitle"),body=$("featureBody");
+  if(!modal||!body)return;
+  const button=(label,action,sub="")=>`<button type="button" data-feature-action="${action}" style="display:block;width:100%;text-align:left;padding:13px;margin:8px 0;background:#182634;border:1px solid #2a3b4d;border-radius:12px"><b>${label}</b>${sub?`<small style="display:block;color:#91a4b7;margin-top:4px">${sub}</small>`:""}</button>`;
+  const panels={
+    gym:{title:"💪 Pro Life Gym",intro:`Fitness: <b>${Math.round(player.fitness)}/100</b> · Energy: <b>${Math.round(player.energy)}</b>`,html:button("🏋️ Lift weights","weights","₦2,000 · +12 fitness, uses energy")+button("🏃 Treadmill run","run","₦1,500 · +9 fitness, uses energy")+button("🧘 Stretch & recover","stretch","Free · +3 fitness, small energy recovery")+button("🥤 Protein shake","shake","₦1,800 · restores hunger and energy")},
+    club:{title:"🎵 Wetheral Nightclub",intro:"Music is playing. Choose how to spend your night.",html:button("💃 Dance floor","dance","₦3,000 · fun and fitness boost")+button("🥤 Buy a soft drink","drink","₦1,200 · social boost")+button("🗣️ Talk to someone","clubtalk","Free · meet a local NPC")+button("🎧 Request a song","song","₦500 · fun boost")},
+    airport:{title:"✈️ Sam Mbakwe Airport",intro:"Check in first, then choose a destination. This is an in-game travel simulation, not a real booking.",html:button("🧳 Check in","checkin","Free · prepare for departure")+button("🏙️ Fly to Lagos","lagos","₦85,000 · simulated trip")+button("🌉 Fly to Port Harcourt","ph","₦42,000 · simulated trip")+button("🏢 Fly to Abuja","abuja","₦68,000 · simulated trip")+button("🌴 Fly to Enugu","enugu","₦25,000 · simulated trip")},
+    jobs:{title:"💼 Jobs & Property",intro:`Current job: <b>${escapeHtml(player.job||"Unemployed")}</b><br>Cash: <b>${money(player.cash)}</b><br>Owned home: <b>${player.houseId?escapeHtml(houseList.find(h=>h.id===player.houseId)?.name||"Yes"):"None"}</b>`,html:button("🧑‍💼 Office assistant shift","office","Earn ₦28,000 · costs energy")+button("🍔 Restaurant shift","restaurant","Earn ₦22,000 · costs energy")+button("🛵 Delivery shift","delivery","Earn ₦35,000 · requires no vehicle")+button("📈 Apply for promotion","promotion","Uses reputation and experience")+button("🏠 Browse property","property","View available homes below")},
+    people:{title:"🧑 People & Social",intro:"Talk to animated local residents or interact with real players when they are online.",html:button("👋 Greet a resident","greet","Free · improve social need")+button("💬 Have a conversation","conversation","Free · fun and social boost")+button("🤝 Make a friend","friend","Free · build your reputation")+button("👥 Open friends & real players","online","Open the multiplayer friends panel")}
+  };
+  const p=panels[type]||panels.people;
+  title.textContent=p.title;body.innerHTML=`<p style="color:#9aabbd;font-size:13px;line-height:1.5;margin-bottom:12px">${p.intro}</p>${p.html}<div id="featureMessage" style="color:#65d8ff;font-size:13px;min-height:18px;margin-top:10px"></div>`;
+  body.querySelectorAll("[data-feature-action]").forEach(b=>b.onclick=()=>runFeatureAction(b.dataset.featureAction,type));
+  modal.style.display="flex";
+}
+function closeFeature(){const modal=$("featureModal");if(modal)modal.style.display="none"}
+function featureMessage(text){const el=$("featureMessage");if(el)el.textContent=text}
+function runFeatureAction(action,type){
+  const cost={weights:2000,run:1500,shake:1800,dance:3000,drink:1200,song:500,lagos:85000,ph:42000,abuja:68000,enugu:25000}[action]||0;
+  if(player.cash<cost){featureMessage("Not enough money for that activity.");return}
+  if(action==="online"){closeFeature();openFriendsPanel();return}
+  if(action==="property"){closeFeature();$("houseList")?.scrollIntoView({behavior:"smooth",block:"center"});return}
+  player.cash-=cost;
+  let msg="";
+  if(action==="weights"){player.fitness=clamp(player.fitness+12);player.energy=clamp(player.energy-16);player.hunger=clamp(player.hunger-8);player.hygiene=clamp(player.hygiene-12);msg="Workout complete. Fitness +12."}
+  else if(action==="run"){player.fitness=clamp(player.fitness+9);player.energy=clamp(player.energy-18);player.hunger=clamp(player.hunger-10);msg="Run complete. Fitness +9."}
+  else if(action==="stretch"){player.fitness=clamp(player.fitness+3);player.energy=clamp(player.energy+3);msg="You stretched and recovered. Fitness +3."}
+  else if(action==="shake"){player.hunger=clamp(player.hunger+14);player.energy=clamp(player.energy+16);msg="Protein shake enjoyed."}
+  else if(action==="dance"){player.fun=clamp(player.fun+24);player.social=clamp(player.social+12);player.fitness=clamp(player.fitness+2);player.energy=clamp(player.energy-14);msg="You danced to the music. Fitness +2."}
+  else if(action==="drink"){player.social=clamp(player.social+10);player.fun=clamp(player.fun+5);msg="You enjoyed a soft drink."}
+  else if(action==="song"){player.fun=clamp(player.fun+12);msg="The DJ played your request."}
+  else if(action==="checkin"){msg="Check-in complete. Pick a flight destination to simulate travel."}
+  else if(["lagos","ph","abuja","enugu"].includes(action)){
+    const cities={lagos:"Lagos",ph:"Port Harcourt",abuja:"Abuja",enugu:"Enugu"};
+    player.energy=clamp(player.energy-8);player.fun=clamp(player.fun+10);player.x=zones.find(z=>z.name==="Sam Mbakwe Airport").x;player.y=zones.find(z=>z.name==="Sam Mbakwe Airport").y;
+    msg="Arrived in "+cities[action]+" in the travel simulation. The current playable map remains Owerri.";
+  }
+  else if(action==="office"||action==="restaurant"||action==="delivery"){
+    const jobs={office:{name:"Office Assistant",pay:28000,energy:18},restaurant:{name:"Restaurant Worker",pay:22000,energy:14},delivery:{name:"Delivery Rider",pay:35000,energy:22}};
+    const j=jobs[action];player.job=j.name;player.cash+=j.pay;player.energy=clamp(player.energy-j.energy);player.hunger=clamp(player.hunger-8);player.reputation+=3;player.level=Math.max(player.level,Math.floor(player.reputation/110)+1);
+    msg="Shift complete: earned "+money(j.pay)+". Job set to "+j.name+".";
+  }
+  else if(action==="promotion"){if(player.reputation<65){featureMessage("Build reputation to at least 65 before applying.");return}player.job=(player.job==="Unemployed"?"Junior Associate":player.job+" II");player.reputation+=5;msg="Promotion approved! Your job title improved."}
+  else if(action==="greet"){player.social=clamp(player.social+8);player.fun=clamp(player.fun+3);msg="A nearby resident greeted you back."}
+  else if(action==="conversation"||action==="clubtalk"){player.social=clamp(player.social+14);player.fun=clamp(player.fun+10);player.reputation+=1;msg=action==="clubtalk"?"You chatted with someone at the club.":"You had a friendly conversation with a resident."}
+  else if(action==="friend"){player.social=clamp(player.social+10);player.reputation+=3;msg="You made a local acquaintance. NPC friendships are simulated."}
+  featureMessage(msg);log("✨ "+msg);update();
+}
 
 function renderGame(){
   root.innerHTML=`
@@ -741,6 +808,7 @@ function renderGame(){
       <div class="stat">💰 <b id="cash"></b></div>
       <div class="stat">⭐ <b id="level"></b></div>
       <div class="stat">❤️ <b id="rep"></b></div>
+      <div class="stat">💪 <b id="fitnessStat">12</b>% Fitness</div>
       <div class="stat">⛽ <b id="fuel"></b>%</div>
       <div class="stat">🚶 <b id="mode"></b></div>
       <div class="stat" id="timeLabel">☀️ Day</div>
@@ -781,6 +849,11 @@ function renderGame(){
         <button id="work" class="full">💼 Work</button>
         <button id="travel" class="full" style="margin-top:6px">🗺️ Random Travel</button>
         <button id="myHouse" class="full" style="margin-top:6px">🏠 My House</button>
+     <button id="gymBtn" class="full" style="margin-top:6px">💪 Pro Life Gym</button>
+     <button id="clubBtn" class="full" style="margin-top:6px">🎵 Nightclub</button>
+     <button id="airportBtn" class="full" style="margin-top:6px">✈️ Airport & Travel</button>
+     <button id="jobsBtn" class="full" style="margin-top:6px">💼 Jobs & Property</button>
+     <button id="peopleBtn" class="full" style="margin-top:6px">🧑 People & Social</button>
       </div>
       <div class="panel">
         <h3>🏠 Houses</h3>
@@ -790,6 +863,12 @@ function renderGame(){
         <h3>Activity</h3>
         <div id="log" class="log"></div>
       </div>
+    </div>
+  </div>
+  <div id="featureModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.78);padding:18px;align-items:center;justify-content:center">
+    <div style="width:100%;max-width:520px;max-height:88vh;overflow:auto;background:#101923;border:1px solid #2a3b4d;border-radius:20px;padding:18px;box-shadow:0 20px 60px #000">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px"><h2 id="featureTitle" style="font-size:20px">Activity</h2><button id="featureClose" type="button">✕</button></div>
+      <div id="featureBody"></div>
     </div>
   </div>
   <div class="interior" id="interior">
@@ -815,6 +894,13 @@ function renderGame(){
   $("work").onclick=work
   $("travel").onclick=travel
   $("myHouse").onclick=enterMyHouse
+  $("gymBtn").onclick=()=>openFeature("gym")
+  $("clubBtn").onclick=()=>openFeature("club")
+  $("airportBtn").onclick=()=>openFeature("airport")
+  $("jobsBtn").onclick=()=>openFeature("jobs")
+  $("peopleBtn").onclick=()=>openFeature("people")
+  $("featureClose").onclick=closeFeature
+  $("featureModal").addEventListener("click",e=>{if(e.target.id==="featureModal")closeFeature()})
   $("leave").onclick=()=>$("interior").classList.remove("show")
   document.querySelectorAll("[data-move]").forEach(b=>{
     const dir=b.dataset.move;
@@ -1089,6 +1175,8 @@ window._ha=t=>houseAction(t)
 
 function renderOthers(){
   const c=$("others");if(!c)return;c.innerHTML=""
+  const locals=[{id:"npc-ada",name:"Ada",x:45,y:42,color:"#e879f9"},{id:"npc-chidi",name:"Chidi",x:62,y:34,color:"#f59e0b"},{id:"npc-amaka",name:"Amaka",x:29,y:55,color:"#34d399"}];
+  locals.forEach(n=>{const el=document.createElement("button");el.type="button";el.className="other npc";el.style.left=n.x+"%";el.style.top=n.y+"%";el.style.background=n.color;el.textContent=n.name[0];el.title=n.name+" · Local resident";el.setAttribute("aria-label","Talk to "+n.name);el.onclick=e=>{e.stopPropagation();openFeature("people");};c.appendChild(el)});
   onlinePlayers.forEach(o=>{
     const el=document.createElement("div")
     el.className="other"+(isFriend(o.id)?" friend":"")
@@ -1109,6 +1197,7 @@ function update(){
   $("cash").textContent=money(player.cash)
   $("level").textContent=player.level
   $("rep").textContent=player.reputation
+  const fitnessStat=$("fitnessStat");if(fitnessStat)fitnessStat.textContent=Math.round(player.fitness)
   $("fuel").textContent=Math.round(player.fuel)
   $("mode").textContent=player.mode
   $("player").style.left=player.x+"%";$("player").style.top=player.y+"%"
