@@ -133,7 +133,7 @@ let player = {
   mode:"Walk", fuel:100, direction:"down",
   hunger:78, energy:82, fun:55, social:50, hygiene:88, bladder:68,
   username:"Player", houseId:null, vehicles:[], currentVehicle:null,
-  friends:[], fitness:12, job:"Unemployed", homeRoomPosition:50
+  friends:[], fitness:12, job:"Unemployed", checkedIn:false
 }
 
 let currentUser = null
@@ -269,6 +269,9 @@ input:focus{outline:none;border-color:#3ecfff}
 .other{position:absolute;transform:translate(-50%,-50%);z-index:22;width:26px;height:26px;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;cursor:pointer;transition:transform .12s}
 .other:hover,.other:active{transform:translate(-50%,-50%) scale(1.28);z-index:35}
 .other.friend{box-shadow:0 0 0 2.5px #3ecfff}
+.other.npc{border-radius:9px 9px 13px 13px;animation:npcBob 1.8s ease-in-out infinite;box-shadow:0 4px 10px #0008}
+.other.npc:nth-child(2n){animation-delay:.35s}.other.npc:nth-child(3n){animation-delay:.7s}
+@keyframes npcBob{0%,100%{margin-top:0}50%{margin-top:-5px}}
 
 .side{display:flex;flex-direction:column;gap:10px}
 .panel{background:linear-gradient(180deg,#111820,#0d131c);border:1px solid #1a2430;border-radius:15px;padding:13px}
@@ -344,6 +347,7 @@ function isFriend(id){return player.friends.some(f=>f.id===id)}
 async function loadPlayerData(){
   if(!currentUser)return
   const {data}=await supabase.from("players").select("*").eq("id",currentUser.id).single()
+  try{const extra=JSON.parse(localStorage.getItem("owerriLifestyleExtra:"+currentUser.id)||"{}");player.fitness=clamp(Number(extra.fitness??12));player.job=String(extra.job||"Unemployed");player.checkedIn=!!extra.checkedIn}catch{}
   if(data){
     player.cash=data.cash??1650000
     player.level=data.level??1
@@ -382,7 +386,11 @@ async function savePlayerData(){
   })
 }
 
-function scheduleSave(){clearTimeout(saveTimeout);saveTimeout=setTimeout(savePlayerData,1400)}
+function scheduleSave(){
+  clearTimeout(saveTimeout);
+  try{if(currentUser)localStorage.setItem("owerriLifestyleExtra:"+currentUser.id,JSON.stringify({fitness:player.fitness,job:player.job,checkedIn:player.checkedIn}))}catch{}
+  saveTimeout=setTimeout(savePlayerData,1400)
+}
 
 // ===================== AUTH =====================
 function showAuthScreen(){
@@ -781,8 +789,10 @@ function runFeatureAction(action,type){
   else if(action==="dance"){player.fun=clamp(player.fun+24);player.social=clamp(player.social+12);player.fitness=clamp(player.fitness+2);player.energy=clamp(player.energy-14);msg="You danced to the music. Fitness +2."}
   else if(action==="drink"){player.social=clamp(player.social+10);player.fun=clamp(player.fun+5);msg="You enjoyed a soft drink."}
   else if(action==="song"){player.fun=clamp(player.fun+12);msg="The DJ played your request."}
-  else if(action==="checkin"){msg="Check-in complete. Pick a flight destination to simulate travel."}
+  else if(action==="checkin"){player.checkedIn=true;msg="Check-in complete. You can now choose a flight destination."}
   else if(["lagos","ph","abuja","enugu"].includes(action)){
+    if(!player.checkedIn){player.cash+=cost;featureMessage("Please check in before choosing a flight.");return}
+    player.checkedIn=false;
     const cities={lagos:"Lagos",ph:"Port Harcourt",abuja:"Abuja",enugu:"Enugu"};
     player.energy=clamp(player.energy-8);player.fun=clamp(player.fun+10);player.x=zones.find(z=>z.name==="Sam Mbakwe Airport").x;player.y=zones.find(z=>z.name==="Sam Mbakwe Airport").y;
     msg="Arrived in "+cities[action]+" in the travel simulation. The current playable map remains Owerri.";
@@ -1176,7 +1186,7 @@ window._ha=t=>houseAction(t)
 function renderOthers(){
   const c=$("others");if(!c)return;c.innerHTML=""
   const locals=[{id:"npc-ada",name:"Ada",x:45,y:42,color:"#e879f9"},{id:"npc-chidi",name:"Chidi",x:62,y:34,color:"#f59e0b"},{id:"npc-amaka",name:"Amaka",x:29,y:55,color:"#34d399"}];
-  locals.forEach(n=>{const el=document.createElement("button");el.type="button";el.className="other npc";el.style.left=n.x+"%";el.style.top=n.y+"%";el.style.background=n.color;el.textContent=n.name[0];el.title=n.name+" · Local resident";el.setAttribute("aria-label","Talk to "+n.name);el.onclick=e=>{e.stopPropagation();openFeature("people");};c.appendChild(el)});
+  locals.forEach(n=>{const el=document.createElement("button");el.type="button";el.className="other npc";el.style.left=n.x+"%";el.style.top=n.y+"%";el.style.background=n.color;el.textContent=n.name[0];el.title=n.name+" · Local resident";el.setAttribute("aria-label","Talk to "+n.name);el.onclick=e=>{e.stopPropagation();openFeature("people");featureMessage("You approached "+n.name+". Choose a conversation below.");};c.appendChild(el)});
   onlinePlayers.forEach(o=>{
     const el=document.createElement("div")
     el.className="other"+(isFriend(o.id)?" friend":"")
