@@ -350,7 +350,17 @@ function isFriend(id){return player.friends.some(f=>f.id===id)}
 
 // ===================== SAVE / LOAD =====================
 async function loadPlayerData(){
-  try{const local=JSON.parse(localStorage.getItem("owerriLifestyleLocal")||"{}");if(local.houseId)player.houseId=local.houseId;if(local.vehicles)player.vehicles=local.vehicles;if(local.cash!==undefined)player.cash=local.cash}catch{}
+  try{
+    const userLocal=currentUser?localStorage.getItem("owerriLifestyleLocal:"+currentUser.id):null;
+    const local=JSON.parse(userLocal||localStorage.getItem("owerriLifestyleLocal")||"{}");
+    if(local.houseId)player.houseId=local.houseId;
+    if(Array.isArray(local.vehicles))player.vehicles=local.vehicles;
+    if(local.cash!==undefined)player.cash=local.cash;
+    if(Number.isFinite(local.x))player.x=local.x;
+    if(Number.isFinite(local.y))player.y=local.y;
+    if(local.mode==="Walk"||local.mode==="Drive")player.mode=local.mode;
+    if(local.currentVehicle)player.currentVehicle=local.currentVehicle;
+  }catch{}
   if(!currentUser)return
   const {data}=await supabase.from("players").select("*").eq("id",currentUser.id).single()
   try{const extra=JSON.parse(localStorage.getItem("owerriLifestyleExtra:"+currentUser.id)||"{}");player.fitness=clamp(Number(extra.fitness??12));player.job=String(extra.job||"Unemployed");player.checkedIn=!!extra.checkedIn;for(const k of ["skills","groceries","traits","aspiration","wishes","moodlets","rentDue","billsDue","radioStation","wanted","fines","business","ownedFurniture","rentedLot","governorSupport"])if(extra[k]!==undefined)player[k]=extra[k]}catch{}
@@ -381,16 +391,21 @@ async function loadPlayerData(){
 }
 
 async function savePlayerData(){
-  try{localStorage.setItem("owerriLifestyleLocal",JSON.stringify({houseId:player.houseId,vehicles:player.vehicles,cash:player.cash}))}catch{}
-  if(!currentUser)return
-  await supabase.from("players").upsert({
+  const snapshot={houseId:player.houseId,vehicles:player.vehicles,cash:player.cash,x:player.x,y:player.y,mode:player.mode,currentVehicle:player.currentVehicle};
+  try{
+    localStorage.setItem("owerriLifestyleLocal",JSON.stringify(snapshot));
+    if(currentUser)localStorage.setItem("owerriLifestyleLocal:"+currentUser.id,JSON.stringify(snapshot));
+  }catch{}
+  if(!currentUser)return;
+  const {error}=await supabase.from("players").upsert({
     id:currentUser.id,display_name:player.username,cash:player.cash,level:player.level,
     reputation:player.reputation,fuel:player.fuel,hunger:Math.round(player.hunger),
     energy:Math.round(player.energy),fun:Math.round(player.fun),social:Math.round(player.social),
     hygiene:Math.round(player.hygiene),bladder:Math.round(player.bladder),
     house_id:player.houseId,vehicles:player.vehicles,friends:player.friends,
     updated_at:new Date().toISOString()
-  })
+  });
+  if(error)console.warn("Cloud save unavailable; local save retained.",error.message);
 }
 
 function scheduleSave(){
@@ -658,14 +673,19 @@ function sendDM(){
 
 // ===================== HOUSES & GARAGE =====================
 function buyHouse(h){
-  if(player.houseId)return log("You already own a house")
-  if(player.cash<h.price)return log("❌ Not enough money")
-  player.cash-=h.price
-  player.houseId=h.id
-  try{localStorage.setItem("owerriLifestyleLocal",JSON.stringify({houseId:player.houseId,vehicles:player.vehicles,cash:player.cash}))}catch{}
-  player.reputation+=18
-  log("🎉 Bought "+h.name)
-  update();scheduleSave()
+  if(!h)return;
+  if(player.houseId)return log("You already own a house — enter it from the map or My House");
+  if(player.cash<h.price)return log("❌ Not enough money");
+  player.cash-=h.price;
+  player.houseId=h.id;
+  player.reputation+=18;
+  const snapshot={houseId:player.houseId,vehicles:player.vehicles,cash:player.cash,x:player.x,y:player.y,mode:player.mode,currentVehicle:player.currentVehicle};
+  try{
+    localStorage.setItem("owerriLifestyleLocal",JSON.stringify(snapshot));
+    if(currentUser)localStorage.setItem("owerriLifestyleLocal:"+currentUser.id,JSON.stringify(snapshot));
+  }catch{}
+  log("🏡 Purchased "+h.name+" — ownership saved");
+  update();scheduleSave();savePlayerData();
 }
 function enterMyHouse(){
   if(!player.houseId)return log("You don't own a house yet")
@@ -769,6 +789,8 @@ function enterPlace(zone){
   else if(type.includes("fitness")||name.includes("gym")){rooms=["gymFloor"];labels={gymFloor:"Gym Floor"};}
   else if(type.includes("travel")||name.includes("airport")){rooms=["airportTerminal","restaurant"];labels={airportTerminal:"Terminal",restaurant:"Café"};}
   else if(type.includes("entertainment")||name.includes("mangrove")){rooms=["entertainment","restaurant"];labels={entertainment:"Games Floor",restaurant:"Snack Bar"};}
+  else if(name.includes("bank")||type.includes("office")||name.includes("world bank")){rooms=["officeFloor","lobby"];labels={officeFloor:"Banking Hall",lobby:"Customer Lounge"};}
+  else if(type.includes("residential")||name.includes("amakohia")||name.includes("new owerri")){rooms=["plaza","living","bedroom"];labels={plaza:"Neighbourhood",living:"Living Room",bedroom:"Sample Home"};}
   else if(type.includes("junction")||type.includes("hub")||type.includes("area")||name.includes("fire service")||name.includes("control post")){rooms=["officeFloor","plaza"];labels={officeFloor:"Public Office",plaza:"Public Area"};}
   currentRoom=rooms[0];$("houseTitle").textContent=zone.name;
   const tabs=$("roomTabs");tabs.innerHTML=rooms.map(function(r){return '<button type="button" data-room="'+r+'">'+(labels[r]||r)+'</button>'}).join("");
@@ -1153,21 +1175,35 @@ async function createCity3D(){
     box(11,.22,9,mat(0xb3b8ae),12,.08,12,false);
     const fountain=new THREE.Mesh(new THREE.CylinderGeometry(1.45,1.65,.55,20),mat(0x9ba8ad));fountain.position.set(12,.48,12);scene.add(fountain);
     const water=new THREE.Mesh(new THREE.CylinderGeometry(1.12,1.12,.12,20),mat(0x3a9fc2,.25));water.position.set(12,.79,12);scene.add(water);
-    // A proper low-poly human avatar in the 3D world, not a flat map marker.
-    const skin=mat(0x9c603f),shirt=mat(0x2777b9),trousers=mat(0x252d39),shoes=mat(0xe8e7dc),hair=mat(0x211915),eyes=mat(0x17120f);
+    // Detailed low-poly human avatar: layered clothing, neck, ears, hands, shoes and face.
+    const skin=mat(0x8f5638,.72),skinLight=mat(0xb97850,.72),shirt=mat(0x246bb0,.78),shirtTrim=mat(0xe6c56a,.7),trousers=mat(0x202936,.86),shoes=mat(0xe8e7dc,.65),hair=mat(0x1b1512,.95),eyes=mat(0x17120f,.5),sole=mat(0x34343a,.9);
     const avatar=new THREE.Group();
     function part(geometry,material,x,y,z){const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;avatar.add(mesh);return mesh;}
-    part(new THREE.CylinderGeometry(.27,.34,.78,12),shirt,0,1.34,0);
-    part(new THREE.SphereGeometry(.245,16,12),skin,0,2.02,0);
-    part(new THREE.SphereGeometry(.258,16,10,0,Math.PI*2,0,Math.PI*.54),hair,0,2.13,-.015);
-    part(new THREE.SphereGeometry(.025,8,6),eyes,-.085,2.04,.219);
-    part(new THREE.SphereGeometry(.025,8,6),eyes,.085,2.04,.219);
-    part(new THREE.CylinderGeometry(.07,.085,.7,10),skin,-.36,1.35,0).rotation.z=-.12;
-    part(new THREE.CylinderGeometry(.07,.085,.7,10),skin,.36,1.35,0).rotation.z=.12;
-    part(new THREE.CylinderGeometry(.105,.12,.72,7),trousers,-.13,.62,0);
-    part(new THREE.CylinderGeometry(.105,.12,.72,7),trousers,.13,.62,0);
-    part(new THREE.BoxGeometry(.22,.12,.38),shoes,-.13,.15,.07);
-    part(new THREE.BoxGeometry(.22,.12,.38),shoes,.13,.15,.07);
+    part(new THREE.CapsuleGeometry(.105,.48,4,8),trousers,-.14,.53,0);
+    part(new THREE.CapsuleGeometry(.105,.48,4,8),trousers,.14,.53,0);
+    part(new THREE.BoxGeometry(.23,.11,.39),shoes,-.14,.13,.09);
+    part(new THREE.BoxGeometry(.23,.045,.39),sole,-.14,.075,.09);
+    part(new THREE.BoxGeometry(.23,.11,.39),shoes,.14,.13,.09);
+    part(new THREE.BoxGeometry(.23,.045,.39),sole,.14,.075,.09);
+    part(new THREE.CapsuleGeometry(.29,.48,5,10),shirt,0,1.35,0);
+    part(new THREE.TorusGeometry(.14,.035,6,12),shirtTrim,0,1.65,.015).rotation.x=Math.PI/2;
+    part(new THREE.CylinderGeometry(.25,.25,.07,12),trousers,0,1.02,0);
+    part(new THREE.CylinderGeometry(.09,.1,.16,10),skin,0,1.75,0);
+    part(new THREE.SphereGeometry(.235,20,16),skin,0,2.02,.015);
+    part(new THREE.SphereGeometry(.246,20,12,0,Math.PI*2,0,Math.PI*.57),hair,0,2.13,-.025);
+    part(new THREE.SphereGeometry(.07,10,8),hair,-.18,2.12,.025);
+    part(new THREE.SphereGeometry(.07,10,8),hair,.18,2.12,.025);
+    part(new THREE.SphereGeometry(.045,10,8),skinLight,-.235,2.015,0);
+    part(new THREE.SphereGeometry(.045,10,8),skinLight,.235,2.015,0);
+    part(new THREE.SphereGeometry(.027,10,8),eyes,-.082,2.04,.225);
+    part(new THREE.SphereGeometry(.027,10,8),eyes,.082,2.04,.225);
+    part(new THREE.ConeGeometry(.045,.09,8),skinLight,0,1.99,.25);
+    part(new THREE.CylinderGeometry(.105,.12,.29,10),shirt,-.34,1.48,0).rotation.z=-.18;
+    part(new THREE.CylinderGeometry(.105,.12,.29,10),shirt,.34,1.48,0).rotation.z=.18;
+    part(new THREE.CapsuleGeometry(.065,.32,4,8),skin,-.39,1.19,.015).rotation.z=-.1;
+    part(new THREE.CapsuleGeometry(.065,.32,4,8),skin,.39,1.19,.015).rotation.z=.1;
+    part(new THREE.SphereGeometry(.075,10,8),skinLight,-.405,.98,.025);
+    part(new THREE.SphereGeometry(.075,10,8),skinLight,.405,.98,.025);
     avatar.position.set(player.x-50,0,player.y-50);
     scene.add(avatar);
     const resize=()=>{
