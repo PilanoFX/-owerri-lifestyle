@@ -497,3 +497,23 @@ button {
 /* Hotel service controls are part of the room, not map markers */
 .room-content .hotel-actions{position:absolute;right:12px;bottom:42px;display:flex;flex-direction:column;gap:7px;max-width:58%;z-index:15}
 .room-content .hotel-actions button{padding:9px 11px;background:#182634;border:1px solid #caa86a;border-radius:8px;color:#f5f7fa;font-size:12px;text-align:left;box-shadow:0 3px 10px #0003}
+
+/* Finishing pass: nightclub atmosphere, clear mobile controls, flight scene */
+.room-content.clubFloor{background:radial-gradient(ellipse at 50% 25%,#553078 0%,#201c3c 38%,#101522 80%)}
+.room-content.clubFloor:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(112deg,transparent 0 32px,#8c4dff1c 33px 36px,transparent 37px 70px),radial-gradient(circle at 25% 18%,#ff3fc52b,transparent 28%),radial-gradient(circle at 78% 24%,#38c8ff2b,transparent 28%);pointer-events:none;animation:club-lights 2.8s ease-in-out infinite alternate}
+.room-content.clubFloor.dancing:before{animation:club-lights .45s ease-in-out infinite alternate}
+@keyframes club-lights{from{filter:hue-rotate(0deg);opacity:.55}to{filter:hue-rotate(80deg);opacity:1}}
+.room-content .club-room-actions{position:absolute;right:12px;bottom:42px;display:flex;flex-direction:column;gap:7px;max-width:60%;z-index:20}
+.room-content .club-room-actions button{padding:9px 11px;background:#171329eF;border:1px solid #b88aff;border-radius:10px;color:#fff;font-size:12px;text-align:left;box-shadow:0 4px 16px #0005}
+.flight-overlay{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:18px;background:rgba(3,8,18,.9);backdrop-filter:blur(9px)}
+.flight-window{width:min(440px,100%);padding:18px;border:1px solid #49667c;border-radius:22px;background:linear-gradient(160deg,#182b40,#09111d);color:#f4f8fc;box-shadow:0 24px 80px #0009;text-align:center}
+.flight-sky{height:150px;position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(#4a9ac7,#a8d5df 68%,#e7e7df 69%,#8ba58c)}
+.flight-plane{position:absolute;top:48px;left:-40px;font-size:42px;color:#fff;text-shadow:0 5px 10px #27445b;animation:plane-fly 3s ease-in-out infinite}
+.flight-cloud{position:absolute;width:75px;height:20px;border-radius:30px;background:#fff9;filter:blur(1px)}
+.cloud-one{top:40px;right:12%;}.cloud-two{top:83px;left:18%;transform:scale(.7)}
+@keyframes plane-fly{0%{left:-40px;top:65px}50%{left:48%;top:28px}100%{left:110%;top:55px}}
+.flight-kicker{font-size:10px;letter-spacing:2px;color:#8fbbd6;margin:17px 0 5px}
+.flight-window h2{font-size:25px;margin:6px 0}.flight-status{font-size:13px;color:#b7c8d5}
+.flight-progress{height:5px;background:#273b4d;border-radius:9px;overflow:hidden;margin:18px 0}.flight-progress span{display:block;width:0;height:100%;background:#6be1b0;transition:width 1.5s ease}
+.flight-arrive{width:100%;padding:12px;border:0;border-radius:12px;background:#67dfb0;color:#082016;font-weight:800}
+@media(max-width:600px){.room-content .club-room-actions,.room-content .hotel-actions{max-width:72%;right:8px;bottom:36px}.room-content .club-room-actions button{font-size:11px;padding:8px}}
