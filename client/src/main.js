@@ -194,9 +194,54 @@ input:focus{outline:none;border-color:#3ecfff}
 .map #zones,.map #houses,.map #others{position:absolute;inset:0;z-index:12;pointer-events:none}
 .map #zones>* ,.map #houses>* ,.map #others>*{pointer-events:auto}
 .map #houses{z-index:18}.map #others{z-index:22}
+.map .player{display:none}
+#roomView{background:#12100e;perspective:1000px}
+#roomView .room-content{overflow:hidden;background:linear-gradient(180deg,#b9b0a0 0%,#d7c7ae 54%,#6d4b34 54%,#3b281d 100%)}
+.room-content::before{content:"";position:absolute;inset:0 0 43%;background:linear-gradient(90deg,rgba(0,0,0,.12),transparent 24%,rgba(255,255,255,.09) 60%,rgba(0,0,0,.12)),repeating-linear-gradient(90deg,transparent 0 22%,rgba(50,39,28,.13) 22.2% 22.6%);border-bottom:8px solid #7d5d42}
+.room-content::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-12%;height:57%;background:repeating-linear-gradient(0deg,#5b3c2a 0 2px,#76523a 2px 48px),repeating-linear-gradient(90deg,transparent 0 88px,rgba(20,10,5,.2) 89px 91px);transform:perspective(380px) rotateX(15deg);transform-origin:top;box-shadow:inset 0 10px 22px #25180f}
+.room-content .window-frame{position:absolute;z-index:2;left:8%;top:9%;width:28%;height:28%;border:10px solid #eee1c8;background:linear-gradient(180deg,#70b9dd,#d2e8ed 60%,#64935c);box-shadow:0 8px 18px #0005,inset 0 0 0 3px #7b6850}
+.room-content .window-frame:before{content:"";position:absolute;left:49%;top:0;bottom:0;width:5px;background:#eee1c8}
+.room-content .window-frame:after{content:"";position:absolute;left:0;right:0;top:48%;height:5px;background:#eee1c8}
+.room-content .curtain{position:absolute;z-index:3;left:5%;top:7%;width:34%;height:32%;border-left:14px solid #9c3542;border-right:14px solid #9c3542;filter:drop-shadow(0 5px 3px #0004)}
+.room-content .sofa3d{position:absolute;z-index:5;left:7%;bottom:19%;width:44%;height:19%;background:linear-gradient(180deg,#71608b,#4b3d61);border-radius:20px 20px 9px 9px;box-shadow:0 15px 13px #0005,inset 0 7px #9b8bb0}
+.room-content .sofa3d:before{content:"";position:absolute;left:-7%;right:-7%;bottom:0;height:62%;background:#5a4a75;border-radius:12px;box-shadow:inset 0 -7px #392d4b}
+.room-content .sofa3d:after{content:"";position:absolute;left:42%;top:0;bottom:12%;width:3px;background:#3d304e}
+.room-content .table3d{position:absolute;z-index:7;right:17%;bottom:15%;width:24%;height:7%;background:#8a5936;border-radius:8px;box-shadow:0 11px 0 #53341f,0 15px 15px #0006}
+.room-content .tv3d{position:absolute;z-index:4;right:8%;top:13%;width:28%;height:21%;background:linear-gradient(145deg,#0a1018,#182b37);border:8px solid #282b2c;border-radius:5px;box-shadow:0 8px 15px #0007;color:#5be4ff;display:grid;place-items:center;font-size:10px;letter-spacing:2px}
+.room-content .tv-stand{position:absolute;z-index:3;right:8%;top:34%;width:28%;height:5%;background:#70472e;box-shadow:0 8px 0 #442a1d}
+.room-content .plant3d{position:absolute;z-index:6;right:5%;bottom:21%;width:30px;height:55px;background:radial-gradient(ellipse at 50% 12%,#3f9a55 0 20%,transparent 22%),radial-gradient(ellipse at 25% 25%,#286d3e 0 22%,transparent 24%),radial-gradient(ellipse at 72% 31%,#4da65b 0 22%,transparent 24%);filter:drop-shadow(0 4px 3px #0004)}
+.room-content .plant3d:after{content:"";position:absolute;bottom:-12px;left:5px;width:24px;height:19px;background:linear-gradient(90deg,#9c6542,#d29a62,#8a4d30);clip-path:polygon(10% 0,90% 0,100% 100%,0 100%)}
+.room-content .avatar3d{position:absolute;z-index:12;left:57%;bottom:17%;width:48px;height:125px;filter:drop-shadow(7px 9px 4px #0005);animation:avatarIdle 3s ease-in-out infinite}
+.room-content .avatar-head{position:absolute;left:15px;top:0;width:22px;height:26px;border-radius:45% 45% 43% 43%;background:linear-gradient(90deg,#8b4d2e,#c88355 45%,#a45f3b);box-shadow:inset -4px 0 #7b422b}
+.room-content .avatar-hair{position:absolute;left:14px;top:-4px;width:24px;height:12px;border-radius:60% 60% 25% 25%;background:#211713}
+.room-content .avatar-body{position:absolute;left:8px;top:24px;width:35px;height:46px;background:linear-gradient(90deg,#1d4d83,#367dc0 55%,#173c6b);border-radius:11px 11px 6px 6px;clip-path:polygon(20% 0,80% 0,100% 16%,85% 100%,15% 100%,0 16%)}
+.room-content .avatar-arm{position:absolute;top:30px;width:10px;height:38px;background:#b9784d;border-radius:7px;transform-origin:top}
+.room-content .avatar-arm.left{left:5px;transform:rotate(12deg)}.room-content .avatar-arm.right{right:1px;transform:rotate(-15deg)}
+.room-content .avatar-leg{position:absolute;top:66px;width:12px;height:42px;background:#252a35;border-radius:4px}.room-content .avatar-leg.left{left:13px}.room-content .avatar-leg.right{left:27px}
+.room-content .avatar-shoe{position:absolute;top:103px;width:17px;height:7px;background:#eee8d9;border-radius:5px}.room-content .avatar-shoe.left{left:7px}.room-content .avatar-shoe.right{left:24px}
+@keyframes avatarIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 .city-label{position:absolute;left:12px;top:12px;z-index:35;background:rgba(5,12,15,.72);border:1px solid rgba(255,255,255,.18);padding:7px 10px;border-radius:9px;color:#f1f5f9;font-size:10px;letter-spacing:1.2px;font-weight:900;pointer-events:none;backdrop-filter:blur(8px)}
 .city-label span{color:#70f0b2}
 .map .block,.map .road{display:none}
+.room-content .bed-real{position:absolute;z-index:6;left:18%;bottom:11%;width:58%;height:27%;background:linear-gradient(180deg,#f0e8df 0 20%,#d4d8e8 20% 80%,#a7b0c5 80%);border-radius:12px 12px 5px 5px;box-shadow:0 15px 18px #0006}
+.room-content .bed-real:before{content:"";position:absolute;left:-3%;right:-3%;bottom:0;height:25%;background:#70452c;border-radius:3px}
+.room-content .pillow{position:absolute;top:7%;left:10%;width:28%;height:24%;background:#fff7e9;border-radius:7px;box-shadow:0 3px 5px #0002}
+.room-content .duvet{position:absolute;top:30%;left:5%;right:5%;height:50%;background:repeating-linear-gradient(90deg,#9baed0 0 17px,#bac6df 17px 34px);border-radius:6px}
+.room-content .wardrobe-real{position:absolute;z-index:5;right:7%;top:12%;width:25%;height:42%;background:linear-gradient(90deg,#633c27,#9a6845 48%,#5d3826);border:5px solid #43291d;box-shadow:0 8px 14px #0005}
+.room-content .wardrobe-real:after{content:"";position:absolute;top:0;bottom:0;left:49%;width:3px;background:#452b1e}
+.room-content .kitchen-counter{position:absolute;z-index:6;left:6%;right:7%;bottom:21%;height:13%;background:linear-gradient(#d9d8d1 0 24%,#8a8d8b 25% 38%,#b7b6ae 39%);border-radius:5px;box-shadow:0 12px 12px #0005}
+.room-content .kitchen-counter:after{content:"";position:absolute;left:10%;right:10%;top:20%;height:8px;background:#3a3d3c;border-radius:5px}
+.room-content .fridge-real{position:absolute;z-index:5;right:7%;top:20%;width:20%;height:43%;background:linear-gradient(90deg,#aeb7bb,#f0f1eb 40%,#b2bec1);border:3px solid #8b989c;border-radius:4px;box-shadow:0 7px 12px #0005}
+.room-content .fridge-real:after{content:"";position:absolute;top:45%;left:8%;right:8%;height:2px;background:#879397}
+.room-content .stove-real{position:absolute;z-index:8;left:19%;bottom:32%;width:25%;height:5%;background:#303337;border:3px solid #aeb2b1;border-radius:4px}
+.room-content .stove-real:after{content:"";position:absolute;inset:1px;background:radial-gradient(circle at 20% 50%,#111 0 4px,transparent 5px),radial-gradient(circle at 55% 50%,#111 0 4px,transparent 5px),radial-gradient(circle at 82% 50%,#111 0 4px,transparent 5px)}
+.room-content .shower-real{position:absolute;z-index:5;right:12%;top:14%;width:33%;height:48%;border:4px solid #b8c5cb;background:linear-gradient(135deg,#a8d4e4,#d5e9ed);box-shadow:0 8px 12px #0004}
+.room-content .shower-real:after{content:"";position:absolute;right:15%;top:10%;width:8px;height:8px;border-radius:50%;background:#737e83;box-shadow:0 18px 0 #737e83,0 36px 0 #737e83}
+.room-content .sink-real{position:absolute;z-index:7;left:9%;bottom:23%;width:26%;height:9%;background:linear-gradient(#fff,#b8c6ca);border-radius:50% 50% 8px 8px;box-shadow:0 9px 0 #657277}
+.room-content .toilet-real{position:absolute;z-index:7;right:14%;bottom:17%;width:23%;height:18%;background:linear-gradient(90deg,#d4dadd,#fff 55%,#c3cdd1);border-radius:45% 45% 30% 30%;box-shadow:0 9px 10px #0004}
+.room-content .toilet-real:before{content:"";position:absolute;left:12%;right:12%;top:-9%;height:40%;background:#e8eeee;border:3px solid #aeb9bc;border-radius:8px}
+.room-caption{position:absolute;z-index:20;left:12px;top:12px;background:#111c;color:#fff;border:1px solid #ffffff30;padding:8px 11px;border-radius:10px;font-size:11px;letter-spacing:1px;font-weight:800}
+.room-caption span{color:#6fe8b0;font-weight:600;font-size:9px}
 .mapbox.night .city-label{background:rgba(4,7,18,.85);border-color:#40516b}
 .road{position:absolute;background:#252c34;z-index:2}.h{height:36px;width:100%}.v{width:36px;height:100%}
 .r1{top:22%}.r2{top:48%}.r3{top:72%}.c1{left:16%}.c2{left:45%}.c3{left:71%}
@@ -650,12 +695,29 @@ window._park=()=>{player.currentVehicle=null;player.mode="Walk";log("Vehicle par
 // ===================== RENDER =====================
 function renderRoom(){
   const view=$("roomView");if(!view)return
-  let html=`<div class="room-content ${currentRoom}"><div class="wall"></div><div class="floor"></div>`
-  if(currentRoom==="living")html+=`<div style="position:absolute;bottom:20%;left:15%;width:120px;height:50px;background:#5c4d7e;border-radius:10px"></div>`
-  if(currentRoom==="bedroom")html+=`<div style="position:absolute;bottom:15%;left:12%;width:150px;height:70px;background:#e8e8f0;border-radius:8px"></div>`
-  if(currentRoom==="kitchen")html+=`<div style="position:absolute;bottom:18%;left:8%;right:8%;height:45px;background:#d4d4d4;border-radius:6px"></div>`
-  if(currentRoom==="bathroom")html+=`<div style="position:absolute;bottom:15%;left:10%;width:130px;height:60px;background:#e0f0ff;border:3px solid #b0d0e8;border-radius:10px"></div>`
-  html+=`</div>`
+  const details={
+    living:{title:"Living Room",window:true,sofa:true,tv:true,table:true,plant:true},
+    bedroom:{title:"Bedroom",window:true,bed:true,wardrobe:true,plant:false},
+    kitchen:{title:"Kitchen",window:false,counter:true,fridge:true,stove:true,plant:false},
+    bathroom:{title:"Bathroom",window:false,shower:true,sink:true,toilet:true,plant:false}
+  }[currentRoom]||{title:"Room",window:true,sofa:true,tv:true,table:true,plant:true};
+  let html=`<div class="room-content ${currentRoom}">
+    ${details.window?'<div class="window-frame"></div><div class="curtain"></div>':''}
+    ${details.tv?'<div class="tv3d">OWERRI TV</div><div class="tv-stand"></div>':''}
+    ${details.sofa?'<div class="sofa3d"></div>':''}
+    ${details.table?'<div class="table3d"></div>':''}
+    ${details.plant?'<div class="plant3d"></div>':''}
+    ${details.bed?'<div class="bed-real"><div class="pillow"></div><div class="duvet"></div></div>':''}
+    ${details.wardrobe?'<div class="wardrobe-real"></div>':''}
+    ${details.counter?'<div class="kitchen-counter"></div>':''}
+    ${details.fridge?'<div class="fridge-real"></div>':''}
+    ${details.stove?'<div class="stove-real"></div>':''}
+    ${details.shower?'<div class="shower-real"></div>':''}
+    ${details.sink?'<div class="sink-real"></div>':''}
+    ${details.toilet?'<div class="toilet-real"></div>':''}
+    <div class="avatar3d"><div class="avatar-hair"></div><div class="avatar-head"></div><div class="avatar-body"></div><div class="avatar-arm left"></div><div class="avatar-arm right"></div><div class="avatar-leg left"></div><div class="avatar-leg right"></div><div class="avatar-shoe left"></div><div class="avatar-shoe right"></div></div>
+    <div class="room-caption">${details.title} <span>• OWERRI RESIDENCE</span></div>
+  </div>`
   view.innerHTML=html
   document.querySelectorAll(".room-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.room===currentRoom))
 }
