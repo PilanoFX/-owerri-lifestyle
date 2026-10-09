@@ -64,7 +64,7 @@ const zones = [
       {label:"Bank Transaction", cost:0, hunger:-3, energy:-8, fun:-4, social:0, hygiene:0, bladder:-3, cash:6000},
       {label:"Network with People", cost:0, hunger:-5, energy:-8, fun:16, social:28, hygiene:0, bladder:-5, cash:0}
     ]},
-  { name:"Amakohia", x:26, y:26, type:"Residential", emoji:"🏠",
+  { name:"Amakohia", x:26, y:26, type:"Residential", emoji:"⌂",
     actions:[
       {label:"Visit Relative", cost:0, hunger:12, energy:6, fun:16, social:32, hygiene:0, bladder:-5, cash:0},
       {label:"Local Food", cost:2000, hunger:42, energy:10, fun:10, social:6, hygiene:-5, bladder:-8, cash:0}
@@ -350,6 +350,7 @@ function isFriend(id){return player.friends.some(f=>f.id===id)}
 
 // ===================== SAVE / LOAD =====================
 async function loadPlayerData(){
+  try{const local=JSON.parse(localStorage.getItem("owerriLifestyleLocal")||"{}");if(local.houseId)player.houseId=local.houseId;if(local.vehicles)player.vehicles=local.vehicles;if(local.cash!==undefined)player.cash=local.cash}catch{}
   if(!currentUser)return
   const {data}=await supabase.from("players").select("*").eq("id",currentUser.id).single()
   try{const extra=JSON.parse(localStorage.getItem("owerriLifestyleExtra:"+currentUser.id)||"{}");player.fitness=clamp(Number(extra.fitness??12));player.job=String(extra.job||"Unemployed");player.checkedIn=!!extra.checkedIn;for(const k of ["skills","groceries","traits","aspiration","wishes","moodlets","rentDue","billsDue","radioStation","wanted","fines","business","ownedFurniture","rentedLot","governorSupport"])if(extra[k]!==undefined)player[k]=extra[k]}catch{}
@@ -365,7 +366,7 @@ async function loadPlayerData(){
     player.hygiene=data.hygiene??88
     player.bladder=data.bladder??68
     player.username=data.display_name||currentUser.user_metadata?.display_name||"Player"
-    player.houseId=data.house_id||null
+    player.houseId=data.house_id||player.houseId||null
     player.vehicles=data.vehicles||[]
     player.friends=data.friends||[]
   }else{
@@ -380,6 +381,7 @@ async function loadPlayerData(){
 }
 
 async function savePlayerData(){
+  try{localStorage.setItem("owerriLifestyleLocal",JSON.stringify({houseId:player.houseId,vehicles:player.vehicles,cash:player.cash}))}catch{}
   if(!currentUser)return
   await supabase.from("players").upsert({
     id:currentUser.id,display_name:player.username,cash:player.cash,level:player.level,
@@ -660,6 +662,7 @@ function buyHouse(h){
   if(player.cash<h.price)return log("❌ Not enough money")
   player.cash-=h.price
   player.houseId=h.id
+  try{localStorage.setItem("owerriLifestyleLocal",JSON.stringify({houseId:player.houseId,vehicles:player.vehicles,cash:player.cash}))}catch{}
   player.reputation+=18
   log("🎉 Bought "+h.name)
   update();scheduleSave()
@@ -667,7 +670,7 @@ function buyHouse(h){
 function enterMyHouse(){
   if(!player.houseId)return log("You don't own a house yet")
   const h=houseList.find(x=>x.id===player.houseId)
-  $("houseTitle").textContent="🏠 "+h.name
+  $("houseTitle").textContent=h.name
   currentRoom=h.rooms[0]||"living"
   const tabs=$("roomTabs");
   tabs.innerHTML=h.rooms.map(room=>`<button type="button" data-room="${room}">${({living:"🛋 Living Room",bedroom:"🛏 Bedroom",kitchen:"🍳 Kitchen",bathroom:"🚿 Bathroom"})[room]||room}</button>`).join("");
@@ -1200,7 +1203,7 @@ function renderHouses(){
     const el=document.createElement("button");el.type="button"
     el.className=owned?"house owned":"house"
     el.style.left=h.x+"%";el.style.top=h.y+"%"
-    el.textContent=owned?"✓":"🏠";el.title=h.name
+    el.innerHTML=owned?'<span class="house-check">✓</span>':'<span class="house-roof"></span><span class="house-wall"></span>';el.title=h.name
     el.onclick=()=>{if(owned)enterMyHouse();else buyHouse(h)}
     c.appendChild(el)
   })
