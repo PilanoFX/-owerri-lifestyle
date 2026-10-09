@@ -686,9 +686,12 @@ function buyHouse(h){
   log("🏡 Purchased "+h.name+" — ownership saved");
   update();scheduleSave();savePlayerData();
 }
-function enterMyHouse(){
-  if(!player.houseId)return log("You don't own a house yet")
-  const h=houseList.find(x=>x.id===player.houseId)
+function enterMyHouse(propertyId=player.houseId){
+  const owned=Array.isArray(player.ownedProperties)?player.ownedProperties:(player.houseId?[player.houseId]:[]);
+  const selectedId=owned.includes(propertyId)?propertyId:player.houseId;
+  if(!selectedId)return log("You don't own a house yet");
+  const h=houseList.find(x=>x.id===selectedId);if(!h)return log("Could not find that property");
+  player.houseId=selectedId;
   $("houseTitle").textContent=h.name
   currentRoom=h.rooms[0]||"living"
   const tabs=$("roomTabs");
@@ -1281,18 +1284,19 @@ function renderHouses(){
   const c=$("houses");if(c)c.replaceChildren();
 }
 function renderHouseList(){
-  const c=$("houseList");if(!c)return
+  const c=$("houseList");if(!c)return;
+  const ownedIds=Array.isArray(player.ownedProperties)?player.ownedProperties:(player.houseId?[player.houseId]:[]);
   c.innerHTML=houseList.map(h=>{
-    const owned=player.houseId===h.id
+    const owned=ownedIds.includes(h.id);
     return `<div style="background:#0c1018;border-radius:10px;padding:9px;margin-bottom:7px;border:1px solid ${owned?'#22c55e':'#1a2430'}">
       <b style="font-size:13px">${h.name}</b><br><small style="color:#7a8b9e">${h.zone} · ${money(h.price)}</small>
-      ${owned?`<button class="full" style="margin-top:7px;background:#22c55e;color:#080b10" onclick="window._enterH()">Enter</button>`
-            :`<button class="full" style="margin-top:7px" onclick="window._buyH('${h.id}')">Buy</button>`}
+      ${owned?`<button class="full" style="margin-top:7px;background:#22c55e;color:#080b10" onclick="window._enterH('${h.id}')">Enter owned property</button>`
+            :`<button class="full" style="margin-top:7px" onclick="window._buyH('${h.id}')">Buy property</button>`}
     </div>`
   }).join("")
 }
 window._buyH=id=>{const h=houseList.find(x=>x.id===id);if(h)buyHouse(h)}
-window._enterH=()=>enterMyHouse()
+window._enterH=id=>enterMyHouse(id||player.houseId)
 window._ha=t=>houseAction(t)
 
 function renderOthers(){
