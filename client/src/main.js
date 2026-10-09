@@ -132,7 +132,7 @@ let player = {
   x:49, y:38, cash:1650000, level:1, reputation:40,
   mode:"Walk", fuel:100, direction:"down",
   hunger:78, energy:82, fun:55, social:50, hygiene:88, bladder:68,
-  username:"Player", houseId:null, vehicles:[], currentVehicle:null,
+  username:"Player", houseId:null, ownedProperties:[], vehicles:[], currentVehicle:null,
   friends:[], fitness:12, job:"Unemployed", checkedIn:false,
   skills:{cooking:0,fitness:0,creativity:0,charisma:0,logic:0,handiness:0},
   groceries:{Rice:2,Beans:1,Eggs:4,Noodles:2,Water:4}, traits:["Friendly"],
@@ -354,6 +354,8 @@ async function loadPlayerData(){
     const userLocal=currentUser?localStorage.getItem("owerriLifestyleLocal:"+currentUser.id):null;
     const local=JSON.parse(userLocal||localStorage.getItem("owerriLifestyleLocal")||"{}");
     if(local.houseId)player.houseId=local.houseId;
+    if(Array.isArray(local.ownedProperties))player.ownedProperties=local.ownedProperties;
+    else if(local.houseId)player.ownedProperties=[local.houseId];
     if(Array.isArray(local.vehicles))player.vehicles=local.vehicles;
     if(local.cash!==undefined)player.cash=local.cash;
     if(Number.isFinite(local.x))player.x=local.x;
@@ -391,7 +393,7 @@ async function loadPlayerData(){
 }
 
 async function savePlayerData(){
-  const snapshot={houseId:player.houseId,vehicles:player.vehicles,cash:player.cash,x:player.x,y:player.y,mode:player.mode,currentVehicle:player.currentVehicle};
+  const snapshot={houseId:player.houseId,ownedProperties:player.ownedProperties||[],vehicles:player.vehicles,cash:player.cash,x:player.x,y:player.y,mode:player.mode,currentVehicle:player.currentVehicle};
   try{
     localStorage.setItem("owerriLifestyleLocal",JSON.stringify(snapshot));
     if(currentUser)localStorage.setItem("owerriLifestyleLocal:"+currentUser.id,JSON.stringify(snapshot));
@@ -674,16 +676,13 @@ function sendDM(){
 // ===================== HOUSES & GARAGE =====================
 function buyHouse(h){
   if(!h)return;
-  if(player.houseId)return log("You already own a house — enter it from the map or My House");
+  if(!Array.isArray(player.ownedProperties))player.ownedProperties=player.houseId?[player.houseId]:[];
+  if(player.ownedProperties.includes(h.id))return log("🏡 You already own "+h.name+" — use Enter in the property list");
   if(player.cash<h.price)return log("❌ Not enough money");
   player.cash-=h.price;
-  player.houseId=h.id;
+  player.ownedProperties.push(h.id);
+  if(!player.houseId)player.houseId=h.id;
   player.reputation+=18;
-  const snapshot={houseId:player.houseId,vehicles:player.vehicles,cash:player.cash,x:player.x,y:player.y,mode:player.mode,currentVehicle:player.currentVehicle};
-  try{
-    localStorage.setItem("owerriLifestyleLocal",JSON.stringify(snapshot));
-    if(currentUser)localStorage.setItem("owerriLifestyleLocal:"+currentUser.id,JSON.stringify(snapshot));
-  }catch{}
   log("🏡 Purchased "+h.name+" — ownership saved");
   update();scheduleSave();savePlayerData();
 }
