@@ -493,3 +493,7 @@ button {
 .room-content .gym-bike:before{content:"";position:absolute;left:26px;top:12px;width:4px;height:38px;background:#e1a84c;transform:rotate(35deg)}
 .room-content .gym-bike i{position:absolute;left:16px;top:-12px;width:25px;height:5px;background:#202936;border-radius:4px}
 .room-content .gym-bike b{position:absolute;right:-13px;top:7px;width:19px;height:5px;background:#202936;border-radius:4px}
+
+/* Hotel service controls are part of the room, not map markers */
+.room-content .hotel-actions{position:absolute;right:12px;bottom:42px;display:flex;flex-direction:column;gap:7px;max-width:58%;z-index:15}
+.room-content .hotel-actions button{padding:9px 11px;background:#182634;border:1px solid #caa86a;border-radius:8px;color:#f5f7fa;font-size:12px;text-align:left;box-shadow:0 3px 10px #0003}
