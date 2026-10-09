@@ -1,5 +1,5 @@
 /* =========================================================
-   Owerri Lifestyle – Stage B (Save Progress)
+   Owerri Lifestyle – Stage B (Save Progress) + Private Texting
    ========================================================= */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -112,6 +112,34 @@ const others = [
   { id: 3, name: "Emeka", x: 25, y: 70, color: "#3498db" }
 ]
 
+// ---------- PRIVATE MESSAGING ----------
+let activeChat = null
+const conversations = {}
+
+const npcReplies = {
+  1: [ // Chidi
+    "Wetin dey happen?",
+    "I dey Douglas now, you fit meet me?",
+    "Abeg no disturb me, I dey hustle 😂",
+    "You don chop today?",
+    "Oya text me later, I dey move"
+  ],
+  2: [ // Ada
+    "Heyyy 💕",
+    "Where you dey?",
+    "I just leave Owerri Mall",
+    "You wan link up?",
+    "Lol stop playing"
+  ],
+  3: [ // Emeka
+    "Bro wetin?",
+    "I dey FUTO side",
+    "You get change?",
+    "Later we go talk",
+    "I dey drive, text me"
+  ]
+}
+
 const root = document.getElementById("root")
 
 const style = document.createElement("style")
@@ -162,7 +190,8 @@ input:focus{outline:none;border-color:#42d4ff}
 .player{position:absolute;transform:translate(-50%,-50%);z-index:30;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
 .person{width:22px;height:22px;border-radius:50%;background:#f1c27d;border:2.5px solid #111;position:relative}
 .person:after{content:"";position:absolute;top:18px;left:2px;width:16px;height:14px;background:#4d7cff;border-radius:7px}
-.other{position:absolute;transform:translate(-50%,-50%);z-index:25;width:26px;height:26px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.other{position:absolute;transform:translate(-50%,-50%);z-index:25;width:26px;height:26px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;cursor:pointer;transition:transform 0.15s}
+.other:hover{transform:scale(1.25);z-index:40}
 .side{display:flex;flex-direction:column;gap:11px}
 .panel{background:linear-gradient(180deg,#151d27,#10161e);border:1px solid #1e2a36;border-radius:16px;padding:14px}
 .panel h3{margin:0 0 11px;font-size:15px}
@@ -185,12 +214,11 @@ input:focus{outline:none;border-color:#42d4ff}
 
 .room-view{position:absolute;top:110px;bottom:100px;left:0;right:0;background:#1a1410;overflow:hidden}
 .room-content{position:relative;width:100%;height:100%}
-.wall{position:absolute;top:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,#d4b896,#c4a882)}
-.floor{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to bottom,#6b4423,#4a2e14)}
-.floor::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 38px,rgba(0,0,0,0.08) 38px 39px)}
+.wall{position:absolute;top:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,#2a3a4a,#1e2a36)}
+.floor{position:absolute;bottom:0;left:0;right:0;height:45%;background:linear-gradient(to bottom,#3d2b1f,#2a1e15)}
 
-.living .window{position:absolute;top:12%;left:8%;width:100px;height:70px;background:linear-gradient(160deg,#7ec8f5,#4aa8d8);border:8px solid #f0e6d8;border-radius:4px}
-.living .sofa{position:absolute;bottom:18%;left:8%;width:140px;height:55px;background:#5c4d7e;border-radius:12px;box-shadow:5px 6px 0 rgba(0,0,0,0.3)}
+.living .window{position:absolute;top:8%;right:12%;width:70px;height:50px;background:#87ceeb;border:4px solid #5a4a3a;border-radius:4px}
+.living .sofa{position:absolute;bottom:18%;left:12%;width:140px;height:55px;background:#5c4d7e;border-radius:12px;box-shadow:5px 6px 0 rgba(0,0,0,0.3)}
 .living .sofa::before{content:"";position:absolute;top:-16px;left:10px;right:10px;height:20px;background:#6b5c8c;border-radius:8px 8px 0 0}
 .living .tv{position:absolute;bottom:28%;right:10%;width:90px;height:55px;background:#111;border:5px solid #222;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#42d4ff;font-weight:800;font-size:14px}
 .living .rug{position:absolute;bottom:20%;left:30%;width:130px;height:45px;background:radial-gradient(ellipse,#8b3a3a,#5a2525);border-radius:50%;opacity:0.7}
@@ -211,6 +239,101 @@ input:focus{outline:none;border-color:#42d4ff}
 
 .house-actions{position:absolute;bottom:12px;left:12px;right:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;z-index:30}
 .house-actions button{background:#1c2733;border:1px solid #2a3542;font-size:13px;padding:12px 6px}
+
+/* ========== PRIVATE DM PANEL ========== */
+#dmPanel{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:320px;
+  max-width:calc(100vw - 40px);
+  height:420px;
+  background:#151d27;
+  border:1px solid #2a3542;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  z-index:200;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  transform:translateY(120%);
+  opacity:0;
+  transition:all 0.25s ease;
+  overflow:hidden;
+}
+#dmPanel.open{
+  transform:translateY(0);
+  opacity:1;
+}
+.dm-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 16px;
+  background:#1c2733;
+  border-bottom:1px solid #2a3542;
+  font-weight:700;
+}
+.dm-header button{
+  background:transparent;
+  color:#8b9aab;
+  font-size:18px;
+  padding:4px 8px;
+}
+.dm-messages{
+  flex:1;
+  overflow-y:auto;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.dm-msg{
+  max-width:80%;
+  padding:10px 14px;
+  border-radius:16px;
+  font-size:14px;
+  line-height:1.35;
+}
+.dm-msg.me{
+  align-self:flex-end;
+  background:#42d4ff;
+  color:#0a0e14;
+  border-bottom-right-radius:4px;
+}
+.dm-msg.them{
+  align-self:flex-start;
+  background:#1c2733;
+  border-bottom-left-radius:4px;
+}
+.dm-msg small{
+  display:block;
+  font-size:10px;
+  opacity:0.6;
+  margin-top:4px;
+}
+.dm-form{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-top:1px solid #2a3542;
+}
+.dm-form input{
+  flex:1;
+  margin:0;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid #2a3542;
+  background:#0f1520;
+  color:#fff;
+  font-size:14px;
+}
+.dm-form button{
+  background:#42d4ff;
+  color:#0a0e14;
+  padding:0 18px;
+  border-radius:12px;
+  font-weight:700;
+}
 `
 document.head.appendChild(style)
 
@@ -224,13 +347,7 @@ async function loadPlayerData() {
     .eq('id', currentUser.id)
     .single()
 
-  if (error && error.code !== 'PGRST116') {
-    console.error('Load error:', error)
-    return
-  }
-
   if (data) {
-    // Load existing data
     player.cash = data.cash ?? 2500000
     player.level = data.level ?? 1
     player.reputation = data.reputation ?? 100
@@ -421,6 +538,88 @@ function needColor(v) {
   return "#e74c3c"
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+// ---------- PRIVATE CHAT FUNCTIONS ----------
+function openPrivateChat(target) {
+  activeChat = target
+  if (!conversations[target.id]) conversations[target.id] = []
+
+  let panel = $("dmPanel")
+  if (!panel) {
+    panel = document.createElement("div")
+    panel.id = "dmPanel"
+    panel.innerHTML = `
+      <div class="dm-header">
+        <span id="dmName"></span>
+        <button id="dmClose">✕</button>
+      </div>
+      <div id="dmMessages" class="dm-messages"></div>
+      <form id="dmForm" class="dm-form">
+        <input id="dmInput" maxlength="160" placeholder="Type a message..." autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+    `
+    document.body.appendChild(panel)
+
+    $("dmClose").onclick = () => {
+      panel.classList.remove("open")
+      activeChat = null
+    }
+
+    $("dmForm").onsubmit = (e) => {
+      e.preventDefault()
+      sendPrivateMessage()
+    }
+  }
+
+  $("dmName").textContent = `💬 ${target.name}`
+  renderConversation(target.id)
+  panel.classList.add("open")
+  $("dmInput").focus()
+}
+
+function renderConversation(id) {
+  const box = $("dmMessages")
+  if (!box) return
+  box.innerHTML = ""
+  ;(conversations[id] || []).forEach(msg => {
+    const div = document.createElement("div")
+    div.className = `dm-msg ${msg.from === "me" ? "me" : "them"}`
+    div.innerHTML = `<span>${escapeHtml(msg.text)}</span><small>${msg.time}</small>`
+    box.appendChild(div)
+  })
+  box.scrollTop = box.scrollHeight
+}
+
+function sendPrivateMessage() {
+  if (!activeChat) return
+  const input = $("dmInput")
+  const text = input.value.trim()
+  if (!text) return
+
+  const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  conversations[activeChat.id].push({ from: "me", text, time })
+  renderConversation(activeChat.id)
+  input.value = ""
+
+  // Temporary NPC replies (replace later with real multiplayer)
+  setTimeout(() => {
+    if (!activeChat) return
+    const replies = npcReplies[activeChat.id] || ["Ok"]
+    const reply = replies[Math.floor(Math.random() * replies.length)]
+    const t = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    conversations[activeChat.id].push({ from: "them", text: reply, time: t })
+    renderConversation(activeChat.id)
+  }, 800 + Math.random() * 1200)
+}
+
 function renderRoom() {
   const view = $("roomView")
   if (!view) return
@@ -516,7 +715,7 @@ function renderGame() {
         </div>
 
         <div class="panel">
-          <h3>📱 Activity</h3>
+          <h3>📜 Activity Log</h3>
           <div id="log" class="log"></div>
         </div>
       </div>
@@ -528,46 +727,39 @@ function renderGame() {
         <button id="leave">Leave</button>
       </div>
       <div class="room-tabs">
-        <button data-room="living" class="active">🛋 Living</button>
-        <button data-room="bedroom">🛏 Bedroom</button>
-        <button data-room="kitchen">🍳 Kitchen</button>
-        <button data-room="bathroom">🚿 Bathroom</button>
+        <button data-room="living" class="active">Living Room</button>
+        <button data-room="bedroom">Bedroom</button>
+        <button data-room="kitchen">Kitchen</button>
+        <button data-room="bathroom">Bathroom</button>
       </div>
       <div class="room-view" id="roomView"></div>
       <div class="house-actions">
-        <button id="actSleep">😴 Sleep</button>
-        <button id="actTV">📺 TV</button>
-        <button id="actSofa">🛋 Sit</button>
-        <button id="actEat">🍽️ Eat</button>
-        <button id="actShower">🚿 Shower</button>
-        <button id="actToilet">🚽 Toilet</button>
+        <button onclick="houseAction('sleep')">😴 Sleep</button>
+        <button onclick="houseAction('tv')">📺 TV</button>
+        <button onclick="houseAction('sofa')">🛋 Sofa</button>
+        <button onclick="houseAction('eat')">🍽️ Eat</button>
+        <button onclick="houseAction('shower')">🚿 Shower</button>
+        <button onclick="houseAction('toilet')">🚽 Toilet</button>
       </div>
     </div>
   `
 
-  $("walk").onclick = () => { player.mode = "Walk"; update(); log("🚶 Walking") }
-  $("drive").onclick = () => { player.mode = "Drive"; update(); log("🚗 Driving") }
+  // Event listeners
+  $("walk").onclick = () => { player.mode = "Walk"; update() }
+  $("drive").onclick = () => { player.mode = "Drive"; update() }
+  $("toggleTime").onclick = toggleTime
+  $("logout").onclick = logout
   $("work").onclick = work
   $("travel").onclick = travel
   $("buy").onclick = buyHouse
   $("enter").onclick = enterHouse
-  $("toggleTime").onclick = toggleTime
-  $("logout").onclick = logout
-  $("leave").onclick = () => { $("interior").classList.remove("show"); log("🚶 Left the house") }
-
-  $("actSleep").onclick = () => houseAction("sleep")
-  $("actTV").onclick = () => houseAction("tv")
-  $("actSofa").onclick = () => houseAction("sofa")
-  $("actEat").onclick = () => houseAction("eat")
-  $("actShower").onclick = () => houseAction("shower")
-  $("actToilet").onclick = () => houseAction("toilet")
-
-  document.querySelectorAll(".room-tabs button").forEach(btn => {
-    btn.onclick = () => switchRoom(btn.dataset.room)
-  })
+  $("leave").onclick = () => $("interior").classList.remove("show")
 
   document.querySelectorAll("[data-move]").forEach(btn => {
     btn.onclick = () => move(btn.dataset.move)
+  })
+  document.querySelectorAll(".room-tabs button").forEach(btn => {
+    btn.onclick = () => switchRoom(btn.dataset.room)
   })
 
   renderZones()
@@ -633,6 +825,11 @@ function renderOthers() {
     el.style.top = o.y + "%"
     el.style.background = o.color
     el.textContent = o.name[0]
+    el.title = `Text ${o.name}`
+    el.onclick = (e) => {
+      e.stopPropagation()
+      openPrivateChat(o)
+    }
     c.appendChild(el)
   })
 }
