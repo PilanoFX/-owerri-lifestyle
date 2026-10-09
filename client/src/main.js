@@ -724,7 +724,13 @@ function renderRoom(){
     living:{title:"Living Room",window:true,sofa:true,tv:true,table:true,plant:true},
     bedroom:{title:"Bedroom",window:true,bed:true,wardrobe:true,plant:false},
     kitchen:{title:"Kitchen",window:false,counter:true,fridge:true,stove:true,plant:false},
-    bathroom:{title:"Bathroom",window:false,shower:true,sink:true,toilet:true,plant:false}
+    bathroom:{title:"Bathroom",window:false,shower:true,sink:true,toilet:true,plant:false},
+    hotelLobby:{title:"Hotel Lobby",window:true,sofa:true,table:true,plant:true,tv:true},hotelRoom:{title:"Hotel Guest Room",window:true,bed:true,wardrobe:true,plant:false},
+    clubFloor:{title:"Nightclub Dance Floor",window:false,tv:true,table:true,plant:false},restaurant:{title:"Restaurant Dining Room",window:true,table:true,plant:true},
+    mallFloor:{title:"Shopping Mall",window:true,table:true,tv:true,plant:true},marketStall:{title:"Market Shops",window:false,table:true,plant:false},
+    campusHall:{title:"Campus Hall",window:true,table:true,plant:true},gymFloor:{title:"Fitness Centre",window:true,table:true,plant:false},
+    airportTerminal:{title:"Airport Terminal",window:true,table:true,tv:true,plant:false},officeFloor:{title:"Office & Civic Centre",window:true,table:true,plant:true},
+    entertainment:{title:"Entertainment Venue",window:false,tv:true,table:true,plant:false},plaza:{title:"Public Plaza",window:true,table:true,plant:true}
   }[currentRoom]||{title:"Room",window:true,sofa:true,tv:true,table:true,plant:true};
   let html=`<div class="room-content ${currentRoom}">
     ${details.window?'<div class="window-frame"></div><div class="curtain"></div>':''}
@@ -741,7 +747,7 @@ function renderRoom(){
     ${details.sink?'<div class="sink-real"></div>':''}
     ${details.toilet?'<div class="toilet-real"></div>':''}
     <div class="avatar3d"><div class="avatar-hair"></div><div class="avatar-head"></div><div class="avatar-body"></div><div class="avatar-arm left"></div><div class="avatar-arm right"></div><div class="avatar-leg left"></div><div class="avatar-leg right"></div><div class="avatar-shoe left"></div><div class="avatar-shoe right"></div></div>
-    <div class="room-caption">${details.title} <span>• OWERRI RESIDENCE</span></div>
+    <div class="room-caption">${details.title} <span>• OWERRI LIFESTYLE</span></div>
      <div style="position:absolute;left:12px;bottom:42px;display:flex;gap:6px;flex-wrap:wrap;max-width:90%">
        ${Object.entries({sofa:"🛋 Sofa",tv:"📺 TV",bed:"🛏 Bed",fridge:"🧊 Fridge",stove:"🍳 Stove",shower:"🚿 Shower",toilet:"🚽 Toilet",wardrobe:"👕 Wardrobe",table:"🪑 Table"}).filter(([key])=>details[key]).map(([key,label])=>`<button type="button" data-furniture="${key}" style="padding:7px 9px;background:#182634;border:1px solid #304458">${label}</button>`).join("")}
      </div>
@@ -751,6 +757,24 @@ function renderRoom(){
   document.querySelectorAll(".room-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.room===currentRoom))
 }
 function switchRoom(r){currentRoom=r;renderRoom();log("🚪 Walked into the "+r)}
+function enterPlace(zone){
+  if(!zone)return;
+  const type=String(zone.type||"").toLowerCase(),name=String(zone.name||"").toLowerCase();
+  let rooms=["plaza","restaurant"],labels={plaza:"Public Area",restaurant:"Local Café"};
+  if(type.includes("hotel")||name.includes("hotel")||name.includes("rock view")||name.includes("concorde")){rooms=["hotelLobby","hotelRoom","restaurant"];labels={hotelLobby:"Lobby",hotelRoom:"Guest Room",restaurant:"Restaurant"};}
+  else if(name.includes("club")||name.includes("wetheral")){rooms=["clubFloor","restaurant"];labels={clubFloor:"Dance Floor",restaurant:"Lounge"};}
+  else if(type.includes("restaurant")||name.includes("kilimanjaro")){rooms=["restaurant","kitchen"];labels={restaurant:"Dining Room",kitchen:"Kitchen"};}
+  else if(type.includes("shopping")||name.includes("mall")||name.includes("market")||name.includes("douglas")){rooms=["mallFloor","marketStall"];labels={mallFloor:"Mall Floor",marketStall:"Shops"};}
+  else if(type.includes("campus")||type.includes("university")||name.includes("imsu")||name.includes("futo")){rooms=["campusHall","officeFloor"];labels={campusHall:"Campus Hall",officeFloor:"Study Hall"};}
+  else if(type.includes("fitness")||name.includes("gym")){rooms=["gymFloor"];labels={gymFloor:"Gym Floor"};}
+  else if(type.includes("travel")||name.includes("airport")){rooms=["airportTerminal","restaurant"];labels={airportTerminal:"Terminal",restaurant:"Café"};}
+  else if(type.includes("entertainment")||name.includes("mangrove")){rooms=["entertainment","restaurant"];labels={entertainment:"Games Floor",restaurant:"Snack Bar"};}
+  else if(type.includes("junction")||type.includes("hub")||type.includes("area")||name.includes("fire service")||name.includes("control post")){rooms=["officeFloor","plaza"];labels={officeFloor:"Public Office",plaza:"Public Area"};}
+  currentRoom=rooms[0];$("houseTitle").textContent=zone.name;
+  const tabs=$("roomTabs");tabs.innerHTML=rooms.map(function(r){return '<button type="button" data-room="'+r+'">'+(labels[r]||r)+'</button>'}).join("");
+  tabs.querySelectorAll("[data-room]").forEach(function(b){b.onclick=function(){switchRoom(b.dataset.room)}});
+  $("interior").classList.add("show");renderRoom();log("Entered "+zone.name);
+}
 function useFurniture(item){
   const actions={
     sofa:()=>{player.fun=clamp(player.fun+10);player.energy=clamp(player.energy+7);log("🛋 You relaxed on the sofa")},
@@ -1269,6 +1293,7 @@ function arriveAtZone(i){
     btn.innerHTML=`${act.label}<small>${act.cost>0?money(act.cost):"Free"}</small>`
     btn.onclick=()=>doAction(act);a.appendChild(btn)
   })
+  const enter=document.createElement("button");enter.className="action-btn";enter.style.borderColor="#47d7a2";enter.textContent="🚪 Enter "+z.name+" — Explore inside";enter.onclick=()=>enterPlace(z);a.prepend(enter)
   log("📍 Arrived at "+z.name);update()
 }
 function startRoute(i){
