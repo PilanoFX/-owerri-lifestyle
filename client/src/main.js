@@ -1236,9 +1236,10 @@ async function createCity3D(){
     // Detailed low-poly human avatar: layered clothing, neck, ears, hands, shoes and face.
     const skin=mat(0x8f5638,.72),skinLight=mat(0xb97850,.72),shirt=mat(0x246bb0,.78),shirtTrim=mat(0xe6c56a,.7),trousers=mat(0x202936,.86),shoes=mat(0xe8e7dc,.65),hair=mat(0x1b1512,.95),eyes=mat(0x17120f,.5),sole=mat(0x34343a,.9);
     const avatar=new THREE.Group();
+    const walkParts={};
     function part(geometry,material,x,y,z){const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;avatar.add(mesh);return mesh;}
-    part(new THREE.CapsuleGeometry(.105,.48,4,8),trousers,-.14,.53,0);
-    part(new THREE.CapsuleGeometry(.105,.48,4,8),trousers,.14,.53,0);
+    walkParts.leftLeg=part(new THREE.CapsuleGeometry(.105,.48,4,8),trousers,-.14,.53,0);
+    walkParts.rightLeg=part(new THREE.CapsuleGeometry(.105,.48,4,8),trousers,.14,.53,0);
     part(new THREE.BoxGeometry(.23,.11,.39),shoes,-.14,.13,.09);
     part(new THREE.BoxGeometry(.23,.045,.39),sole,-.14,.075,.09);
     part(new THREE.BoxGeometry(.23,.11,.39),shoes,.14,.13,.09);
@@ -1256,10 +1257,10 @@ async function createCity3D(){
     part(new THREE.SphereGeometry(.027,10,8),eyes,-.082,2.04,.225);
     part(new THREE.SphereGeometry(.027,10,8),eyes,.082,2.04,.225);
     part(new THREE.ConeGeometry(.045,.09,8),skinLight,0,1.99,.25);
-    part(new THREE.CylinderGeometry(.105,.12,.29,10),shirt,-.34,1.48,0).rotation.z=-.18;
-    part(new THREE.CylinderGeometry(.105,.12,.29,10),shirt,.34,1.48,0).rotation.z=.18;
-    part(new THREE.CapsuleGeometry(.065,.32,4,8),skin,-.39,1.19,.015).rotation.z=-.1;
-    part(new THREE.CapsuleGeometry(.065,.32,4,8),skin,.39,1.19,.015).rotation.z=.1;
+    walkParts.leftArm=part(new THREE.CylinderGeometry(.105,.12,.29,10),shirt,-.34,1.48,0);walkParts.leftArm.rotation.z=-.18;
+    walkParts.rightArm=part(new THREE.CylinderGeometry(.105,.12,.29,10),shirt,.34,1.48,0);walkParts.rightArm.rotation.z=.18;
+    walkParts.leftForearm=part(new THREE.CapsuleGeometry(.065,.32,4,8),skin,-.39,1.19,.015);walkParts.leftForearm.rotation.z=-.1;
+    walkParts.rightForearm=part(new THREE.CapsuleGeometry(.065,.32,4,8),skin,.39,1.19,.015);walkParts.rightForearm.rotation.z=.1;
     part(new THREE.SphereGeometry(.075,10,8),skinLight,-.405,.98,.025);
     part(new THREE.SphereGeometry(.075,10,8),skinLight,.405,.98,.025);
     avatar.position.set(player.x-50,0,player.y-50);
@@ -1282,7 +1283,11 @@ async function createCity3D(){
         camera.position.z+=(desiredZ-camera.position.z)*.11;
         camera.position.y+=(8.5-camera.position.y)*.08;
         const walking=!!heldDirection||routeTarget!==null;
-        avatar.position.y=walking?Math.abs(Math.sin(performance.now()*.014))*.09:0;
+        const gait=walking?Math.sin(performance.now()*.012):0;
+        avatar.position.y=walking?Math.abs(Math.sin(performance.now()*.024))*.035:0;
+        walkParts.leftLeg.rotation.x=gait*.42;walkParts.rightLeg.rotation.x=-gait*.42;
+        walkParts.leftArm.rotation.x=-gait*.32;walkParts.rightArm.rotation.x=gait*.32;
+        walkParts.leftForearm.rotation.x=-gait*.14;walkParts.rightForearm.rotation.x=gait*.14;
         camera.lookAt(p.x,1.15,p.z);
       }
       renderer.render(scene,camera);
