@@ -778,6 +778,21 @@ function renderRoom(){
   if(details.weights)html=html.replace('</div>`','<div class="gym-actions"><button type="button" data-furniture="weights">🏋️ Lift Weights</button><button type="button" data-furniture="treadmill">🏃 Run Treadmill</button><button type="button" data-furniture="exerciseBike">🚴 Exercise Bike</button></div></div>`');
   view.innerHTML=html
   view.querySelectorAll("[data-furniture]").forEach(b=>b.onclick=()=>useFurniture(b.dataset.furniture))
+  if(currentRoom==="hotelRoom"||currentRoom==="hotelLobby"){
+    const actions=document.createElement("div");actions.className="hotel-actions";
+    actions.innerHTML='<button type="button" data-hotel-action="service">🍽️ Order Room Service · ₦6,500</button><button type="button" data-hotel-action="stay">🛎️ Book Overnight Stay · ₦18,000</button>';
+    view.querySelector(".room-content")?.appendChild(actions);
+    actions.querySelector('[data-hotel-action="service"]').onclick=()=>{
+      if(player.cash<6500)return log("❌ Room service costs ₦6,500");
+      player.cash-=6500;player.hunger=clamp(player.hunger+30);player.fun=clamp(player.fun+4);
+      log("🍽️ Room service delivered. You feel less hungry.");update();scheduleSave();
+    };
+    actions.querySelector('[data-hotel-action="stay"]').onclick=()=>{
+      if(player.cash<18000)return log("❌ An overnight hotel stay costs ₦18,000");
+      player.cash-=18000;player.energy=clamp(player.energy+28);player.hygiene=clamp(player.hygiene+10);
+      log("🛎️ You checked in for the night and rested.");update();scheduleSave();
+    };
+  }
   document.querySelectorAll(".room-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.room===currentRoom))
 }
 function switchRoom(r){currentRoom=r;renderRoom();log("🚪 Walked into the "+r)}
@@ -1254,28 +1269,17 @@ function renderNeeds(){
   $("needs").innerHTML=ns.map(n=>`<div class="need">${n.e} ${n.l} ${Math.round(player[n.k])}<div class="need-bar"><div class="need-fill" style="width:${player[n.k]}%;background:${needColor(player[n.k])}"></div></div></div>`).join("")
 }
 function renderZones(){
-  const c=$("zones");c.innerHTML=""
-  zones.forEach((z,i)=>{
-    const el=document.createElement("button");el.type="button";el.className="zone"
-    el.style.left=z.x+"%";el.style.top=z.y+"%"
-    el.textContent=z.emoji;el.title=z.name;el.setAttribute("aria-label",z.name)
-    el.onclick=()=>startRoute(i);c.appendChild(el)
-  })
+  // Keep the city map clean: navigation happens through the destination list,
+  // not floating emoji pins layered over the streets.
+  const c=$("zones");if(c)c.replaceChildren();
   const list=$("destinations");
   if(list)list.innerHTML=zones.map((z,i)=>`<button class="destination-btn" type="button" data-destination="${i}"><span class="dest-icon">${z.emoji}</span><span class="dest-copy"><b>${z.name}</b><small>${z.type}</small></span></button>`).join("");
   list?.querySelectorAll("[data-destination]").forEach(button=>button.onclick=()=>startRoute(Number(button.dataset.destination)));
 }
 function renderHouses(){
-  const c=$("houses");if(!c)return;c.innerHTML=""
-  houseList.forEach(h=>{
-    const owned=player.houseId===h.id
-    const el=document.createElement("button");el.type="button"
-    el.className=owned?"house owned":"house"
-    el.style.left=h.x+"%";el.style.top=h.y+"%"
-    el.innerHTML=owned?'<span class="house-check">✓</span>':'<span class="house-roof"></span><span class="house-wall"></span>';el.title=h.name
-    el.onclick=()=>{if(owned)enterMyHouse();else buyHouse(h)}
-    c.appendChild(el)
-  })
+  // House buying and entering stay available in the property list.
+  // Do not render floating house icons or check-mark pins on the city map.
+  const c=$("houses");if(c)c.replaceChildren();
 }
 function renderHouseList(){
   const c=$("houseList");if(!c)return
