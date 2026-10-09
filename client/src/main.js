@@ -650,6 +650,9 @@ function enterMyHouse(){
   const h=houseList.find(x=>x.id===player.houseId)
   $("houseTitle").textContent="🏠 "+h.name
   currentRoom=h.rooms[0]||"living"
+  const tabs=$("roomTabs");
+  tabs.innerHTML=h.rooms.map(room=>`<button type="button" data-room="${room}">${({living:"🛋 Living Room",bedroom:"🛏 Bedroom",kitchen:"🍳 Kitchen",bathroom:"🚿 Bathroom"})[room]||room}</button>`).join("");
+  tabs.querySelectorAll("[data-room]").forEach(button=>button.onclick=()=>switchRoom(button.dataset.room));
   $("interior").classList.add("show")
   renderRoom()
 }
@@ -925,6 +928,21 @@ async function createCity3D(){
     box(11,.22,9,mat(0xb3b8ae),12,.08,12,false);
     const fountain=new THREE.Mesh(new THREE.CylinderGeometry(1.45,1.65,.55,20),mat(0x9ba8ad));fountain.position.set(12,.48,12);scene.add(fountain);
     const water=new THREE.Mesh(new THREE.CylinderGeometry(1.12,1.12,.12,20),mat(0x3a9fc2,.25));water.position.set(12,.79,12);scene.add(water);
+    // A proper low-poly human avatar in the 3D world, not a flat map marker.
+    const skin=mat(0x9c603f),shirt=mat(0x2777b9),trousers=mat(0x252d39),shoes=mat(0xe8e7dc),hair=mat(0x211915);
+    const avatar=new THREE.Group();
+    function part(geometry,material,x,y,z){const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;avatar.add(mesh);return mesh;}
+    part(new THREE.CylinderGeometry(.24,.32,.78,8),shirt,0,1.35,0);
+    part(new THREE.SphereGeometry(.25,12,10),skin,0,2.02,0);
+    part(new THREE.SphereGeometry(.255,12,8,0,Math.PI*2,0,Math.PI*.52),hair,0,2.13,-.015);
+    part(new THREE.CylinderGeometry(.075,.09,.72,7),skin,-.34,1.35,0).rotation.z=-.12;
+    part(new THREE.CylinderGeometry(.075,.09,.72,7),skin,.34,1.35,0).rotation.z=.12;
+    part(new THREE.CylinderGeometry(.105,.12,.72,7),trousers,-.13,.62,0);
+    part(new THREE.CylinderGeometry(.105,.12,.72,7),trousers,.13,.62,0);
+    part(new THREE.BoxGeometry(.22,.12,.38),shoes,-.13,.15,.07);
+    part(new THREE.BoxGeometry(.22,.12,.38),shoes,.13,.15,.07);
+    avatar.position.set(player.x-50,0,player.y-50);
+    scene.add(avatar);
     const resize=()=>{
       if(!host.isConnected)return;
       const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);
@@ -934,7 +952,8 @@ async function createCity3D(){
     const observer=new ResizeObserver(resize);observer.observe(host);
     let frame=0;
     const draw=()=>{if(!canvas.isConnected){observer.disconnect();renderer.dispose();return;}frame=requestAnimationFrame(draw);renderer.render(scene,camera);};
-    city3dState={renderer,scene,camera,observer,frame};
+    city3dState={renderer,scene,camera,observer,frame,playerGroup:avatar};
+    syncCityAvatar();
     draw();
   }catch(error){
     console.error("3D city failed to load",error);
@@ -943,6 +962,13 @@ async function createCity3D(){
   }
 }
 
+function syncCityAvatar(){
+  const avatar=city3dState?.playerGroup;
+  if(!avatar)return;
+  avatar.position.x=player.x-50;
+  avatar.position.z=player.y-50;
+  avatar.rotation.y=player.direction==="left"?-Math.PI/2:player.direction==="right"?Math.PI/2:player.direction==="up"?Math.PI:0;
+}
 function renderNeeds(){
   const ns=[{k:"hunger",l:"Hunger",e:"🍽️"},{k:"energy",l:"Energy",e:"⚡"},{k:"fun",l:"Fun",e:"🎉"},{k:"social",l:"Social",e:"👥"},{k:"hygiene",l:"Hygiene",e:"🚿"},{k:"bladder",l:"Bladder",e:"🚽"}]
   $("needs").innerHTML=ns.map(n=>`<div class="need">${n.e} ${n.l} ${Math.round(player[n.k])}<div class="need-bar"><div class="need-fill" style="width:${player[n.k]}%;background:${needColor(player[n.k])}"></div></div></div>`).join("")
@@ -1009,6 +1035,7 @@ function update(){
   $("mode").textContent=player.mode
   $("player").style.left=player.x+"%";$("player").style.top=player.y+"%"
   $("player").className="player "+player.direction
+  syncCityAvatar();
   $("player").innerHTML=player.mode==="Drive"
     ?`<div style="font-size:20px">${vehicleList.find(v=>v.id===player.currentVehicle)?.emoji||"🚗"}</div>`
     :`<div class="person"></div>`
