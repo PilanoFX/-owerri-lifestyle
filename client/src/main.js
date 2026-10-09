@@ -133,7 +133,12 @@ let player = {
   mode:"Walk", fuel:100, direction:"down",
   hunger:78, energy:82, fun:55, social:50, hygiene:88, bladder:68,
   username:"Player", houseId:null, vehicles:[], currentVehicle:null,
-  friends:[], fitness:12, job:"Unemployed", checkedIn:false
+  friends:[], fitness:12, job:"Unemployed", checkedIn:false,
+  skills:{cooking:0,fitness:0,creativity:0,charisma:0,logic:0,handiness:0},
+  groceries:{Rice:2,Beans:1,Eggs:4,Noodles:2,Water:4}, traits:["Friendly"],
+  aspiration:"Successful Life", wishes:["Earn ₦50,000","Meet a neighbour","Improve fitness"], moodlets:["New in Owerri"],
+  rentDue:0,billsDue:2500,radioStation:"Owerri FM",wanted:0,fines:0,business:null,
+  ownedFurniture:["sofa","bed","fridge","stove","shower","toilet","table","tv"],rentedLot:null,governorSupport:0
 }
 
 let currentUser = null
@@ -347,7 +352,7 @@ function isFriend(id){return player.friends.some(f=>f.id===id)}
 async function loadPlayerData(){
   if(!currentUser)return
   const {data}=await supabase.from("players").select("*").eq("id",currentUser.id).single()
-  try{const extra=JSON.parse(localStorage.getItem("owerriLifestyleExtra:"+currentUser.id)||"{}");player.fitness=clamp(Number(extra.fitness??12));player.job=String(extra.job||"Unemployed");player.checkedIn=!!extra.checkedIn}catch{}
+  try{const extra=JSON.parse(localStorage.getItem("owerriLifestyleExtra:"+currentUser.id)||"{}");player.fitness=clamp(Number(extra.fitness??12));player.job=String(extra.job||"Unemployed");player.checkedIn=!!extra.checkedIn;for(const k of ["skills","groceries","traits","aspiration","wishes","moodlets","rentDue","billsDue","radioStation","wanted","fines","business","ownedFurniture","rentedLot","governorSupport"])if(extra[k]!==undefined)player[k]=extra[k]}catch{}
   if(data){
     player.cash=data.cash??1650000
     player.level=data.level??1
@@ -388,7 +393,7 @@ async function savePlayerData(){
 
 function scheduleSave(){
   clearTimeout(saveTimeout);
-  try{if(currentUser)localStorage.setItem("owerriLifestyleExtra:"+currentUser.id,JSON.stringify({fitness:player.fitness,job:player.job,checkedIn:player.checkedIn}))}catch{}
+  try{if(currentUser)localStorage.setItem("owerriLifestyleExtra:"+currentUser.id,JSON.stringify({fitness:player.fitness,job:player.job,checkedIn:player.checkedIn,skills:player.skills,groceries:player.groceries,traits:player.traits,aspiration:player.aspiration,wishes:player.wishes,moodlets:player.moodlets,rentDue:player.rentDue,billsDue:player.billsDue,radioStation:player.radioStation,wanted:player.wanted,fines:player.fines,business:player.business,ownedFurniture:player.ownedFurniture,rentedLot:player.rentedLot,governorSupport:player.governorSupport}))}catch{}
   saveTimeout=setTimeout(savePlayerData,1400)
 }
 
@@ -766,7 +771,10 @@ function openFeature(type){
     club:{title:"🎵 Wetheral Nightclub",intro:"Music is playing. Choose how to spend your night.",html:button("💃 Dance floor","dance","₦3,000 · fun and fitness boost")+button("🥤 Buy a soft drink","drink","₦1,200 · social boost")+button("🗣️ Talk to someone","clubtalk","Free · meet a local NPC")+button("🎧 Request a song","song","₦500 · fun boost")},
     airport:{title:"✈️ Sam Mbakwe Airport",intro:"Check in first, then choose a destination. This is an in-game travel simulation, not a real booking.",html:button("🧳 Check in","checkin","Free · prepare for departure")+button("🏙️ Fly to Lagos","lagos","₦85,000 · simulated trip")+button("🌉 Fly to Port Harcourt","ph","₦42,000 · simulated trip")+button("🏢 Fly to Abuja","abuja","₦68,000 · simulated trip")+button("🌴 Fly to Enugu","enugu","₦25,000 · simulated trip")},
     jobs:{title:"💼 Jobs & Property",intro:`Current job: <b>${escapeHtml(player.job||"Unemployed")}</b><br>Cash: <b>${money(player.cash)}</b><br>Owned home: <b>${player.houseId?escapeHtml(houseList.find(h=>h.id===player.houseId)?.name||"Yes"):"None"}</b>`,html:button("🧑‍💼 Office assistant shift","office","Earn ₦28,000 · costs energy")+button("🍔 Restaurant shift","restaurant","Earn ₦22,000 · costs energy")+button("🛵 Delivery shift","delivery","Earn ₦35,000 · requires no vehicle")+button("📈 Apply for promotion","promotion","Uses reputation and experience")+button("🏠 Browse property","property","View available homes below")},
-    people:{title:"🧑 People & Social",intro:"Talk to animated local residents or interact with real players when they are online.",html:button("👋 Greet a resident","greet","Free · improve social need")+button("💬 Have a conversation","conversation","Free · fun and social boost")+button("🤝 Make a friend","friend","Free · build your reputation")+button("👥 Open friends & real players","online","Open the multiplayer friends panel")}
+    people:{title:"🧑 People & Social",intro:"Talk to animated local residents or interact with real players when they are online.",html:button("👋 Greet a resident","greet","Free · improve social need")+button("💬 Have a conversation","conversation","Free · fun and social boost")+button("🤝 Make a friend","friend","Free · build your reputation")+button("👥 Open friends & real players","online","Open the multiplayer friends panel")},
+    skills:{title:"📚 Skills, Traits & Aspirations",intro:`Aspiration: ${escapeHtml(player.aspiration)} · Traits: ${player.traits.map(escapeHtml).join(", ")}<br>Cooking ${player.skills.cooking} · Fitness ${player.skills.fitness} · Creativity ${player.skills.creativity} · Charisma ${player.skills.charisma} · Logic ${player.skills.logic} · Handiness ${player.skills.handiness}<br>Wishes: ${player.wishes.map(escapeHtml).join(" · ")}<br>Mood: ${player.moodlets.map(escapeHtml).join(", ")}`,html:button("🍳 Practice cooking","skillcook","Build cooking skill")+button("🧠 Study logic","skilllogic","Build logic skill")+button("🎨 Create art","skillcreative","Build creativity skill")+button("🗣️ Practise charisma","skillcharisma","Build social confidence")+button("🔧 Practise handiness","skillhandy","Build handiness skill")+button("🎯 Wealth aspiration","aspwealth","Choose life goal")+button("🎯 Popularity aspiration","asppopular","Choose life goal")+button("🎯 Fitness aspiration","aspfitness","Choose life goal")+button("🌟 Change trait","trait","Cycle personality traits")+button("✨ Complete a wish","wish","Earn a reward for a wish")},
+    home:{title:"🏠 Home, Groceries & Bills",intro:`Groceries: ${Object.entries(player.groceries).map(([k,v])=>`${escapeHtml(k)} ×${v}`).join(", ")}<br>House bills: ${money(player.billsDue)} · Rent due: ${money(player.rentDue)}<br>Furniture owned: ${player.ownedFurniture.map(escapeHtml).join(", ")}`,html:button("🛒 Buy groceries","groceries","₦8,500 · ingredients for meals")+button("🍲 Cook Nigerian meal","cookmeal","Use groceries and restore hunger")+button("💡 Pay electricity/water bills","paybills","Pay ₦2,500 bill")+button("🔑 Rent a room","rent","₦25,000 simulated monthly rent")+button("🪑 Buy furniture","furniture","₦15,000 · add chair to inventory")+button("🏪 Start a small business","business","₦120,000 startup cost")+button("💸 Pay rent due","payrent","Pay recorded rent")},
+    city:{title:"🏙️ City Services & Public Life",intro:`Radio: ${escapeHtml(player.radioStation)} · Wanted level ${player.wanted}/5 · Fines ${money(player.fines)}<br>Governor support: ${player.governorSupport} · Public rental: ${escapeHtml(player.rentedLot||"None")}`,html:button("📻 Change radio station","radio","Tune local stations (audio not streamed)")+button("🚦 Obey traffic rules","traffic","Improve reputation and reduce wanted level")+button("🚓 Police station","police","Pay fines or reduce wanted level")+button("🗳️ Support a city policy","policy","Build civic reputation")+button("📢 Rent a billboard","billboard","₦35,000 · local rental record")+button("🌿 Rent a public plot","plot","₦50,000 · local rental record")}
   };
   const p=panels[type]||panels.people;
   title.textContent=p.title;body.innerHTML=`<p style="color:#9aabbd;font-size:13px;line-height:1.5;margin-bottom:12px">${p.intro}</p>${p.html}<div id="featureMessage" style="color:#65d8ff;font-size:13px;min-height:18px;margin-top:10px"></div>`;
@@ -776,7 +784,7 @@ function openFeature(type){
 function closeFeature(){const modal=$("featureModal");if(modal)modal.style.display="none"}
 function featureMessage(text){const el=$("featureMessage");if(el)el.textContent=text}
 function runFeatureAction(action,type){
-  const cost={weights:2000,run:1500,shake:1800,dance:3000,drink:1200,song:500,lagos:85000,ph:42000,abuja:68000,enugu:25000}[action]||0;
+  const cost={weights:2000,run:1500,shake:1800,dance:3000,drink:1200,song:500,lagos:85000,ph:42000,abuja:68000,enugu:25000,groceries:8500,paybills:2500,rent:25000,furniture:15000,business:120000,billboard:35000,plot:50000}[action]||0;
   if(player.cash<cost){featureMessage("Not enough money for that activity.");return}
   if(action==="online"){closeFeature();openFriendsPanel();return}
   if(action==="property"){closeFeature();$("houseList")?.scrollIntoView({behavior:"smooth",block:"center"});return}
@@ -805,7 +813,30 @@ function runFeatureAction(action,type){
   else if(action==="promotion"){if(player.reputation<65){featureMessage("Build reputation to at least 65 before applying.");return}player.job=(player.job==="Unemployed"?"Junior Associate":player.job+" II");player.reputation+=5;msg="Promotion approved! Your job title improved."}
   else if(action==="greet"){player.social=clamp(player.social+8);player.fun=clamp(player.fun+3);msg="A nearby resident greeted you back."}
   else if(action==="conversation"||action==="clubtalk"){player.social=clamp(player.social+14);player.fun=clamp(player.fun+10);player.reputation+=1;msg=action==="clubtalk"?"You chatted with someone at the club.":"You had a friendly conversation with a resident."}
-  else if(action==="friend"){player.social=clamp(player.social+10);player.reputation+=3;msg="You made a local acquaintance. NPC friendships are simulated."}
+  else if(action==="friend"){player.social=clamp(player.social+10);player.reputation+=3;player.skills.charisma++;msg="You made a local acquaintance. NPC friendships are simulated."}
+  else if(action==="skillcook"){player.skills.cooking++;player.energy=clamp(player.energy-5);msg="Cooking skill increased."}
+  else if(action==="skilllogic"){player.skills.logic++;player.energy=clamp(player.energy-10);msg="Logic skill increased."}
+  else if(action==="skillcreative"){player.skills.creativity++;player.fun=clamp(player.fun+8);msg="Creativity skill increased."}
+  else if(action==="skillcharisma"){player.skills.charisma++;player.social=clamp(player.social+8);msg="Charisma skill increased."}
+  else if(action==="skillhandy"){player.skills.handiness++;msg="Handiness skill increased."}
+  else if(action==="aspwealth"){player.aspiration="Successful Life";msg="Aspiration set to Successful Life."}
+  else if(action==="asppopular"){player.aspiration="Popular Neighbour";msg="Aspiration set to Popular Neighbour."}
+  else if(action==="aspfitness"){player.aspiration="Peak Fitness";msg="Aspiration set to Peak Fitness."}
+  else if(action==="trait"){const traits=["Friendly","Ambitious","Creative","Active","Outgoing","Family Focused","Lucky","Hardworking","Romantic","Independent"];player.traits=[traits[(traits.indexOf(player.traits[0])+1)%traits.length]];msg="Personality trait changed to "+player.traits[0]+"."}
+  else if(action==="wish"){player.cash+=10000;player.reputation+=3;player.wishes=["Earn ₦50,000","Meet a neighbour","Improve fitness"];player.moodlets=["Wish fulfilled","Accomplished"];msg="Wish completed! Reward: ₦10,000."}
+  else if(action==="groceries"){for(const [item,n] of Object.entries({Rice:2,Beans:1,Eggs:4,Noodles:2,Water:4}))player.groceries[item]=(player.groceries[item]||0)+n;msg="Groceries added to your inventory."}
+  else if(action==="cookmeal"){if(!player.groceries.Rice||!player.groceries.Water){featureMessage("Buy groceries first.");player.cash+=cost;return}player.groceries.Rice--;player.groceries.Water--;player.hunger=clamp(player.hunger+42);player.fun=clamp(player.fun+5);player.skills.cooking++;player.moodlets=["Well Fed"];msg="Nigerian meal cooked. Hunger restored; cooking skill +1."}
+  else if(action==="paybills"){player.billsDue=0;msg="Electricity and water bills paid."}
+  else if(action==="rent"){player.rentDue+=25000;msg="A room rental was recorded for the month."}
+  else if(action==="furniture"){player.ownedFurniture.push("chair");msg="Chair added to your furniture inventory."}
+  else if(action==="business"){if(player.business){featureMessage("You already run a business.");player.cash+=cost;return}player.business="Neighbourhood Shop";msg="Neighbourhood Shop opened. Work shifts now earn extra income."}
+  else if(action==="payrent"){if(player.rentDue<=0){msg="No rent is due."}else if(player.cash<player.rentDue){featureMessage("Not enough cash to pay rent.");player.cash+=cost;return}else{player.cash-=player.rentDue;player.rentDue=0;msg="Rent paid in full."}}
+  else if(action==="radio"){const stations=["Owerri FM","Hot FM Owerri","Orient FM","Dream FM","Imo Radio"];player.radioStation=stations[(stations.indexOf(player.radioStation)+1)%stations.length];msg="Radio changed to "+player.radioStation+". Live audio is not connected."}
+  else if(action==="traffic"){player.reputation+=2;player.wanted=Math.max(0,player.wanted-1);msg="You obeyed traffic rules. Reputation improved."}
+  else if(action==="police"){if(player.fines>0&&player.cash>=player.fines){player.cash-=player.fines;player.fines=0;player.wanted=0;msg="Fines paid; wanted level cleared."}else if(player.wanted>0){player.wanted--;msg="Police warning; wanted level reduced."}else msg="No fines are due."}
+  else if(action==="policy"){player.governorSupport++;player.reputation++;msg="City policy support recorded."}
+  else if(action==="billboard"){player.rentedLot="Douglas Road billboard";msg="Billboard rental recorded locally; shared-world advertising is not connected."}
+  else if(action==="plot"){player.rentedLot="Owerri public plot";msg="Public plot rental recorded locally; shared-world ownership is not connected."}
   featureMessage(msg);log("✨ "+msg);update();
 }
 
@@ -864,6 +895,9 @@ function renderGame(){
      <button id="airportBtn" class="full" style="margin-top:6px">✈️ Airport & Travel</button>
      <button id="jobsBtn" class="full" style="margin-top:6px">💼 Jobs & Property</button>
      <button id="peopleBtn" class="full" style="margin-top:6px">🧑 People & Social</button>
+      <button id="skillsBtn" class="full" style="margin-top:6px">📚 Skills & Aspirations</button>
+      <button id="homeBtn" class="full" style="margin-top:6px">🛒 Groceries, Home & Bills</button>
+      <button id="cityBtn" class="full" style="margin-top:6px">📻 City Services</button>
       </div>
       <div class="panel">
         <h3>🏠 Houses</h3>
@@ -909,6 +943,9 @@ function renderGame(){
   $("airportBtn").onclick=()=>openFeature("airport")
   $("jobsBtn").onclick=()=>openFeature("jobs")
   $("peopleBtn").onclick=()=>openFeature("people")
+  $("skillsBtn").onclick=()=>openFeature("skills")
+  $("homeBtn").onclick=()=>openFeature("home")
+  $("cityBtn").onclick=()=>openFeature("city")
   $("featureClose").onclick=closeFeature
   $("featureModal").addEventListener("click",e=>{if(e.target.id==="featureModal")closeFeature()})
   $("leave").onclick=()=>$("interior").classList.remove("show")
@@ -1274,7 +1311,7 @@ function doAction(a){
   player.hygiene=clamp(player.hygiene+a.hygiene)
   player.bladder=clamp(player.bladder+a.bladder)
   if(a.cash)player.cash+=a.cash
-  player.reputation+=2
+  player.reputation+=2;player.skills.charisma+=a.social>10?1:0;player.moodlets=[a.hunger>20?"Well Fed":a.fun>20?"Having Fun":"Out and About"]
   log("✅ "+a.label);update()
 }
 function houseAction(t){
@@ -1301,8 +1338,8 @@ function move(dir){
   update()
 }
 function work(){
-  const pay=player.mode==="Drive"?48000:30000
-  player.cash+=pay;player.energy=clamp(player.energy-22);player.hunger=clamp(player.hunger-12)
+  const pay=player.business?48000:(player.mode==="Drive"?48000:30000)
+  player.cash+=pay;player.energy=clamp(player.energy-22);player.hunger=clamp(player.hunger-12);if(player.business)log("🏪 Business income included.")
   player.reputation+=4
   if(player.reputation>=player.level*110){player.level++;log("⭐ Level up!")}
   log("💼 Earned "+money(pay));update()
