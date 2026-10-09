@@ -1051,9 +1051,15 @@ function renderGame(){
   $("leave").onclick=()=>$("interior").classList.remove("show")
   document.querySelectorAll("[data-move]").forEach(b=>{
     const dir=b.dataset.move;
+    b.setAttribute("aria-label","Walk "+dir);
     b.onclick=e=>{if(e.detail===0)move(dir)};
-    b.addEventListener("pointerdown",e=>{e.preventDefault();startHeldMove(dir)});
-    ["pointerup","pointerleave","pointercancel"].forEach(type=>b.addEventListener(type,stopHeldMove));
+    b.addEventListener("pointerdown",e=>{
+      e.preventDefault();
+      try{b.setPointerCapture(e.pointerId)}catch{}
+      startHeldMove(dir);
+    });
+    ["pointerup","pointercancel","lostpointercapture"].forEach(type=>b.addEventListener(type,stopHeldMove));
+    b.addEventListener("contextmenu",e=>e.preventDefault());
   })
   document.addEventListener("keydown",onMovementKey);
   document.addEventListener("keyup",onMovementKeyUp);
@@ -1110,6 +1116,35 @@ async function createCity3D(){
     scene.background=new THREE.Color(isNight?0x08111d:0x9bc8d5);
     scene.fog=new THREE.Fog(isNight?0x08111d:0x9bc8d5,65,155);
     const camera=new THREE.PerspectiveCamera(43,1,0.1,250);
+    let cameraZoom=1;
+    let pinchStartDistance=0,pinchStartZoom=1;
+    const activeMapPointers=new Map();
+    const pointerDistance=()=>{
+      const points=[...activeMapPointers.values()];
+      if(points.length<2)return 0;
+      return Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y);
+    };
+    const onMapPointerDown=e=>{
+      activeMapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(activeMapPointers.size===2){pinchStartDistance=pointerDistance();pinchStartZoom=cameraZoom;}
+    };
+    const onMapPointerMove=e=>{
+      if(!activeMapPointers.has(e.pointerId))return;
+      activeMapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(activeMapPointers.size>=2){
+        const distance=pointerDistance();
+        if(pinchStartDistance>0&&distance>0){
+          cameraZoom=Math.max(.55,Math.min(1.8,pinchStartZoom*pinchStartDistance/distance));
+        }
+      }
+    };
+    const onMapPointerUp=e=>{
+      activeMapPointers.delete(e.pointerId);
+      if(activeMapPointers.size<2)pinchStartDistance=0;
+    };
+    host.addEventListener("pointerdown",onMapPointerDown,{passive:true});
+    host.addEventListener("pointermove",onMapPointerMove,{passive:true});
+    ["pointerup","pointercancel","pointerleave"].forEach(type=>host.addEventListener(type,onMapPointerUp,{passive:true}));
     camera.position.set(0,28,38);
     camera.lookAt(0,0,0);
     const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:"low-power"});
@@ -1304,10 +1339,10 @@ async function createCity3D(){
         const p=city3dState.playerGroup.position;
         const dir=player.direction||"down";
         const offset=dir==="up"?{x:0,z:9}:dir==="left"?{x:9,z:0}:dir==="right"?{x:-9,z:0}:{x:0,z:-9};
-        const desiredX=p.x+offset.x,desiredZ=p.z+offset.z;
+        const desiredX=p.x+offset.x*cameraZoom,desiredZ=p.z+offset.z*cameraZoom;
         camera.position.x+=(desiredX-camera.position.x)*.11;
         camera.position.z+=(desiredZ-camera.position.z)*.11;
-        camera.position.y+=(8.5-camera.position.y)*.08;
+        camera.position.y+=(8.5*cameraZoom-camera.position.y)*.08;
         const walking=!!heldDirection||routeTarget!==null;
         const gait=walking?Math.sin(performance.now()*.012):0;
         avatar.position.y=walking?Math.abs(Math.sin(performance.now()*.024))*.035:0;
