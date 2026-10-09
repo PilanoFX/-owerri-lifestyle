@@ -841,7 +841,7 @@ function openFeature(type){
   const button=(label,action,sub="")=>`<button type="button" data-feature-action="${action}" style="display:block;width:100%;text-align:left;padding:13px;margin:8px 0;background:#182634;border:1px solid #2a3b4d;border-radius:12px"><b>${label}</b>${sub?`<small style="display:block;color:#91a4b7;margin-top:4px">${sub}</small>`:""}</button>`;
   const panels={
     gym:{title:"💪 Pro Life Gym",intro:`Fitness: <b>${Math.round(player.fitness)}/100</b> · Energy: <b>${Math.round(player.energy)}</b>`,html:button("🏋️ Lift weights","weights","₦2,000 · +12 fitness, uses energy")+button("🏃 Treadmill run","run","₦1,500 · +9 fitness, uses energy")+button("🧘 Stretch & recover","stretch","Free · +3 fitness, small energy recovery")+button("🥤 Protein shake","shake","₦1,800 · restores hunger and energy")},
-    club:{title:"🎵 Wetheral Nightclub",intro:"Music is playing. Choose how to spend your night.",html:button("💃 Dance floor","dance","₦3,000 · fun and fitness boost")+button("🥤 Buy a soft drink","drink","₦1,200 · social boost")+button("🗣️ Talk to someone","clubtalk","Free · meet a local NPC")+button("🎧 Request a song","song","₦500 · fun boost")},
+    club:{title:"🎵 Wetheral Nightclub",intro:"Music is playing. Choose how to spend your night.",html:button("🎶 Toggle club music","clubmusic","Play or pause the original in-game beat")+button("💃 Dance floor","dance","₦3,000 · fun and fitness boost")+button("🥤 Buy a soft drink","drink","₦1,200 · social boost")+button("🗣️ Talk to someone","clubtalk","Free · meet a local NPC")+button("🎧 Request a song","song","₦500 · fun boost")},
     airport:{title:"✈️ Sam Mbakwe Airport",intro:"Check in first, then choose a destination. This is an in-game travel simulation, not a real booking.",html:button("🧳 Check in","checkin","Free · prepare for departure")+button("🏙️ Fly to Lagos","lagos","₦85,000 · simulated trip")+button("🌉 Fly to Port Harcourt","ph","₦42,000 · simulated trip")+button("🏢 Fly to Abuja","abuja","₦68,000 · simulated trip")+button("🌴 Fly to Enugu","enugu","₦25,000 · simulated trip")},
     jobs:{title:"💼 Jobs & Property",intro:`Current job: <b>${escapeHtml(player.job||"Unemployed")}</b><br>Cash: <b>${money(player.cash)}</b><br>Owned home: <b>${player.houseId?escapeHtml(houseList.find(h=>h.id===player.houseId)?.name||"Yes"):"None"}</b>`,html:button("🧑‍💼 Office assistant shift","office","Earn ₦28,000 · costs energy")+button("🍔 Restaurant shift","restaurant","Earn ₦22,000 · costs energy")+button("🛵 Delivery shift","delivery","Earn ₦35,000 · requires no vehicle")+button("📈 Apply for promotion","promotion","Uses reputation and experience")+button("🏠 Browse property","property","View available homes below")},
     people:{title:"🧑 People & Social",intro:"Talk to animated local residents or interact with real players when they are online.",html:button("👋 Greet a resident","greet","Free · improve social need")+button("💬 Have a conversation","conversation","Free · fun and social boost")+button("🤝 Make a friend","friend","Free · build your reputation")+button("👥 Open friends & real players","online","Open the multiplayer friends panel")},
@@ -855,7 +855,25 @@ function openFeature(type){
   modal.style.display="flex";
 }
 function closeFeature(){const modal=$("featureModal");if(modal)modal.style.display="none"}
+function toggleClubMusic(){
+  if(clubMusicOn){clubMusicOn=false;if(clubMusicTimer)clearInterval(clubMusicTimer);clubMusicTimer=null;try{clubAudioContext?.suspend()}catch{};return}
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx){featureMessage("Audio playback is not supported in this browser.");return}
+  try{if(!clubAudioContext)clubAudioContext=new AudioCtx();clubAudioContext.resume();clubMusicOn=true;clubBeatIndex=0;
+    const notes=[110,0,164.81,0,130.81,0,196,0,110,0,146.83,0,174.61,0,130.81,0];
+    const playBeat=()=>{if(!clubMusicOn||!clubAudioContext)return;const freq=notes[clubBeatIndex++%notes.length];if(!freq)return;const osc=clubAudioContext.createOscillator(),gain=clubAudioContext.createGain();osc.type="triangle";osc.frequency.value=freq;gain.gain.setValueAtTime(.0001,clubAudioContext.currentTime);gain.gain.exponentialRampToValueAtTime(.045,clubAudioContext.currentTime+.025);gain.gain.exponentialRampToValueAtTime(.0001,clubAudioContext.currentTime+.2);osc.connect(gain);gain.connect(clubAudioContext.destination);osc.start();osc.stop(clubAudioContext.currentTime+.22)};
+    playBeat();clubMusicTimer=setInterval(playBeat,230);
+  }catch(error){clubMusicOn=false;featureMessage("Could not start the club beat. Tap music again to retry.")}
+}
 function featureMessage(text){const el=$("featureMessage");if(el)el.textContent=text}
+function showFlightJourney(destination){
+  if(flightOverlay)flightOverlay.remove();
+  flightOverlay=document.createElement("div");flightOverlay.className="flight-overlay";
+  flightOverlay.innerHTML=`<div class="flight-window"><div class="flight-sky"><div class="flight-cloud cloud-one"></div><div class="flight-cloud cloud-two"></div><div class="flight-plane">✈</div></div><p class="flight-kicker">SAM MBAKWE INTERNATIONAL</p><h2>Flying to ${escapeHtml(destination)}</h2><p class="flight-status">Boarding complete · In-game flight journey</p><div class="flight-progress"><span></span></div><button type="button" class="flight-arrive">Arrive in ${escapeHtml(destination)}</button></div>`;
+  document.body.appendChild(flightOverlay);
+  flightOverlay.querySelector(".flight-arrive").onclick=()=>{flightOverlay.remove();flightOverlay=null;featureMessage("Welcome to "+destination+"! Your trip has been recorded in this simulation.");log("✈️ Landed in "+destination+". The playable city map is still Owerri.");update();scheduleSave()};
+  const progress=flightOverlay.querySelector(".flight-progress span");requestAnimationFrame(()=>{if(progress)progress.style.width="100%"});
+}
 function runFeatureAction(action,type){
   const cost={weights:2000,run:1500,shake:1800,dance:3000,drink:1200,song:500,lagos:85000,ph:42000,abuja:68000,enugu:25000,groceries:8500,paybills:2500,rent:25000,furniture:15000,business:120000,billboard:35000,plot:50000}[action]||0;
   if(player.cash<cost){featureMessage("Not enough money for that activity.");return}
@@ -867,7 +885,8 @@ function runFeatureAction(action,type){
   else if(action==="run"){player.fitness=clamp(player.fitness+9);player.energy=clamp(player.energy-18);player.hunger=clamp(player.hunger-10);msg="Run complete. Fitness +9."}
   else if(action==="stretch"){player.fitness=clamp(player.fitness+3);player.energy=clamp(player.energy+3);msg="You stretched and recovered. Fitness +3."}
   else if(action==="shake"){player.hunger=clamp(player.hunger+14);player.energy=clamp(player.energy+16);msg="Protein shake enjoyed."}
-  else if(action==="dance"){player.fun=clamp(player.fun+24);player.social=clamp(player.social+12);player.fitness=clamp(player.fitness+2);player.energy=clamp(player.energy-14);msg="You danced to the music. Fitness +2."}
+  else if(action==="clubmusic"){toggleClubMusic();msg=clubMusicOn?"Original club beat is playing.":"Club music paused."}
+  else if(action==="dance"){if(type==="club"&&!clubMusicOn)toggleClubMusic();player.fun=clamp(player.fun+24);player.social=clamp(player.social+12);player.fitness=clamp(player.fitness+2);player.energy=clamp(player.energy-14);msg="You danced to the music. Fitness +2."}
   else if(action==="drink"){player.social=clamp(player.social+10);player.fun=clamp(player.fun+5);msg="You enjoyed a soft drink."}
   else if(action==="song"){player.fun=clamp(player.fun+12);msg="The DJ played your request."}
   else if(action==="checkin"){player.checkedIn=true;msg="Check-in complete. You can now choose a flight destination."}
@@ -875,8 +894,8 @@ function runFeatureAction(action,type){
     if(!player.checkedIn){player.cash+=cost;featureMessage("Please check in before choosing a flight.");return}
     player.checkedIn=false;
     const cities={lagos:"Lagos",ph:"Port Harcourt",abuja:"Abuja",enugu:"Enugu"};
-    player.energy=clamp(player.energy-8);player.fun=clamp(player.fun+10);player.x=zones.find(z=>z.name==="Sam Mbakwe Airport").x;player.y=zones.find(z=>z.name==="Sam Mbakwe Airport").y;
-    msg="Arrived in "+cities[action]+" in the travel simulation. The current playable map remains Owerri.";
+    player.energy=clamp(player.energy-8);player.fun=clamp(player.fun+10);const airport=zones.find(z=>z.name==="Sam Mbakwe Airport");if(airport){player.x=airport.x;player.y=airport.y;}
+    showFlightJourney(cities[action]);msg="Flight journey started to "+cities[action]+".";
   }
   else if(action==="office"||action==="restaurant"||action==="delivery"){
     const jobs={office:{name:"Office Assistant",pay:28000,energy:18},restaurant:{name:"Restaurant Worker",pay:22000,energy:14},delivery:{name:"Delivery Rider",pay:35000,energy:22}};
@@ -1241,11 +1260,15 @@ async function createCity3D(){
     const draw=()=>{if(!canvas.isConnected){observer.disconnect();renderer.dispose();return;}frame=requestAnimationFrame(draw);
       if(city3dState?.playerGroup){
         const p=city3dState.playerGroup.position;
-        const desiredX=p.x+2,desiredZ=p.z+20;
-        camera.position.x+=(desiredX-camera.position.x)*.075;
-        camera.position.z+=(desiredZ-camera.position.z)*.075;
-        camera.position.y+=(27-camera.position.y)*.05;
-        camera.lookAt(p.x,1.2,p.z);
+        const dir=player.direction||"down";
+        const offset=dir==="up"?{x:0,z:9}:dir==="left"?{x:9,z:0}:dir==="right"?{x:-9,z:0}:{x:0,z:-9};
+        const desiredX=p.x+offset.x,desiredZ=p.z+offset.z;
+        camera.position.x+=(desiredX-camera.position.x)*.11;
+        camera.position.z+=(desiredZ-camera.position.z)*.11;
+        camera.position.y+=(8.5-camera.position.y)*.08;
+        const walking=!!heldDirection||routeTarget!==null;
+        avatar.position.y=walking?Math.abs(Math.sin(performance.now()*.014))*.09:0;
+        camera.lookAt(p.x,1.15,p.z);
       }
       renderer.render(scene,camera);
     };
@@ -1336,6 +1359,7 @@ function update(){
 }
 
 let routeTarget=null,routeTimer=null,heldDirection=null,heldTimer=null;
+let clubMusicOn=false,clubAudioContext=null,clubMusicTimer=null,clubBeatIndex=0,flightOverlay=null;
 function arriveAtZone(i){
   const z=zones[i];routeTarget=null;
   $("locInfo").innerHTML=`<b>${z.emoji} ${z.name}</b><br><small style="color:#7a8b9e">${z.type} · You have arrived</small>`
@@ -1371,7 +1395,7 @@ function selectZone(i){startRoute(i)}
 function startHeldMove(dir){
   heldDirection=dir;move(dir);
   if(heldTimer)clearInterval(heldTimer);
-  heldTimer=setInterval(()=>{if(heldDirection)move(heldDirection)},110);
+  heldTimer=setInterval(()=>{if(heldDirection)move(heldDirection)},75);
 }
 function stopHeldMove(){heldDirection=null;if(heldTimer){clearInterval(heldTimer);heldTimer=null;}}
 function onMovementKey(e){
