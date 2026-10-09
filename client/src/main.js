@@ -143,16 +143,12 @@ let saveTimeout = null
 let activeChat = null
 const conversations = {}
 
-// Simulated live players (replace with real presence later)
-let onlinePlayers = [
-  {id:"p1", username:"Chidi_Okeke", x:42, y:38, color:"#e74c3c", zone:"Douglas Road"},
-  {id:"p2", username:"Ada_Ngozi", x:60, y:54, color:"#9b59b6", zone:"Owerri Mall"},
-  {id:"p3", username:"Emeka_Boss", x:24, y:72, color:"#3498db", zone:"FUTO"},
-  {id:"p4", username:"Ngozi_Queen", x:80, y:38, color:"#f39c12", zone:"Concorde Hotel"},
-  {id:"p5", username:"Kelechi_Dev", x:44, y:22, color:"#1abc9c", zone:"Pro Life Gym"},
-  {id:"p6", username:"Ifeanyi_King", x:70, y:48, color:"#e67e22", zone:"Hotel CP"},
-  {id:"p7", username:"Chioma_Babe", x:52, y:32, color:"#e91e63", zone:"Kilimanjaro"}
-]
+// Real-time connected players are supplied by the game server.
+let onlinePlayers = [];
+let multiplayerSocket = null;
+let multiplayerReconnectTimer = null;
+let multiplayerId = null;
+let lastPresenceSend = 0;
 
 const root = document.getElementById("root")
 
@@ -386,13 +382,104 @@ async function login(){
   await loadPlayerData()
   startGame()
 }
-async function logout(){await savePlayerData();await supabase.auth.signOut();currentUser=null;showAuthScreen()}
+async function logout(){
+  await savePlayerData();
+  if(multiplayerReconnectTimer){clearTimeout(multiplayerReconnectTimer);multiplayerReconnectTimer=null;}
+  if(multiplayerSocket){multiplayerSocket.close();multiplayerSocket=null;}
+  multiplayerId=null;onlinePlayers=[];
+  await supabase.auth.signOut();currentUser=null;showAuthScreen();
+}
 async function checkSession(){
   const {data:{session}}=await supabase.auth.getSession()
   if(session){currentUser=session.user;await loadPlayerData();startGame()}
   else showAuthScreen()
 }
-function startGame(){renderGame()}
+function startGame(){
+  renderGame();
+  connectMultiplayer();
+}
+
+function connectMultiplayer(){
+  if(!currentUser || (multiplayerSocket && [WebSocket.OPEN, WebSocket.CONNECTING].includes(multiplayerSocket.readyState))) return;
+  if(multiplayerReconnectTimer){clearTimeout(multiplayerReconnectTimer);multiplayerReconnectTimer=null;}
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  const socket = new WebSocket(protocol + "//" + location.host);
+  multiplayerSocket = socket;
+
+  socket.addEventListener("open",()=>{
+    if(multiplayerSocket!==socket)return;
+    log("🟢 Connected to live Owerri server");
+    socket.send(JSON.stringify({type:"name",name:player.username,x:player.x,y:player.y,zone:currentZoneName(),mode:player.mode}));
+    sendPresence(true);
+  });
+  socket.addEventListener("message",(event)=>{
+    let message;
+    try{message=JSON.parse(event.data)}catch{return}
+    if(message.type==="welcome"){
+      multiplayerId=message.id||null;
+      if(Array.isArray(message.players))setLivePlayers(message.players);
+      if(typeof message.online==="number")updateOnlineCount(message.online);
+    }
+    if(message.type==="players"){
+      setLivePlayers(Array.isArray(message.players)?message.players:[]);
+      if(typeof message.online==="number")updateOnlineCount(message.online);
+    }
+    if(message.type==="chat"){
+      if(message.fromId===multiplayerId)return;
+      log("💬 "+(message.name||"Player")+": "+message.text);
+    }
+    if(message.type==="dm"){
+      const id=message.fromId;
+      const target=onlinePlayers.find(p=>p.id===id)||{id,username:message.fromName||"Player"};
+      if(!conversations[id])conversations[id]=[];
+      const time=new Date(message.at||Date.now()).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+      conversations[id].push({from:"them",text:String(message.text||""),time});
+      if(activeChat && activeChat.id===id)renderConv(id);
+      else log("💬 New message from @"+target.username);
+    }
+  });
+  socket.addEventListener("close",()=>{
+    if(multiplayerSocket!==socket)return;
+    multiplayerSocket=null;
+    if(currentUser){
+      log("🟠 Live connection lost; reconnecting…");
+      multiplayerReconnectTimer=setTimeout(connectMultiplayer,4000);
+    }
+  });
+  socket.addEventListener("error",()=>{});
+}
+
+function currentZoneName(){
+  let best=zones[0],distance=Infinity;
+  for(const z of zones){
+    const d=Math.hypot(player.x-z.x,player.y-z.y);
+    if(d<distance){distance=d;best=z;}
+  }
+  return best?.name||"Owerri";
+}
+function setLivePlayers(list){
+  onlinePlayers=list
+    .filter(p=>p && p.id && p.id!==multiplayerId)
+    .map(p=>({...p,username:p.username||p.name||"Player",color:p.color||"#3498db"}));
+  renderOthers();
+  renderFriendsPanelIfOpen();
+}
+function updateOnlineCount(count){
+  const el=$("onlineCount");
+  if(el)el.textContent=String(count);
+}
+function renderFriendsPanelIfOpen(){
+  const panel=$("friendsPanel");
+  if(panel && panel.classList.contains("open"))renderFriendsPanel();
+}
+function sendPresence(force=false){
+  const socket=multiplayerSocket;
+  if(!socket || socket.readyState!==WebSocket.OPEN)return;
+  const now=Date.now();
+  if(!force && now-lastPresenceSend<90)return;
+  lastPresenceSend=now;
+  socket.send(JSON.stringify({type:"move",x:player.x,y:player.y,zone:currentZoneName(),mode:player.mode}));
+}
 
 // ===================== FRIENDS =====================
 function addFriend(target){
@@ -488,15 +575,11 @@ function sendDM(){
   conversations[activeChat.id].push({from:"me",text,time})
   renderConv(activeChat.id)
   input.value=""
-  // Simulated reply – real multiplayer will replace this
-  setTimeout(()=>{
-    if(!activeChat)return
-    const replies=["Wetin dey?","I dey around o","Where you dey?","Oya later","I go link you","Lol true talk","You don chop?","Owerri sweet","Abeg I dey come","I see you"]
-    const reply=replies[Math.floor(Math.random()*replies.length)]
-    const t=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
-    conversations[activeChat.id].push({from:"them",text:reply,time:t})
-    renderConv(activeChat.id)
-  },700+Math.random()*1400)
+  if(!multiplayerSocket || multiplayerSocket.readyState!==WebSocket.OPEN){
+    log("🟠 Message not sent: live connection is unavailable");
+    return;
+  }
+  multiplayerSocket.send(JSON.stringify({type:"dm",to:activeChat.id,text}))
 }
 
 // ===================== HOUSES & GARAGE =====================
@@ -574,7 +657,7 @@ function renderGame(){
   root.innerHTML=`
   <div class="top">
     <div class="logo">🌆 Owerri <span>Lifestyle</span></div>
-    <div class="user-line">Playing as <b>@${player.username}</b></div>
+    <div class="user-line">Playing as <b>@${player.username}</b> · <span id="onlineCount">1</span> online</div>
     <div class="stats">
       <div class="stat">💰 <b id="cash"></b></div>
       <div class="stat">⭐ <b id="level"></b></div>
@@ -719,6 +802,7 @@ function renderOthers(){
 }
 
 function update(){
+  sendPresence();
   $("cash").textContent=money(player.cash)
   $("level").textContent=player.level
   $("rep").textContent=player.reputation
@@ -794,11 +878,7 @@ function toggleTime(){
 }
 
 setInterval(()=>{
-  onlinePlayers.forEach(o=>{
-    o.x=Math.max(7,Math.min(93,o.x+(Math.random()-.5)*5.5))
-    o.y=Math.max(7,Math.min(93,o.y+(Math.random()-.5)*5.5))
-  })
-  renderOthers()
+  // Live player positions are received from the server; no fake movement.
 },4800)
 
 setInterval(()=>{
