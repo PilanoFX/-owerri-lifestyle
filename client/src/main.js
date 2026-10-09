@@ -772,6 +772,7 @@ function renderRoom(){
        ${Object.entries({sofa:"🛋 Sofa",tv:"📺 TV",bed:"🛏 Bed",fridge:"🧊 Fridge",stove:"🍳 Stove",shower:"🚿 Shower",toilet:"🚽 Toilet",wardrobe:"👕 Wardrobe",table:"🪑 Table"}).filter(([key])=>details[key]).map(([key,label])=>`<button type="button" data-furniture="${key}" style="padding:7px 9px;background:#182634;border:1px solid #304458">${label}</button>`).join("")}
      </div>
   </div>`
+  if(details.weights)html=html.replace('</div>`','<div class="gym-actions"><button type="button" data-furniture="weights">🏋️ Lift Weights</button><button type="button" data-furniture="treadmill">🏃 Run Treadmill</button><button type="button" data-furniture="exerciseBike">🚴 Exercise Bike</button></div></div>`');
   view.innerHTML=html
   view.querySelectorAll("[data-furniture]").forEach(b=>b.onclick=()=>useFurniture(b.dataset.furniture))
   document.querySelectorAll(".room-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.room===currentRoom))
