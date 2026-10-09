@@ -780,6 +780,14 @@ function renderRoom(){
   if(details.weights)html=html.replace('</div>`','<div class="gym-actions"><button type="button" data-furniture="weights">🏋️ Lift Weights</button><button type="button" data-furniture="treadmill">🏃 Run Treadmill</button><button type="button" data-furniture="exerciseBike">🚴 Exercise Bike</button></div></div>`');
   view.innerHTML=html
   view.querySelectorAll("[data-furniture]").forEach(b=>b.onclick=()=>useFurniture(b.dataset.furniture))
+  if(currentRoom==="clubFloor"){
+    const club=document.createElement("div");club.className="club-room-actions";
+    club.innerHTML='<button type="button" data-club="music">🎶 '+(clubMusicOn?'Pause music':'Play club music')+'</button><button type="button" data-club="dance">💃 Dance & vibe · ₦3,000</button><button type="button" data-club="drink">🥤 Soft drink · ₦1,200</button>';
+    view.querySelector(".room-content")?.appendChild(club);
+    club.querySelector('[data-club="music"]').onclick=()=>{toggleClubMusic();club.querySelector('[data-club="music"]').textContent=clubMusicOn?'Pause music':'Play club music';log(clubMusicOn?'🎶 Club music is playing':'🔇 Club music paused');};
+    club.querySelector('[data-club="dance"]').onclick=()=>{if(player.cash<3000)return log("❌ Dancing costs ₦3,000");player.cash-=3000;player.fun=clamp(player.fun+24);player.social=clamp(player.social+12);player.fitness=clamp(player.fitness+2);player.energy=clamp(player.energy-14);if(!clubMusicOn)toggleClubMusic();view.querySelector(".room-content")?.classList.add("dancing");setTimeout(()=>view.querySelector(".room-content")?.classList.remove("dancing"),2200);log("💃 You danced and vibed on the club floor.");update();scheduleSave();};
+    club.querySelector('[data-club="drink"]').onclick=()=>{if(player.cash<1200)return log("❌ A soft drink costs ₦1,200");player.cash-=1200;player.social=clamp(player.social+10);player.fun=clamp(player.fun+5);log("🥤 You enjoyed a soft drink.");update();scheduleSave();};
+  }
   if(currentRoom==="hotelRoom"||currentRoom==="hotelLobby"){
     const actions=document.createElement("div");actions.className="hotel-actions";
     actions.innerHTML='<button type="button" data-hotel-action="service">🍽️ Order Room Service · ₦6,500</button><button type="button" data-hotel-action="stay">🛎️ Book Overnight Stay · ₦18,000</button>';
