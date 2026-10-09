@@ -195,6 +195,11 @@ input:focus{outline:none;border-color:#3ecfff}
 .map #zones>* ,.map #houses>* ,.map #others>*{pointer-events:auto}
 .map #houses{z-index:18}.map #others{z-index:22}
 .map .player{display:none}
+.destinations{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
+.destination-btn{display:flex;align-items:center;gap:7px;text-align:left;background:#0b131b;border:1px solid #263746;padding:8px 7px;font-size:11px;min-height:42px}
+.destination-btn .dest-icon{font-size:18px}.destination-btn .dest-copy{min-width:0}.destination-btn b{display:block;white-space:normal;line-height:1.15}.destination-btn small{display:block;color:#77d9b4;font-size:9px;margin-top:3px}
+.map .zone{width:27px;height:27px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:15px;border:1px solid #fff;background:#12232de8;box-shadow:0 3px 8px #0009;white-space:normal}
+.map .zone b{display:none}.map .zone:after{content:"";position:absolute;bottom:-5px;left:10px;width:6px;height:6px;background:inherit;border-right:1px solid #fff;border-bottom:1px solid #fff;transform:rotate(45deg)}
 #roomView{background:#12100e;perspective:1000px}
 #roomView .room-content{overflow:hidden;background:linear-gradient(180deg,#b9b0a0 0%,#d7c7ae 54%,#6d4b34 54%,#3b281d 100%)}
 .room-content::before{content:"";position:absolute;inset:0 0 43%;background:linear-gradient(90deg,rgba(0,0,0,.12),transparent 24%,rgba(255,255,255,.09) 60%,rgba(0,0,0,.12)),repeating-linear-gradient(90deg,transparent 0 22%,rgba(50,39,28,.13) 22.2% 22.6%);border-bottom:8px solid #7d5d42}
@@ -767,6 +772,8 @@ function renderGame(){
         <h3>📍 Location</h3>
         <div id="locInfo" style="font-size:13px;color:#7a8b9e">Tap a place on the map</div>
         <div class="actions" id="actions"></div>
+        <h3 style="margin-top:14px">🧭 Places to visit</h3>
+        <div id="destinations" class="destinations"></div>
       </div>
       <div class="panel">
         <h3>Quick</h3>
@@ -808,7 +815,15 @@ function renderGame(){
   $("travel").onclick=travel
   $("myHouse").onclick=enterMyHouse
   $("leave").onclick=()=>$("interior").classList.remove("show")
-  document.querySelectorAll("[data-move]").forEach(b=>b.onclick=()=>move(b.dataset.move))
+  document.querySelectorAll("[data-move]").forEach(b=>{
+    const dir=b.dataset.move;
+    b.onclick=()=>move(dir);
+    b.addEventListener("pointerdown",e=>{e.preventDefault();startHeldMove(dir)});
+    ["pointerup","pointerleave","pointercancel"].forEach(type=>b.addEventListener(type,stopHeldMove));
+  })
+  document.addEventListener("keydown",onMovementKey);
+  document.addEventListener("keyup",onMovementKeyUp);
+  window.addEventListener("blur",stopHeldMove);
 
   renderZones();renderHouses();renderOthers();renderHouseList();update()
   createCity3D();
@@ -830,7 +845,7 @@ async function createCity3D(){
     scene.background=new THREE.Color(isNight?0x08111d:0x9bc8d5);
     scene.fog=new THREE.Fog(isNight?0x08111d:0x9bc8d5,65,155);
     const camera=new THREE.PerspectiveCamera(43,1,0.1,250);
-    camera.position.set(0,48,64);
+    camera.position.set(0,28,38);
     camera.lookAt(0,0,0);
     const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:"low-power"});
     renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
@@ -924,6 +939,55 @@ async function createCity3D(){
         if(isNight){const light=new THREE.PointLight(0xffcf85,1.8,13);light.position.set(x,3.6,z);scene.add(light);}
       }
     }
+    // Recognisable destination buildings are placed at the same coordinates as the map destinations.
+    // Their names are painted onto physical signboards attached to each facade.
+    function makeSign(text,x,y,z,width=7){
+      const signCanvas=document.createElement("canvas");signCanvas.width=512;signCanvas.height=128;
+      const ctx=signCanvas.getContext("2d");ctx.fillStyle="#14252b";ctx.fillRect(0,0,512,128);
+      ctx.fillStyle="#eaf6f1";ctx.font="bold 32px system-ui, sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
+      const label=text.toUpperCase();let shown=label;
+      while(ctx.measureText(shown).width>470&&shown.length>5)shown=shown.slice(0,-1);
+      ctx.fillText(shown,256,64);
+      ctx.strokeStyle="#f4ca65";ctx.lineWidth=8;ctx.strokeRect(4,4,504,120);
+      const texture=new THREE.CanvasTexture(signCanvas);texture.colorSpace=THREE.SRGBColorSpace;
+      const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,1.8),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));
+      mesh.position.set(x,y,z);scene.add(mesh);return mesh;
+    }
+    const landmarks=[
+      {name:"PRO LIFE GYM",x:42,y:20,w:8,d:6,h:5,color:0xc8d2d5,kind:"gym"},
+      {name:"WETHERAL CLUB",x:70,y:26,w:9,d:7,h:7,color:0x29283d,kind:"club"},
+      {name:"SAM MBAKWE AIRPORT",x:88,y:12,w:13,d:9,h:5,color:0xd4d6cf,kind:"airport"},
+      {name:"CONCORDE HOTEL",x:82,y:36,w:10,d:8,h:13,color:0xd8c5a4,kind:"hotel"},
+      {name:"HOTEL PRESIDENTIAL",x:72,y:46,w:9,d:7,h:10,color:0xd7c8b0,kind:"hotel"},
+      {name:"OWERRI MALL",x:58,y:56,w:11,d:8,h:7,color:0xd2d8d5,kind:"mall"},
+      {name:"IMSU",x:48,y:16,w:11,d:8,h:8,color:0xd9d2bf,kind:"campus"},
+      {name:"DOUGLAS MARKET",x:55,y:40,w:9,d:7,h:5,color:0xcaa67c,kind:"market"}
+    ];
+    landmarks.forEach(l=>{
+      const x=l.x-50,z=l.y-50;
+      const facade=mat(l.color),roof=mat(0x555c61);
+      box(l.w,.5,l.d,mat(0x8b918f),x,.12,z,false);
+      box(l.w,l.h,l.d,facade,x,.62,z,true);
+      box(l.w+.3,.35,l.d+.3,roof,x,.62+l.h,z,true);
+      const windowMat=mat(l.kind==="club"?0x8d58c6:l.kind==="airport"?0x8ac5d8:0x82b9cb,.35);
+      const floors=Math.max(1,Math.floor(l.h/2.5));
+      for(let fl=0;fl<floors;fl++)for(let col=0;col<Math.max(2,Math.floor(l.w/2));col++){
+        const wx=x-l.w/2+1+col*2.1,wy=.95+fl*2.3;
+        const win=new THREE.Mesh(new THREE.BoxGeometry(1,.85,.07),windowMat);
+        win.position.set(wx,wy,z+l.d/2+.05);scene.add(win);
+      }
+      if(l.kind==="airport"){
+        box(l.w*.75,.3,l.d*.65,mat(0xe9ece9),x,.8+l.h,z,false);
+        box(1,.22,l.d*1.8,mat(0x414b52),x,.2,z+l.d*1.5,false);
+      }
+      if(l.kind==="gym"){
+        box(l.w*.75,.35,.5,mat(0x2ca47a),x,2.2,z+l.d/2+.25,false);
+      }
+      if(l.kind==="club"){
+        for(let k=0;k<3;k++)box(.4,.25,.4,mat([0x9c55ff,0x27d6f5,0xff4e9b][k]),x-1+k,z+l.h*.2,z+l.d/2+.3,false);
+      }
+      makeSign(l.name,x,.62+l.h*.65,z+l.d/2+.12,Math.min(11,l.w+1));
+    });
     // A central civic plaza makes the world feel like a destination, not a blank grid.
     box(11,.22,9,mat(0xb3b8ae),12,.08,12,false);
     const fountain=new THREE.Mesh(new THREE.CylinderGeometry(1.45,1.65,.55,20),mat(0x9ba8ad));fountain.position.set(12,.48,12);scene.add(fountain);
@@ -951,7 +1015,17 @@ async function createCity3D(){
     resize();
     const observer=new ResizeObserver(resize);observer.observe(host);
     let frame=0;
-    const draw=()=>{if(!canvas.isConnected){observer.disconnect();renderer.dispose();return;}frame=requestAnimationFrame(draw);renderer.render(scene,camera);};
+    const draw=()=>{if(!canvas.isConnected){observer.disconnect();renderer.dispose();return;}frame=requestAnimationFrame(draw);
+      if(city3dState?.playerGroup){
+        const p=city3dState.playerGroup.position;
+        const desiredX=p.x+2,desiredZ=p.z+20;
+        camera.position.x+=(desiredX-camera.position.x)*.075;
+        camera.position.z+=(desiredZ-camera.position.z)*.075;
+        camera.position.y+=(27-camera.position.y)*.05;
+        camera.lookAt(p.x,1.2,p.z);
+      }
+      renderer.render(scene,camera);
+    };
     city3dState={renderer,scene,camera,observer,frame,playerGroup:avatar};
     syncCityAvatar();
     draw();
@@ -976,11 +1050,14 @@ function renderNeeds(){
 function renderZones(){
   const c=$("zones");c.innerHTML=""
   zones.forEach((z,i)=>{
-    const el=document.createElement("div");el.className="zone"
+    const el=document.createElement("button");el.type="button";el.className="zone"
     el.style.left=z.x+"%";el.style.top=z.y+"%"
-    el.innerHTML=`${z.emoji} <b>${z.name}</b>`
-    el.onclick=()=>selectZone(i);c.appendChild(el)
+    el.textContent=z.emoji;el.title=z.name;el.setAttribute("aria-label",z.name)
+    el.onclick=()=>startRoute(i);c.appendChild(el)
   })
+  const list=$("destinations");
+  if(list)list.innerHTML=zones.map((z,i)=>`<button class="destination-btn" type="button" data-destination="${i}"><span class="dest-icon">${z.emoji}</span><span class="dest-copy"><b>${z.name}</b><small>${z.type}</small></span></button>`).join("");
+  list?.querySelectorAll("[data-destination]").forEach(button=>button.onclick=()=>startRoute(Number(button.dataset.destination)));
 }
 function renderHouses(){
   const c=$("houses");if(!c)return;c.innerHTML=""
@@ -1042,17 +1119,51 @@ function update(){
   renderNeeds();renderHouses();renderOthers();renderHouseList();scheduleSave()
 }
 
-function selectZone(i){
-  const z=zones[i];player.x=z.x;player.y=z.y
-  $("locInfo").innerHTML=`<b>${z.emoji} ${z.name}</b><br><small style="color:#7a8b9e">${z.type}</small>`
+let routeTarget=null,routeTimer=null,heldDirection=null,heldTimer=null;
+function arriveAtZone(i){
+  const z=zones[i];routeTarget=null;
+  $("locInfo").innerHTML=`<b>${z.emoji} ${z.name}</b><br><small style="color:#7a8b9e">${z.type} · You have arrived</small>`
   const a=$("actions");a.innerHTML=""
   z.actions.forEach(act=>{
     const btn=document.createElement("button");btn.className="action-btn"
     btn.innerHTML=`${act.label}<small>${act.cost>0?money(act.cost):"Free"}</small>`
     btn.onclick=()=>doAction(act);a.appendChild(btn)
   })
-  log("📍 "+z.name);update()
+  log("📍 Arrived at "+z.name);update()
 }
+function startRoute(i){
+  const z=zones[i];if(!z)return;
+  routeTarget=i;
+  $("locInfo").innerHTML=`<b>🧭 Going to ${z.name}</b><br><small style="color:#7a8b9e">Follow the streets to reach this destination.</small>`
+  $("actions").innerHTML='<div style="color:#8da3b5;font-size:12px;padding:6px 0">🚶 En route…</div>';
+  if(routeTimer)clearInterval(routeTimer);
+  routeTimer=setInterval(()=>{
+    const dx=z.x-player.x,dy=z.y-player.y,dist=Math.hypot(dx,dy);
+    if(dist<0.9){clearInterval(routeTimer);routeTimer=null;arriveAtZone(i);return;}
+    const step=player.mode==="Drive"&&player.currentVehicle?(vehicleList.find(v=>v.id===player.currentVehicle)?.speed||3.3)*0.16:0.22;
+    if(player.mode==="Drive"&&player.fuel<=0){clearInterval(routeTimer);routeTimer=null;routeTarget=null;log("⛽ Out of fuel — route stopped");return;}
+    if(player.mode==="Drive"&&player.currentVehicle)player.fuel=Math.max(0,player.fuel-0.035);
+    if(Math.abs(dx)>Math.abs(dy)){player.direction=dx<0?"left":"right";player.x+=Math.sign(dx)*Math.min(step,Math.abs(dx));}
+    else{player.direction=dy<0?"up":"down";player.y+=Math.sign(dy)*Math.min(step,Math.abs(dy));}
+    player.x=Math.max(3,Math.min(97,player.x));player.y=Math.max(5,Math.min(95,player.y));
+    update();
+  },45);
+  log("🧭 Heading to "+z.name);
+}
+function selectZone(i){startRoute(i)}
+function startHeldMove(dir){
+  heldDirection=dir;move(dir);
+  if(heldTimer)clearInterval(heldTimer);
+  heldTimer=setInterval(()=>{if(heldDirection)move(heldDirection)},110);
+}
+function stopHeldMove(){heldDirection=null;if(heldTimer){clearInterval(heldTimer);heldTimer=null;}}
+function onMovementKey(e){
+  if(["ArrowUp","w","W"].includes(e.key)){e.preventDefault();if(!heldDirection)startHeldMove("up")}
+  else if(["ArrowDown","s","S"].includes(e.key)){e.preventDefault();if(!heldDirection)startHeldMove("down")}
+  else if(["ArrowLeft","a","A"].includes(e.key)){e.preventDefault();if(!heldDirection)startHeldMove("left")}
+  else if(["ArrowRight","d","D"].includes(e.key)){e.preventDefault();if(!heldDirection)startHeldMove("right")}
+}
+function onMovementKeyUp(e){if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","w","W","a","A","s","S","d","D"].includes(e.key))stopHeldMove()}
 function doAction(a){
   if(player.cash<a.cost)return log("❌ Not enough money")
   player.cash-=a.cost
