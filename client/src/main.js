@@ -1067,6 +1067,12 @@ function renderGame(){
 
 // ===================== 3D OWERRI CITY =====================
 let city3dState = null;
+let cityCollisionBoxes=[];
+const PLAYER_COLLISION_RADIUS=.42;
+function addCityCollider(x,z,w,d,pad=.55){cityCollisionBoxes.push({x,z,w:w+pad*2,d:d+pad*2});}
+function isCityPositionBlocked(px,py){const wx=px-50,wz=py-50,r=PLAYER_COLLISION_RADIUS;return cityCollisionBoxes.some(b=>Math.abs(wx-b.x)<b.w/2+r&&Math.abs(wz-b.z)<b.d/2+r);}
+function movePlayerSafely(nx,ny){nx=Math.max(3,Math.min(97,nx));ny=Math.max(5,Math.min(95,ny));if(!isCityPositionBlocked(nx,ny)){player.x=nx;player.y=ny;return true;}let moved=false;if(Math.abs(nx-player.x)>.0001&&!isCityPositionBlocked(nx,player.y)){player.x=nx;moved=true;}if(Math.abs(ny-player.y)>.0001&&!isCityPositionBlocked(player.x,ny)){player.y=ny;moved=true;}return moved;}
+function targetArrivalRadius(z){const wx=z.x-50,wz=z.y-50;const b=cityCollisionBoxes.find(c=>Math.abs(wx-c.x)<=c.w/2&&Math.abs(wz-c.z)<=c.d/2);return b?Math.max(b.w,b.d)/2+1.1:2.0;}
 async function createCity3D(){
   const canvas=$("city3d");
   const host=$("cityMap");
@@ -1076,6 +1082,7 @@ async function createCity3D(){
     if(!$("city3d"))return;
     if(city3dState?.renderer){city3dState.renderer.dispose();}
     const scene=new THREE.Scene();
+    cityCollisionBoxes=[];
     scene.background=new THREE.Color(isNight?0x08111d:0x9bc8d5);
     scene.fog=new THREE.Fog(isNight?0x08111d:0x9bc8d5,65,155);
     const camera=new THREE.PerspectiveCamera(43,1,0.1,250);
@@ -1120,7 +1127,7 @@ async function createCity3D(){
         const x=bx+(rand()-.5)*10,z=bz+(rand()-.5)*10;
         const base=mat(buildingColors[Math.floor(rand()*buildingColors.length)]);
         box(w,.45,d,mat(0x8c918b),x,.12,z,false);
-        box(w,h,d,base,x,.55,z,true);
+        box(w,h,d,base,x,.55,z,true);addCityCollider(x,z,w,d,.8);
         // Flat roof, parapet, facade windows and shopfronts.
         box(w+.18,.28,d+.18,mat(0x858b8a),x,.55+h,z,true);
         const floors=Math.max(1,Math.floor(h/2.4));
@@ -1145,7 +1152,7 @@ async function createCity3D(){
     for(let i=0;i<44;i++){
       const x=(rand()-.5)*100,z=(rand()-.5)*100;
       if(Math.abs(x%24)<7||Math.abs(z%24)<7)continue;
-      box(.34,2.1,.34,trunk,x,0,z,false);
+      box(.34,2.1,.34,trunk,x,0,z,false);addCityCollider(x,z,.55,.55,.2);
       const crown=new THREE.Mesh(new THREE.SphereGeometry(1.15+rand()*.45,7,6),leafMats[i%leafMats.length]);
       crown.position.set(x,2.8+rand()*.5,z);crown.castShadow=true;scene.add(crown);
     }
@@ -1156,7 +1163,7 @@ async function createCity3D(){
       const x=vertical?(i%4<2?-7.1:7.1):pos;
       const z=vertical?pos:(i%4<2?-7.1:7.1);
       const color=mat(carColors[i%carColors.length],.38);
-      box(1.8,.65,3.5,color,x,.18,z,true);
+      box(1.8,.65,3.5,color,x,.18,z,true);addCityCollider(x,z,1.9,3.6,.25);
       box(1.35,.55,1.65,mat(0x8db9c9,.28),x,.82,z-.05,true);
       for(const dx of [-.95,.95])for(const dz of [-1.05,1.05]){
         const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.16,8),mat(0x17191c));
@@ -1201,7 +1208,7 @@ async function createCity3D(){
       const x=l.x-50,z=l.y-50;
       const facade=mat(l.color),roof=mat(0x555c61);
       box(l.w,.5,l.d,mat(0x8b918f),x,.12,z,false);
-      box(l.w,l.h,l.d,facade,x,.62,z,true);
+      box(l.w,l.h,l.d,facade,x,.62,z,true);addCityCollider(x,z,l.w,l.d,.75);
       box(l.w+.3,.35,l.d+.3,roof,x,.62+l.h,z,true);
       const windowMat=mat(l.kind==="club"?0x8d58c6:l.kind==="airport"?0x8ac5d8:0x82b9cb,.35);
       const floors=Math.max(1,Math.floor(l.h/2.5));
@@ -1401,9 +1408,10 @@ function startRoute(i){
 }
 function selectZone(i){startRoute(i)}
 function startHeldMove(dir){
+  if(routeTimer){clearInterval(routeTimer);routeTimer=null;routeTarget=null;}
   heldDirection=dir;move(dir);
   if(heldTimer)clearInterval(heldTimer);
-  heldTimer=setInterval(()=>{if(heldDirection)move(heldDirection)},95);
+  heldTimer=setInterval(()=>{if(heldDirection)move(heldDirection)},32);
 }
 function stopHeldMove(){heldDirection=null;if(heldTimer){clearInterval(heldTimer);heldTimer=null;}}
 function onMovementKey(e){
@@ -1436,18 +1444,11 @@ function houseAction(t){
   update()
 }
 function move(dir){
-  let step=heldDirection?0.62:1.55
-  if(player.mode==="Drive"&&player.currentVehicle){
-    const v=vehicleList.find(x=>x.id===player.currentVehicle)
-    step=v?v.speed:3.3
-    if(player.fuel<=0)return log("⛽ Out of fuel")
-    player.fuel=Math.max(0,player.fuel-0.7)
-  }
-  player.direction=dir
-  if(dir==="up")player.y-=step;if(dir==="down")player.y+=step
-  if(dir==="left")player.x-=step;if(dir==="right")player.x+=step
-  player.x=Math.max(3,Math.min(97,player.x));player.y=Math.max(5,Math.min(95,player.y))
-  update()
+  let step=heldDirection ? 0.13 : 0.75;
+  if(player.mode==="Drive"&&player.currentVehicle){const v=vehicleList.find(x=>x.id===player.currentVehicle);step=(v?v.speed:3.3)*(heldDirection ? 0.035 : 0.18);if(player.fuel<=0)return log("⛽ Out of fuel");player.fuel=Math.max(0,player.fuel-(heldDirection ? 0.04 : 0.7));}
+  player.direction=dir;let nx=player.x,ny=player.y;
+  if(dir==="up")ny-=step;if(dir==="down")ny+=step;if(dir==="left")nx-=step;if(dir==="right")nx+=step;
+  const moved=movePlayerSafely(nx,ny);if(!moved&&!heldDirection)log("🚧 A wall or obstacle is blocking the way.");update();
 }
 function work(){
   const pay=player.business?48000:(player.mode==="Drive"?48000:30000)
