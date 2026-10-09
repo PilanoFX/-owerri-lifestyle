@@ -748,7 +748,7 @@ function renderRoom(){
     hotelLobby:{title:"Hotel Lobby",window:true,sofa:true,table:true,plant:true,tv:true},hotelRoom:{title:"Hotel Guest Room",window:true,bed:true,wardrobe:true,plant:false},
     clubFloor:{title:"Nightclub Dance Floor",window:false,tv:true,table:true,plant:false},restaurant:{title:"Restaurant Dining Room",window:true,table:true,plant:true},
     mallFloor:{title:"Shopping Mall",window:true,table:true,tv:true,plant:true},marketStall:{title:"Market Shops",window:false,table:true,plant:false},
-    campusHall:{title:"Campus Hall",window:true,table:true,plant:true},gymFloor:{title:"Fitness Centre",window:true,table:true,plant:false},
+    campusHall:{title:"Campus Hall",window:true,table:true,plant:true},gymFloor:{title:"Fitness Centre",window:true,table:true,plant:false,weights:true,treadmill:true,exerciseBike:true},lockerRoom:{title:"Gym Changing Room",window:false,wardrobe:true,table:true},
     airportTerminal:{title:"Airport Terminal",window:true,table:true,tv:true,plant:false},officeFloor:{title:"Office & Civic Centre",window:true,table:true,plant:true},
     entertainment:{title:"Entertainment Venue",window:false,tv:true,table:true,plant:false},plaza:{title:"Public Plaza",window:true,table:true,plant:true}
   }[currentRoom]||{title:"Room",window:true,sofa:true,tv:true,table:true,plant:true};
@@ -786,7 +786,7 @@ function enterPlace(zone){
   else if(type.includes("restaurant")||name.includes("kilimanjaro")){rooms=["restaurant","kitchen"];labels={restaurant:"Dining Room",kitchen:"Kitchen"};}
   else if(type.includes("shopping")||name.includes("mall")||name.includes("market")||name.includes("douglas")){rooms=["mallFloor","marketStall"];labels={mallFloor:"Mall Floor",marketStall:"Shops"};}
   else if(type.includes("campus")||type.includes("university")||name.includes("imsu")||name.includes("futo")){rooms=["campusHall","officeFloor"];labels={campusHall:"Campus Hall",officeFloor:"Study Hall"};}
-  else if(type.includes("fitness")||name.includes("gym")){rooms=["gymFloor"];labels={gymFloor:"Gym Floor"};}
+  else if(type.includes("fitness")||name.includes("gym")){rooms=["gymFloor","lockerRoom"];labels={gymFloor:"Gym Floor",lockerRoom:"Changing Room"};}
   else if(type.includes("travel")||name.includes("airport")){rooms=["airportTerminal","restaurant"];labels={airportTerminal:"Terminal",restaurant:"Café"};}
   else if(type.includes("entertainment")||name.includes("mangrove")){rooms=["entertainment","restaurant"];labels={entertainment:"Games Floor",restaurant:"Snack Bar"};}
   else if(name.includes("bank")||type.includes("office")||name.includes("world bank")){rooms=["officeFloor","lobby"];labels={officeFloor:"Banking Hall",lobby:"Customer Lounge"};}
@@ -807,9 +807,12 @@ function useFurniture(item){
     shower:()=>{player.hygiene=100;player.energy=clamp(player.energy-4);log("🚿 You took a shower")},
     toilet:()=>{player.bladder=100;log("🚽 You used the bathroom")},
     wardrobe:()=>{player.reputation+=1;log("👕 You changed your outfit")},
-    table:()=>{player.social=clamp(player.social+4);log("🪑 You sat at the table")}
+    table:()=>{player.social=clamp(player.social+4);log("🪑 You sat at the table")},
+    weights:()=>{if(player.energy<8)return log("😴 You need more energy first");if(player.cash<2000)return log("❌ Gym session costs ₦2,000");player.cash-=2000;player.fitness=clamp(player.fitness+12);player.energy=clamp(player.energy-8);player.fun=clamp(player.fun+3);log("🏋️ Workout complete: +12 fitness")},
+    treadmill:()=>{if(player.energy<10)return log("😴 You need more energy first");if(player.cash<1500)return log("❌ Treadmill session costs ₦1,500");player.cash-=1500;player.fitness=clamp(player.fitness+9);player.energy=clamp(player.energy-10);player.hunger=clamp(player.hunger-4);log("🏃 Treadmill run complete: +9 fitness")},
+    exerciseBike:()=>{if(player.energy<7)return log("😴 You need more energy first");if(player.cash<1200)return log("❌ Exercise bike session costs ₦1,200");player.cash-=1200;player.fitness=clamp(player.fitness+7);player.energy=clamp(player.energy-7);log("🚴 Cycling session complete: +7 fitness")}
   };
-  if(actions[item]){actions[item]();update()}
+  if(actions[item]){actions[item]();update();scheduleSave()}
 }
 function openFeature(type){
   const modal=$("featureModal"),title=$("featureTitle"),body=$("featureBody");
