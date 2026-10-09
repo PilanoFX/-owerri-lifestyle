@@ -1389,21 +1389,39 @@ function arriveAtZone(i){
 }
 function startRoute(i){
   const z=zones[i];if(!z)return;
+  stopHeldMove();
   routeTarget=i;
-  $("locInfo").innerHTML=`<b>🧭 Going to ${z.name}</b><br><small style="color:#7a8b9e">Follow the streets to reach this destination.</small>`
-  $("actions").innerHTML='<div style="color:#8da3b5;font-size:12px;padding:6px 0">🚶 En route…</div>';
+  $("locInfo").innerHTML=`<b>🧭 Going to ${z.name}</b><br><small style="color:#7a8b9e">Following walkable ground to the entrance.</small>`;
+  $("actions").innerHTML='<div style="color:#8da3b5;font-size:12px;padding:6px 0">🚶 Walking to destination…</div>';
   if(routeTimer)clearInterval(routeTimer);
+  let blockedTicks=0;
   routeTimer=setInterval(()=>{
     const dx=z.x-player.x,dy=z.y-player.y,dist=Math.hypot(dx,dy);
-    if(dist<0.9){clearInterval(routeTimer);routeTimer=null;arriveAtZone(i);return;}
-    const step=player.mode==="Drive"&&player.currentVehicle?(vehicleList.find(v=>v.id===player.currentVehicle)?.speed||3.3)*0.16:0.22;
-    if(player.mode==="Drive"&&player.fuel<=0){clearInterval(routeTimer);routeTimer=null;routeTarget=null;log("⛽ Out of fuel — route stopped");return;}
-    if(player.mode==="Drive"&&player.currentVehicle)player.fuel=Math.max(0,player.fuel-0.035);
-    if(Math.abs(dx)>Math.abs(dy)){player.direction=dx<0?"left":"right";player.x+=Math.sign(dx)*Math.min(step,Math.abs(dx));}
-    else{player.direction=dy<0?"up":"down";player.y+=Math.sign(dy)*Math.min(step,Math.abs(dy));}
-    player.x=Math.max(3,Math.min(97,player.x));player.y=Math.max(5,Math.min(95,player.y));
+    if(dist<=targetArrivalRadius(z)){
+      clearInterval(routeTimer);routeTimer=null;routeTarget=null;arriveAtZone(i);return;
+    }
+    const step=player.mode==="Drive"&&player.currentVehicle?(vehicleList.find(v=>v.id===player.currentVehicle)?.speed||3.3)*.035:.12;
+    if(player.mode==="Drive"&&player.fuel<=0){
+      clearInterval(routeTimer);routeTimer=null;routeTarget=null;log("⛽ Out of fuel — route stopped");return;
+    }
+    if(player.mode==="Drive"&&player.currentVehicle)player.fuel=Math.max(0,player.fuel-.025);
+    const oldX=player.x,oldY=player.y;
+    player.direction=Math.abs(dx)>Math.abs(dy)?(dx<0?"left":"right"):(dy<0?"up":"down");
+    const ratio=Math.min(step,dist)/Math.max(dist,.001);
+    const moved=movePlayerSafely(player.x+dx*ratio,player.y+dy*ratio);
+    if(!moved){
+      blockedTicks++;
+      const sideSteps= Math.abs(dx)>Math.abs(dy)?[[0,-.16],[0,.16]]:[[-.16,0],[.16,0]];
+      for(const [sx,sy] of sideSteps){
+        if(movePlayerSafely(oldX+sx,oldY+sy)){blockedTicks=0;break;}
+      }
+      if(blockedTicks>18){
+        clearInterval(routeTimer);routeTimer=null;routeTarget=null;
+        log("🚧 The direct path is blocked. Try another street or walk around the building.");
+      }
+    }else blockedTicks=0;
     update();
-  },45);
+  },32);
   log("🧭 Heading to "+z.name);
 }
 function selectZone(i){startRoute(i)}
