@@ -1154,14 +1154,16 @@ async function createCity3D(){
     const fountain=new THREE.Mesh(new THREE.CylinderGeometry(1.45,1.65,.55,20),mat(0x9ba8ad));fountain.position.set(12,.48,12);scene.add(fountain);
     const water=new THREE.Mesh(new THREE.CylinderGeometry(1.12,1.12,.12,20),mat(0x3a9fc2,.25));water.position.set(12,.79,12);scene.add(water);
     // A proper low-poly human avatar in the 3D world, not a flat map marker.
-    const skin=mat(0x9c603f),shirt=mat(0x2777b9),trousers=mat(0x252d39),shoes=mat(0xe8e7dc),hair=mat(0x211915);
+    const skin=mat(0x9c603f),shirt=mat(0x2777b9),trousers=mat(0x252d39),shoes=mat(0xe8e7dc),hair=mat(0x211915),eyes=mat(0x17120f);
     const avatar=new THREE.Group();
     function part(geometry,material,x,y,z){const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;avatar.add(mesh);return mesh;}
-    part(new THREE.CylinderGeometry(.24,.32,.78,8),shirt,0,1.35,0);
-    part(new THREE.SphereGeometry(.25,12,10),skin,0,2.02,0);
-    part(new THREE.SphereGeometry(.255,12,8,0,Math.PI*2,0,Math.PI*.52),hair,0,2.13,-.015);
-    part(new THREE.CylinderGeometry(.075,.09,.72,7),skin,-.34,1.35,0).rotation.z=-.12;
-    part(new THREE.CylinderGeometry(.075,.09,.72,7),skin,.34,1.35,0).rotation.z=.12;
+    part(new THREE.CylinderGeometry(.27,.34,.78,12),shirt,0,1.34,0);
+    part(new THREE.SphereGeometry(.245,16,12),skin,0,2.02,0);
+    part(new THREE.SphereGeometry(.258,16,10,0,Math.PI*2,0,Math.PI*.54),hair,0,2.13,-.015);
+    part(new THREE.SphereGeometry(.025,8,6),eyes,-.085,2.04,.219);
+    part(new THREE.SphereGeometry(.025,8,6),eyes,.085,2.04,.219);
+    part(new THREE.CylinderGeometry(.07,.085,.7,10),skin,-.36,1.35,0).rotation.z=-.12;
+    part(new THREE.CylinderGeometry(.07,.085,.7,10),skin,.36,1.35,0).rotation.z=.12;
     part(new THREE.CylinderGeometry(.105,.12,.72,7),trousers,-.13,.62,0);
     part(new THREE.CylinderGeometry(.105,.12,.72,7),trousers,.13,.62,0);
     part(new THREE.BoxGeometry(.22,.12,.38),shoes,-.13,.15,.07);
