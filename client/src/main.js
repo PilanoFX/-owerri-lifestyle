@@ -1051,7 +1051,7 @@ function renderGame(){
   $("leave").onclick=()=>$("interior").classList.remove("show")
   document.querySelectorAll("[data-move]").forEach(b=>{
     const dir=b.dataset.move;
-    b.onclick=()=>move(dir);
+    b.onclick=e=>{if(e.detail===0)move(dir)};
     b.addEventListener("pointerdown",e=>{e.preventDefault();startHeldMove(dir)});
     ["pointerup","pointerleave","pointercancel"].forEach(type=>b.addEventListener(type,stopHeldMove));
   })
@@ -1403,7 +1403,7 @@ function selectZone(i){startRoute(i)}
 function startHeldMove(dir){
   heldDirection=dir;move(dir);
   if(heldTimer)clearInterval(heldTimer);
-  heldTimer=setInterval(()=>{if(heldDirection)move(heldDirection)},75);
+  heldTimer=setInterval(()=>{if(heldDirection)move(heldDirection)},95);
 }
 function stopHeldMove(){heldDirection=null;if(heldTimer){clearInterval(heldTimer);heldTimer=null;}}
 function onMovementKey(e){
@@ -1436,7 +1436,7 @@ function houseAction(t){
   update()
 }
 function move(dir){
-  let step=1.55
+  let step=heldDirection?0.62:1.55
   if(player.mode==="Drive"&&player.currentVehicle){
     const v=vehicleList.find(x=>x.id===player.currentVehicle)
     step=v?v.speed:3.3
