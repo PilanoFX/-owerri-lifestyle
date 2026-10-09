@@ -198,6 +198,7 @@ input:focus{outline:none;border-color:#3ecfff}
 .destinations{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
 .destination-btn{display:flex;align-items:center;gap:7px;text-align:left;background:#0b131b;border:1px solid #263746;padding:8px 7px;font-size:11px;min-height:42px}
 .destination-btn .dest-icon{font-size:18px}.destination-btn .dest-copy{min-width:0}.destination-btn b{display:block;white-space:normal;line-height:1.15}.destination-btn small{display:block;color:#77d9b4;font-size:9px;margin-top:3px}
+.map #zones{display:none}
 .map .zone{width:27px;height:27px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:15px;border:1px solid #fff;background:#12232de8;box-shadow:0 3px 8px #0009;white-space:normal}
 .map .zone b{display:none}.map .zone:after{content:"";position:absolute;bottom:-5px;left:10px;width:6px;height:6px;background:inherit;border-right:1px solid #fff;border-bottom:1px solid #fff;transform:rotate(45deg)}
 #roomView{background:#12100e;perspective:1000px}
