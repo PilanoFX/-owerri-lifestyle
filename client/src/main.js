@@ -766,6 +766,9 @@ function renderRoom(){
     ${details.shower?'<div class="shower-real"></div>':''}
     ${details.sink?'<div class="sink-real"></div>':''}
     ${details.toilet?'<div class="toilet-real"></div>':''}
+    ${details.weights?'<div class="gym-weight-rack" aria-label="Weight rack"><span></span><span></span><span></span></div>':''}
+    ${details.treadmill?'<div class="gym-treadmill" aria-label="Treadmill"><i></i><b></b></div>':''}
+    ${details.exerciseBike?'<div class="gym-bike" aria-label="Exercise bike"><i></i><b></b></div>':''}
     <div class="avatar3d"><div class="avatar-hair"></div><div class="avatar-head"></div><div class="avatar-body"></div><div class="avatar-arm left"></div><div class="avatar-arm right"></div><div class="avatar-leg left"></div><div class="avatar-leg right"></div><div class="avatar-shoe left"></div><div class="avatar-shoe right"></div></div>
     <div class="room-caption">${details.title} <span>• OWERRI LIFESTYLE</span></div>
      <div style="position:absolute;left:12px;bottom:42px;display:flex;gap:6px;flex-wrap:wrap;max-width:90%">
