@@ -1071,7 +1071,31 @@ let cityCollisionBoxes=[];
 const PLAYER_COLLISION_RADIUS=.3;
 function addCityCollider(x,z,w,d,pad=.12){cityCollisionBoxes.push({x,z,w:w+pad*2,d:d+pad*2});}
 function isCityPositionBlocked(px,py){const wx=px-50,wz=py-50,r=PLAYER_COLLISION_RADIUS;return cityCollisionBoxes.some(b=>Math.abs(wx-b.x)<b.w/2+r&&Math.abs(wz-b.z)<b.d/2+r);}
-function movePlayerSafely(nx,ny){nx=Math.max(3,Math.min(97,nx));ny=Math.max(5,Math.min(95,ny));if(!isCityPositionBlocked(nx,ny)){player.x=nx;player.y=ny;return true;}let moved=false;if(Math.abs(nx-player.x)>.0001&&!isCityPositionBlocked(nx,player.y)){player.x=nx;moved=true;}if(Math.abs(ny-player.y)>.0001&&!isCityPositionBlocked(player.x,ny)){player.y=ny;moved=true;}return moved;}
+function recoverPlayerIfTrapped(){
+  if(!cityCollisionBoxes.length||!isCityPositionBlocked(player.x,player.y))return false;
+  // Older saves can place the player inside a newly added building collider.
+  // Search outward for the closest clear point rather than freezing movement.
+  for(let radius=.35;radius<=7;radius+=.25){
+    const samples=Math.max(12,Math.ceil(radius*10));
+    for(let i=0;i<samples;i++){
+      const angle=(Math.PI*2*i)/samples;
+      const x=Math.max(3,Math.min(97,player.x+Math.cos(angle)*radius));
+      const y=Math.max(5,Math.min(95,player.y+Math.sin(angle)*radius));
+      if(!isCityPositionBlocked(x,y)){player.x=x;player.y=y;return true;}
+    }
+  }
+  return false;
+}
+function movePlayerSafely(nx,ny){
+  nx=Math.max(3,Math.min(97,nx));ny=Math.max(5,Math.min(95,ny));
+  recoverPlayerIfTrapped();
+  if(!isCityPositionBlocked(nx,ny)){player.x=nx;player.y=ny;return true;}
+  // Slide along the wall by testing each axis separately.
+  let moved=false;
+  if(Math.abs(nx-player.x)>.0001&&!isCityPositionBlocked(nx,player.y)){player.x=nx;moved=true;}
+  if(Math.abs(ny-player.y)>.0001&&!isCityPositionBlocked(player.x,ny)){player.y=ny;moved=true;}
+  return moved;
+}
 function targetArrivalRadius(z){const wx=z.x-50,wz=z.y-50;const b=cityCollisionBoxes.find(c=>Math.abs(wx-c.x)<=c.w/2&&Math.abs(wz-c.z)<=c.d/2);return b?Math.max(b.w,b.d)/2+1.1:2.0;}
 async function createCity3D(){
   const canvas=$("city3d");
@@ -1307,6 +1331,7 @@ async function createCity3D(){
 function syncCityAvatar(){
   const avatar=city3dState?.playerGroup;
   if(!avatar)return;
+  recoverPlayerIfTrapped();
   avatar.position.x=player.x-50;
   avatar.position.z=player.y-50;
   avatar.rotation.y=player.direction==="left"?-Math.PI/2:player.direction==="right"?Math.PI/2:player.direction==="up"?Math.PI:0;
@@ -1471,9 +1496,13 @@ function houseAction(t){
 function move(dir){
   let step=heldDirection ? 0.18 : 0.32;
   if(player.mode==="Drive"&&player.currentVehicle){const v=vehicleList.find(x=>x.id===player.currentVehicle);step=(v?v.speed:3.3)*(heldDirection ? 0.035 : 0.18);if(player.fuel<=0)return log("⛽ Out of fuel");player.fuel=Math.max(0,player.fuel-(heldDirection ? 0.04 : 0.7));}
-  player.direction=dir;let nx=player.x,ny=player.y;
+  player.direction=dir;
+  recoverPlayerIfTrapped();
+  let nx=player.x,ny=player.y;
   if(dir==="up")ny-=step;if(dir==="down")ny+=step;if(dir==="left")nx-=step;if(dir==="right")nx+=step;
-  const moved=movePlayerSafely(nx,ny);if(!moved&&!heldDirection)log("🚧 A wall or obstacle is blocking the way.");update();
+  const moved=movePlayerSafely(nx,ny);
+  if(!moved&&!heldDirection)log("🚧 A wall or obstacle is blocking the way.");
+  update();
 }
 function work(){
   const pay=player.business?48000:(player.mode==="Drive"?48000:30000)
