@@ -517,3 +517,11 @@ button {
 .flight-progress{height:5px;background:#273b4d;border-radius:9px;overflow:hidden;margin:18px 0}.flight-progress span{display:block;width:0;height:100%;background:#6be1b0;transition:width 1.5s ease}
 .flight-arrive{width:100%;padding:12px;border:0;border-radius:12px;background:#67dfb0;color:#082016;font-weight:800}
 @media(max-width:600px){.room-content .club-room-actions,.room-content .hotel-actions{max-width:72%;right:8px;bottom:36px}.room-content .club-room-actions button{font-size:11px;padding:8px}}
+
+/* Final control polish for touch-first life-simulation play */
+.controls{grid-template-columns:repeat(3,minmax(48px,58px));gap:7px;touch-action:none;user-select:none;-webkit-user-select:none}
+.controls button{height:52px;min-width:48px;border-radius:13px;background:linear-gradient(160deg,#263d4b,#13232e);color:#e8f5ff;border:1px solid #537182;font-size:20px;font-weight:800;box-shadow:0 4px 0 #07121a,0 6px 12px #0005;touch-action:none;-webkit-tap-highlight-color:transparent}
+.controls button:active{transform:translateY(2px);box-shadow:0 2px 0 #07121a;background:#28624f}
+.controls .empty{visibility:hidden;box-shadow:none}
+#cityMap{touch-action:pan-y}
+@media(max-width:600px){.controls{grid-template-columns:repeat(3,58px);gap:7px}.controls button{height:54px;font-size:21px}.flight-window{padding:13px}}
