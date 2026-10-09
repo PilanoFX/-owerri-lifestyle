@@ -189,7 +189,15 @@ input:focus{outline:none;border-color:#3ecfff}
 .layout{display:flex;flex-direction:column;gap:11px;padding:11px}
 .mapbox{position:relative;width:100%;height:min(56vh,500px);min-height:360px;border-radius:18px;overflow:hidden;border:2px solid #1e3a2c;box-shadow:0 18px 40px rgba(0,0,0,.5)}
 .mapbox.day{background:#152820}.mapbox.night{background:#0a1510}
-.map{position:absolute;inset:0;background:linear-gradient(155deg,#1a3226,#203c2e 45%,#15281f)}
+.map{position:absolute;inset:0;background:linear-gradient(155deg,#1a3226,#203c2e 45%,#15281f);overflow:hidden}
+#city3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none}
+.map #zones,.map #houses,.map #others{position:absolute;inset:0;z-index:12;pointer-events:none}
+.map #zones>* ,.map #houses>* ,.map #others>*{pointer-events:auto}
+.map #houses{z-index:18}.map #others{z-index:22}
+.city-label{position:absolute;left:12px;top:12px;z-index:35;background:rgba(5,12,15,.72);border:1px solid rgba(255,255,255,.18);padding:7px 10px;border-radius:9px;color:#f1f5f9;font-size:10px;letter-spacing:1.2px;font-weight:900;pointer-events:none;backdrop-filter:blur(8px)}
+.city-label span{color:#70f0b2}
+.map .block,.map .road{display:none}
+.mapbox.night .city-label{background:rgba(4,7,18,.85);border-color:#40516b}
 .road{position:absolute;background:#252c34;z-index:2}.h{height:36px;width:100%}.v{width:36px;height:100%}
 .r1{top:22%}.r2{top:48%}.r3{top:72%}.c1{left:16%}.c2{left:45%}.c3{left:71%}
 .block{position:absolute;background:linear-gradient(145deg,#2a4234,#34523e);border-radius:2px;z-index:3;box-shadow:0 7px 0 #101a14}
@@ -670,14 +678,11 @@ function renderGame(){
   </div>
   <div class="layout">
     <div class="mapbox day" id="mapbox">
-      <div class="map">
-        <div class="block b1"></div><div class="block b2"></div><div class="block b3"></div><div class="block b4"></div>
-        <div class="block b5"></div><div class="block b6"></div><div class="block b7"></div><div class="block b8"></div>
-        <div class="block b9"></div><div class="block b10"></div><div class="block b11"></div><div class="block b12"></div>
-        <div class="road h r1"></div><div class="road h r2"></div><div class="road h r3"></div>
-        <div class="road v c1"></div><div class="road v c2"></div><div class="road v c3"></div>
+      <div class="map" id="cityMap">
+        <canvas id="city3d" aria-label="3D view of Owerri city"></canvas>
         <div id="zones"></div><div id="houses"></div><div id="others"></div>
         <div class="player down" id="player"><div class="person"></div></div>
+        <div class="city-label">OWERRI CITY <span>• LIVE WORLD</span></div>
       </div>
     </div>
     <div class="side">
@@ -741,7 +746,139 @@ function renderGame(){
   document.querySelectorAll("[data-move]").forEach(b=>b.onclick=()=>move(b.dataset.move))
 
   renderZones();renderHouses();renderOthers();renderHouseList();update()
+  createCity3D();
   log("Welcome to Owerri, @"+player.username)
+}
+
+
+// ===================== 3D OWERRI CITY =====================
+let city3dState = null;
+async function createCity3D(){
+  const canvas=$("city3d");
+  const host=$("cityMap");
+  if(!canvas||!host)return;
+  try{
+    const THREE=await import("https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js");
+    if(!$("city3d"))return;
+    if(city3dState?.renderer){city3dState.renderer.dispose();}
+    const scene=new THREE.Scene();
+    scene.background=new THREE.Color(isNight?0x08111d:0x9bc8d5);
+    scene.fog=new THREE.Fog(isNight?0x08111d:0x9bc8d5,65,155);
+    const camera=new THREE.PerspectiveCamera(43,1,0.1,250);
+    camera.position.set(0,48,64);
+    camera.lookAt(0,0,0);
+    const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:"low-power"});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.15;
+    scene.add(new THREE.HemisphereLight(isNight?0x8096c8:0xe3f5ff,isNight?0x11182b:0x53684d,isNight?1.15:1.8));
+    const sun=new THREE.DirectionalLight(isNight?0x9ab6ff:0xffe4b2,isNight?1.25:2.5);
+    sun.position.set(-28,55,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
+    sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;scene.add(sun);
+    const mat=(color,roughness=.88)=>new THREE.MeshStandardMaterial({color,roughness});
+    const grass=mat(isNight?0x182b27:0x567a4d),asphalt=mat(isNight?0x252a34:0x454b51),sidewalk=mat(isNight?0x5b6268:0xc7c4b7),lane=mat(0xf5d77b),white=mat(0xe7e8df);
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(150,150),grass);ground.rotation.x=-Math.PI/2;ground.position.y=-.15;ground.receiveShadow=true;scene.add(ground);
+    function box(w,h,d,material,x,y,z,cast=true){
+      const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);mesh.position.set(x,y+h/2,z);mesh.castShadow=cast;mesh.receiveShadow=true;scene.add(mesh);return mesh;
+    }
+    // A connected street grid with sidewalks and painted road markings.
+    for(let p=-48;p<=48;p+=24){
+      box(10,.12,112,asphalt,p,.01,0,false);box(1.25,.16,112,sidewalk,p-5.65,.02,0,false);box(1.25,.16,112,sidewalk,p+5.65,.02,0,false);
+      box(.13,.025,108,lane,p,.14,0,false);
+      for(let z=-49;z<50;z+=5)box(.12,.025,1.7,white,p,.15,z,false);
+      box(112,.12,10,asphalt,0,.01,p,false);box(112,.16,1.25,sidewalk,0,.02,p-5.65,false);box(112,.16,1.25,sidewalk,0,.02,p+5.65,false);
+      box(108,.025,.13,lane,0,.15,p,false);
+      for(let x=-49;x<50;x+=5)box(1.7,.025,.12,white,x,.15,p,false);
+    }
+    const buildingColors=[0xd8d0c2,0xe4c6a1,0x9db9c4,0xd6d8d2,0xb6c2ad,0xe2b6a8,0xb9b2d1,0xd9d1b6];
+    const windowMats=[mat(0x8dc5d5,.35),mat(0x344b60,.4),mat(isNight?0xffd58a:0x8cb6c1,.45)];
+    // Building clusters sit inside the city blocks, leaving roads open.
+    let seed=17;const rand=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+    for(let gx=-2;gx<=2;gx++)for(let gz=-2;gz<=2;gz++){
+      const bx=gx*24,bz=gz*24;
+      if(Math.abs(gx)===2&&Math.abs(gz)===2)continue;
+      const count=2+Math.floor(rand()*3);
+      for(let j=0;j<count;j++){
+        const w=4+rand()*5,d=4+rand()*5,h=3.5+rand()*(rand()>.72?14:7);
+        const x=bx+(rand()-.5)*10,z=bz+(rand()-.5)*10;
+        const base=mat(buildingColors[Math.floor(rand()*buildingColors.length)]);
+        box(w,.45,d,mat(0x8c918b),x,.12,z,false);
+        box(w,h,d,base,x,.55,z,true);
+        // Flat roof, parapet, facade windows and shopfronts.
+        box(w+.18,.28,d+.18,mat(0x858b8a),x,.55+h,z,true);
+        const floors=Math.max(1,Math.floor(h/2.4));
+        for(let fl=0;fl<floors;fl++){
+          const yy=.95+fl*2.25;
+          for(let col=0;col<Math.max(1,Math.floor(w/1.55));col++){
+            const xx=x-w/2+.8+col*1.5;
+            const front=new THREE.Mesh(new THREE.BoxGeometry(.66,.82,.055),windowMats[Math.floor(rand()*windowMats.length)]);
+            front.position.set(xx,yy,z+d/2+.035);scene.add(front);
+            const side=new THREE.Mesh(new THREE.BoxGeometry(.055,.82,.66),windowMats[Math.floor(rand()*windowMats.length)]);
+            side.position.set(x+w/2+.035,yy,z-d/2+.8+col*1.35);scene.add(side);
+          }
+        }
+        if(h<8){
+          box(w*.72,1.1,.08,mat(0x31414b),x,.65,z+d/2+.08,false);
+          box(w*.8,.18,.45,mat([0x1c8d7a,0xc18b43,0x3c72b4][Math.floor(rand()*3)]),x,2.1,z+d/2+.1,false);
+        }
+      }
+    }
+    // Tropical roadside trees: trunk, canopy and a little variety in height.
+    const trunk=mat(0x725039),leafMats=[mat(0x276749),mat(0x347d4f),mat(0x4b8a52)];
+    for(let i=0;i<44;i++){
+      const x=(rand()-.5)*100,z=(rand()-.5)*100;
+      if(Math.abs(x%24)<7||Math.abs(z%24)<7)continue;
+      box(.34,2.1,.34,trunk,x,0,z,false);
+      const crown=new THREE.Mesh(new THREE.SphereGeometry(1.15+rand()*.45,7,6),leafMats[i%leafMats.length]);
+      crown.position.set(x,2.8+rand()*.5,z);crown.castShadow=true;scene.add(crown);
+    }
+    // Parked cars along curbs.
+    const carColors=[0xd8343e,0xf0f0e8,0x202a38,0x2d78c7,0xcaa33a,0x21856e];
+    for(let i=0;i<16;i++){
+      const vertical=i%2===0;const pos=-42+rand()*84;
+      const x=vertical?(i%4<2?-7.1:7.1):pos;
+      const z=vertical?pos:(i%4<2?-7.1:7.1);
+      const color=mat(carColors[i%carColors.length],.38);
+      box(1.8,.65,3.5,color,x,.18,z,true);
+      box(1.35,.55,1.65,mat(0x8db9c9,.28),x,.82,z-.05,true);
+      for(const dx of [-.95,.95])for(const dz of [-1.05,1.05]){
+        const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.16,8),mat(0x17191c));
+        wheel.rotation.z=Math.PI/2;wheel.position.set(x+dx,.38,z+dz);scene.add(wheel);
+      }
+    }
+    // Streetlights with glowing heads, brighter at night.
+    const poleMat=mat(0x555d64),bulbMat=new THREE.MeshStandardMaterial({color:isNight?0xffdf9c:0xf9f2d8,emissive:isNight?0xffb74d:0x000000,emissiveIntensity:isNight?2.5:0});
+    for(let i=-2;i<=2;i++){
+      for(const side of [-1,1]){
+        const x=i*24+side*7.4,z= i*18;
+        box(.12,4,.12,poleMat,x,0,z,false);
+        box(.8,.12,.3,bulbMat,x+.25,3.9,z,false);
+        if(isNight){const light=new THREE.PointLight(0xffcf85,1.8,13);light.position.set(x,3.6,z);scene.add(light);}
+      }
+    }
+    // A central civic plaza makes the world feel like a destination, not a blank grid.
+    box(11,.22,9,mat(0xb3b8ae),12,.08,12,false);
+    const fountain=new THREE.Mesh(new THREE.CylinderGeometry(1.45,1.65,.55,20),mat(0x9ba8ad));fountain.position.set(12,.48,12);scene.add(fountain);
+    const water=new THREE.Mesh(new THREE.CylinderGeometry(1.12,1.12,.12,20),mat(0x3a9fc2,.25));water.position.set(12,.79,12);scene.add(water);
+    const resize=()=>{
+      if(!host.isConnected)return;
+      const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);
+      renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+    };
+    resize();
+    const observer=new ResizeObserver(resize);observer.observe(host);
+    let frame=0;
+    const draw=()=>{if(!canvas.isConnected){observer.disconnect();renderer.dispose();return;}frame=requestAnimationFrame(draw);renderer.render(scene,camera);};
+    city3dState={renderer,scene,camera,observer,frame};
+    draw();
+  }catch(error){
+    console.error("3D city failed to load",error);
+    const label=$("cityMap")?.querySelector(".city-label");
+    if(label)label.innerHTML="OWERRI CITY <span>• 3D VIEW UNAVAILABLE — RELOAD TO RETRY</span>";
+  }
 }
 
 function renderNeeds(){
